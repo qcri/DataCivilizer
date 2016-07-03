@@ -1,0 +1,7 @@
+Ihab -> first pass over intro, then Sam
+Raul -> fill section 2
+Dong -> fill section 3
+Mourad -> fill section 5
+
+Once we have these done we resynchronize so the others can work on the other
+sections
