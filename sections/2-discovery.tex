@@ -1,2 +1,100 @@
 \section{Discovery}
 \label{sec:discovery}
+
+\notera{add paragraph to explain discovery in the context of running example
+introduced in evaluation. }
+
+Modern organizations organize their data into thousands of het- erogeneous
+databases and data lakes that are managed by different teams and departments. In
+such an environment, a data analyst is faced with the problem of finding which
+datasets contain the data needed to answer their questions. As data processing
+systems be- come ever faster, analysts will spend more and more of their time
+finding relevant data to answer the question at hand than the spend actually
+analyzing it.
+
+Finding relevant data is difficult because no single person in an organization
+knows about all the data sources [8]. Suppose an analyst wants to answer the
+question: what is the monthly sales trend by department? The analyst knows
+conceptually what data is needed to answer this question (a table of sales, a
+table of departments, a table of products sold by each department), but not
+which specific data sources (relations in a schema or files in an HDFS
+deployment) contain such data. The typical solution is to 1) ask an expert (if
+such a person is available), or to perform manual exploration, inspecting
+datasets one by one (which is time-consuming and prone to missing relevant data
+sources). We say this analyst is facing a data discovery challenge.
+
+The role of the data discovery component is to narrow down the search of
+relevant data from the thousands and millions of data sources to a handful of
+them that can then be fed to stitching---that performs the final preparation
+before processing. Users have different APIs available to search for relevant
+data, such as search for a schema, add attributes to a known tables, find
+datasets similar to known ones of interest, etc. Next we describe the general
+steps of data discovery:
+
+\subsection{Data Discovery Architecture}
+
+The data discovery system consists of three differentiated layers that
+collaborate with each other:
+
+\begin{enumerate}
+\item We first accumulate knowledge of the data sources by summarizing them
+into concise profiles. A profile contains a signature---domain-dependent,
+compact representation of the original content---cardinality information, data
+type, entity or semantic type represented by the data. This module creates a
+summary per field, \ie column or attribute, in the original data.
+\item We create search paths over the signatures that reflect different relatedness
+measurements and allows one to navigate the sources, such as similarity measures
+between data sources. Such similarity measures may refer to the content, the
+schema, the semantic type, but also to the hierarchy in which data sources were
+read, \ie if they are part of the same schema.
+\item Finally we expose the built knowledge through a set of data discovery
+primitives that can be used interactively to explore and find relevant data.
+Data discovery primitives can be composed into more complex data functions, and
+all of these combine through combinator operators to build expressive discovery
+queries.
+\end{enumerate}
+
+\subsubsection{Building profiles}
+
+The profiling and summarization module is responsible
+for computing signatures for each attribute in the dataset. A signature for
+finding similar attributes must: (i) represent the attribute values in a compact
+way; and (ii) be compatible with a similarity metric. Currently we have
+primitives for numerical and textual values. For numerical values the module
+learns the probability distribution of the data. We use non-parametric methods
+for this, as it is in general impossible to tune the learning process for every
+attribute in the dataset due to the scale. We use kernel density estimators and
+we are also exploring one-dimensional support vector machines, which are robust
+to noise: a desirable property when learning a signature over dirty data. For
+textual values we first represent each attribute as a bag of words and then
+compute its TF-IDF vector.
+
+The module is also in charge of computing data type, cardinality as well as
+extracting the entity or semantic type represented by the original data. We
+perform some basic denoising to avoid common data errors such as empty values
+that can hamper the data type detection. For efficient cardinality and quantile
+estimation---that we need to summarize numerical data---we use sketches
+extensively, which allows for memory-efficient computation. By treating the
+input data as a read-once stream we also avoid throttling the original data
+sources and in general, allows higher performance summary computation.
+
+\subsubsection{Search path creation}
+
+We use a multigraph representation for the summaries we have, which are nodes in
+the graph, and the different relationships among the nodes, which are edges in
+the graph. In this way, the multigraph will have an edge of type
+\emph{content-similarity} between nodes A and B if these are similar, and one of
+type \emph{schema-similarity} if the schema names are similar too. Each edge is
+scored with a weight that represents the strenght of the edge: the particular
+meaning depends on the edge semantics.
+
+Although this search path creates a logically complete graph, in practice it is
+possible to define a minimum similarity threshold to prune edges. Building the
+graph search path requires a pair-wise operation among all attributes in the
+entire dataset, a $N^2$ operation. To scale this process, we are introducing
+approximate nearest neighbor techniques based on locality sensitive hashing [4]
+that helps to scale the process. In addition, we have built a distributed
+prototype that can ingest data and compute signatures and search paths in
+parallel.
+
+
