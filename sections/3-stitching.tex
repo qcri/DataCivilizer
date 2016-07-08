@@ -10,7 +10,7 @@
 \newcommand{\RX}{\ensuremath{\R[\X]}\xspace}
 \newcommand{\SY}{\ensuremath{\S[\Y]}\xspace}
 \newcommand{\IND}{IND\ensuremath{(\X,\Y)}\xspace}
-\newcommand{\EIND}{EIND\ensuremath{(\X,\Y)}\xspace}
+\newcommand{\EIND}{\texttt{EIND}\ensuremath{(\RX,\SY)}\xspace}
 \newcommand\subsetsim{\mathrel{%
   \ooalign{\raise0.3ex\hbox{$\subset$}\cr\hidewidth\raise-0.6ex\hbox{\scalebox{0.8}{$\sim$}}\hidewidth\cr}}}
 \newcommand{\G}{\ensuremath{G}\xspace}
@@ -33,8 +33,9 @@
 
 %\dong{I am gonna to do a more detailed survey on inclusion dependency.} 
 
+%, which we discuss in Section~\ref{subsec:incremental}
 
-As data in large corporations are typically scattered everywhere. To better manage and use the data, it is crucial to link them together. Given a bunch of related tables without schema information, data stitcher builds a join graph on top of them, where each node represents a table and each directed edge represents a join path between two tables with necessary information, such as primary key and foreign key. Inclusion dependency is usually used to find the functional dependency (i.e., the join path or the primary key foreign key relationship) between two tables. There are several challenges in finding inclusion dependency not well solved in existing works. First of all, data in the wild is rather dirty. To tolerate errors, we extend the traditional inclusion dependency by both key coverage and text similarity and propose the \emph{\eind} in Section~\ref{subsec:eind}. We design an efficient and scalable algorithm to find the \eind. Secondly, as new data comes to us continuously, inclusion dependency must be found incrementally, which we discuss in Section~\ref{subsec:incremental}. When the join graph is ready, the user can query the join graph explicitly or implicitly. The user can specify several attributes he is interested in, which compose a \emph{query schema}. The result should be a view contains the query schema. As there are multiple views that contain the query schema and the cost for cleaning each view is different, we discuss how to rank the views by cleanliness in Section~\ref{subsec:query}.
+As data in large corporations are typically scattered everywhere, to better manage and use the data, it is crucial to link them together. Given a bunch of related tables without schema information, data stitcher builds a join graph on top of them, where each vertex represents a table and each directed edge represents a join path between two tables with necessary information, such as primary key and foreign key. Inclusion dependency is usually used to find the functional dependency (i.e., the join path or the primary key foreign key relationship) between two tables. There are several challenges in finding inclusion dependency not well solved by existing works. First of all, data in the wild is rather dirty. The dirty data contaminates the inclusion dependency in two ways: make less keys overlap and make keys not exactly match. To tolerate errors, we extend the traditional inclusion dependency by both key coverage and text similarity and propose the \emph{\eind} in Section~\ref{subsec:eind}. We design an efficient and scalable algorithm to find the \eind. Secondly, as new data comes to us continuously, inclusion dependency must be found incrementally. When the join graph is ready, the user can query the join graph explicitly or implicitly. The user can specify several attributes he is interested in, which compose a \emph{query schema}. The result should be a view that contains the query schema. As there are multiple views that contain the query schema and the cost for cleaning each view is different, we discuss how to rank the views by cleanliness in Section~\ref{subsec:query}.
 
 
 %1. Limit the search space
@@ -67,37 +68,47 @@ As data in large corporations are typically scattered everywhere. To better mana
 \end{table}
 
 
-Foreign key is one of the most important schema information in managing and using data, which is typically missing in real world. The foreign key and primary key relations are usually identified by inclusion dependency\footnote{To add reference here}. Next we briefly introduce the inclusion dependency. For ease of presentation, we first give some notations, which is shown in Table~\ref{table:notation}. We use \R and \S to denote two different relational tables (without schema information) and \X and \Y to denote two collection of attributes from \R and \S respectively. Note \X and \Y have the same cardinality, i.e., same number of attributes. \RX and \SY are respectively the projection of \R on attributes in \X and the projection of \S on attributes in \Y. There is an inclusion dependency from \X to \Y iff. $\RX\subseteq\SY$. We shall call the values in \RX \emph{dependent values} and the values in \SY \emph{referenced values}. For example, \dong{add an example here.}
+Foreign key is one of the most important schema information in managing and using data, which is typically missing in real world. The foreign key and primary key relations are usually identified by inclusion dependency\footnote{To add reference here}. We first briefly introduce the inclusion dependency. For ease of presentation, we first give some notations, which are shown in Table~\ref{table:notation}. We use \R and \S to denote two different relational tables (without schema information) and \X and \Y to denote two collection of attributes from \R and \S respectively. Note \X and \Y have the same cardinality, i.e., same number of attributes. \RX and \SY are respectively the projection of \R on attributes in \X and the projection of \S on attributes in \Y. There is an inclusion dependency from \X to \Y iff. $\RX\subseteq\SY$. We shall call the values in \RX \emph{dependent values} and the values in \SY \emph{referenced values}. For example, \dong{add an example here.}
 
-However, data in the wild is full of errors, such as inconsistence and format errors. This yields to the requirement of error tolerating in inclusion dependency. We observe that the errors in data can contaminate the inclusion dependency in two ways. First, they make the corresponding dependent value and the referenced value not match exactly. Second, they make the dependent values are not all covered by the referenced values. To address these issues, we design an error-robust inclusion dependency which enhances the traditional inclusion dependency with value coverage and text similarity and utilize it to build the join graph. Next we discuss the details.
-
-
-Given two projections \RX and \SY, we use the maximum bipartite matching to calculate the chance of inclusion dependency from \RX to \SY. We first build a bigraph $\G=((\U,\V),\E)$ based on the projections. Each vertex $u$ in $\U$ corresponds to an instance in \RX and each vertex $v$ in $\V$ corresponds to an instance in \SY. There is an edge between any two vertex $u\in\U$ and $v\in\V$ and the weight $w(u,v)$ is defined by the text similarity between their corresponding instance values. We utilize Jaccard similarity and edit similarity to evaluate the text similarity between two values. As it requires all the values in two instance to be similar in inclusion dependency, we combine the similarities by multiplying. \dong{To add an example here.}
+However, data in the wild is full of errors, such as inconsistence and format errors. This yields to the requirement of error tolerating in inclusion dependency. We observe that the errors in data can contaminate the inclusion dependency in two ways. First, they make the corresponding dependent value and the referenced value not match exactly. Second, they make the dependent values are not all covered by the referenced values. To address these issues, we design an error-robust inclusion dependency which enhances the traditional inclusion dependency with value coverage and text similarity. Next we discuss the details.
 
 
-%$\X\precsim\Y$  $\X\preceq\Y$
+Given two projections \RX and \SY, we build a weighted bigraph $\G=((\U,\V),\E)$ based on the projections. There is a bijection between the vertexes in \U and the distinct instances in \RX, i.e., each vertex $u$ in $\U$ maps to a distinct instance in \RX and vice versa. This also applies to the vertex set \V and the distinct instances in \SY. For any vertexes $u\in\U$ and $v\in\V$, there is a weighted edge $e=(u,v)\in\E$ where the weight $w_e$ is defined by the text similarity between their corresponding instance values, such as Jaccard similarity and edit similarity. The maximum bipartite matching of \G is a set of edges $\E_{max}\subseteq\E$ which satisfies (1) any two edges in it share no common vertex and (2) the sum of edge weights is maximum. Let $\EIND=\frac{\sum_{e\in\E_{max}}w_e}{|\U|}$. Then \EIND is proportional to the chance of an inclusion dependency from $\RX$ to $\SY$. Given an error-tolerating threshold $\delta$, we formally define the \eind as follows.
 
 \begin{definition}[Error-Robust Inclusion Dependency]
-Given two projections \RX and \SY on relational tables and an error-tolerating threshold $\delta$, there is an error-robust inclusion dependency from \X to \Y when the weight of the maximum bipartite matching in the bigraph constructed from \RX and \SY is no smaller than $\delta$.
+Given two projections \RX and \SY on relational tables and an error-tolerating threshold $\delta$, there is an error-robust inclusion dependency from \X to \Y when $\EIND\geq\delta$.
 \end{definition}
 
-\dong{I am gonna to come up with some algorithm here later.}
+\dong{To add an example here.}
 
-\dong{scalable inclusion dependency finding algorithm that runs on distributed platform can be a future work.}
-
-\dong{semantic matching can be another future work.}
-
-\subsection{Find Inclusion Dependency Incrementally}\label{subsec:incremental}
+Note as it requires all the values in two instances to be match in inclusion dependency, we combine the text  similarities from each value in the same instance by multiplying them. It is easy to see that the domain of $\EIND$ is $[0,1]$ as the text similarity is within $[0,1]$. When $\EIND=1$, there is a traditional inclusion dependency from $\RX$ to $\SY$. It is straightforward to construct the join graph using the \eind: each table is a vertex and there is an edge between two vertexes only if there exists an \eind between them. As inclusion dependency does not necessary to be functional dependency, further techniques to eliminates the false positives are needed. Also as the data comes to us gradually while finding the inclusion dependency, especially the error-robust inclusion dependency, is time consuming, it is necessary to have the \eind incrementally founded. %\dong{I will come up with some incremental algorithm here}.
 
 
-As the data comes to us gradually while finding the inclusion dependency, especially the error-robust inclusion dependency, is time consuming, it is urgent to have the inclusion dependency incrementally founded. To achieve this, \dong{I will come up with some incremental algorithm here}.  
+%two projections \RX and \SY such that $\EIND\geq\delta$.
+
+
+\dong{I am gonna to come up with some algorithms here.}
+
+%\dong{scalable inclusion dependency finding algorithm that runs on distributed platform can be a future work.}
+
+%\dong{semantic matching can be another future work.}
+
+%\subsection{Find Inclusion Dependency Incrementally}\label{subsec:incremental}
 
 
 
+\iffalse
 \subsection{Query the Join Graph}\label{subsec:query}
 
-Once the join graph is constructed, the users can query it in various way. The essential way to query the join graph is taking several vertexes and find an subgraph containing all the query vertexes.
+Once the join graph is constructed, the users can query it in various way. Among them, one of the most important one is to.
+
+The essential way to query the join graph is taking several vertexes and find an subgraph containing all the query vertexes.
+
+The user can specify several attributes which compose a \emph{query schema}. 
+
+Given a collection of attributes, we aim to find a subgraph that contains all the corresponding vertexes. 
 
 %\subsection{Cleanliness Estimation}
 %finding ind in a scalable way
 %column de-duplication
+\fi
