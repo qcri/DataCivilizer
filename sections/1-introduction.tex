@@ -2,7 +2,7 @@
 \section{Introduction}
 \label{introduction}
 
-There is overwhelming anecdotal evidence that data scientists spend at least 80%
+There is overwhelming anecdotal evidence that data scientists spend at least 80\%
 of their time finding, preparing, integrating and cleaning data sets which they
 wish to analyze. The remaining 20\% of their time is spend doing the analysis
 tasks, that comprise their job description.  One data officer (Mark Schrieber of
@@ -10,13 +10,12 @@ Merck) estimates the number is 98\%, in which case data scientists spend less
 than one hour a week on tasks in their job description.
 
 n this paper we present the architecture of Data Civilizer, a system under
-construction at MIT, QCRI and Waterloo, whose purpose is to lower the “mung
-work” faced by data scientists.  In the rest of this section we present the
+construction at MIT, QCRI and Waterloo, whose purpose is to lower the ``mung work'' faced by data scientists.  In the rest of this section we present the
 environment at Merck to motivate the components of Data Civilizer.  We also
-indicate an architecture diagram of our system.  Then, Section 2 – 6 present the
-components of our system, followed in Section 7 by experiences “in the wild” at
+indicate an architecture diagram of our system.  Then, Sections~\ref{sec:discovery}--\ref{sec:enhancedstitching} present the
+components of our system, followed in Section~\ref{sec:updates} by experiences ``in the wild'' at
 both Merck and the M.I.T. Data Warehouse.  We expect to present a demo at CIDR
-of our system running in the MIT environment.   Finally, Section 8 draws
+of our system running in the MIT environment.   Finally, Section~\ref{sec:workflow} draws
 conclusions and suggests next steps.
 
 \subsection{Merck Environment}
@@ -28,20 +27,20 @@ more than 1Kg.  His first job is identify data sets, both within the Merck
 firewall and outside that might contribute to resolving this question.  Inside
 the firewall, Merck has some 4000 Oracle databases and countless other
 repositories in which relevant data might reside.  Data Civilizer has a
-Discovery component, discussed in Section 2,which assists the scientist with
+Discovery component, discussed in Section~\ref{sec:discovery}, which assists the scientist with
 finding data sets of interest.
 
 Data sets identified by the Discovery module are invariably linked together by
-intermediary data sets.  Hence, the next step is to construct  “data stitching”
-paths among all of the data sets indentified during discovery.  This task is the
-job of the Data Stitcher, which is discussed in Section 3. One can think of the
+intermediary data sets.  Hence, the next step is to construct ``data stitching''
+paths among all of the data sets identified during discovery.  This task is the
+job of the Data Stitcher, which is discussed in Section~\ref{sec:stitching}. One can think of the
 output of the data stitcher as one or more views on the underlying data. It is
 now necessary to perform data curation on these multiple views.  This entails
 extracting data from source data storage systems, performing schema integration
 on the multiple views, transforming data into a common representation, cleaning
 erroneous values from the source data sets, and performing entity consolidation
-on resulting records.  Our Data Tamer system [ref] dealt with schema integration
-and entity consolidation.  More recently, we wrote a system DataXformer [ref]
+on resulting records.  Our Data Tamer system\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} dealt with schema integration
+and entity consolidation.  More recently, we wrote a system DataXformer~\cite{DBLP:conf/icde/AbedjanMIOPS16}
 which supported transformations, and we examined a collection of data cleaning
 systems [ref].  
 
