@@ -3,8 +3,7 @@
 \label{sec:curating}
 
 Our local polystore system is called BigDAWG.  It consists of a middleware query
-optimizer and executor, and shims to various local storage systems, as noted in
-[ref-1, ref-2].  Assume that a user has run discovery and stitching to identify
+optimizer and executor, and shims to various local storage systems, as noted in~\cite{DBLP:journals/sigmod/DugganESBHKMMMZ15, DBLP:journals/pvldb/ElmoreDSBCGHHKK15}.  Assume that a user has run discovery and stitching to identify
 a virtual relation (view) that he wishes to query.  Also, assume that he has
 identified the subset of each source table in which he is interested.  In other
 words, he has defined the join path using stitching and the predicates that
@@ -19,8 +18,8 @@ For example, if one has a data value, New Yark, and wants to transform it to one
 of its airport codes (JFK, LGA), then one must correct the data to New York,
 prior to the airport code lookup.  Obviously, cleaning usually entails a human
 specification of the corrected value or a review of an automatic algorithm.
-Hence, it is expensive in human resources, which we believe is generally “the
-high pole in the tent”.  As such, a user has to decide how he wants to trade off
+Hence, it is expensive in human resources, which we believe is generally ``the
+high pole in the tent''.  As such, a user has to decide how he wants to trade off
 data cleanliness and cost.  Data Civilizer defines two parameters under his
 control.
 
