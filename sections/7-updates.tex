@@ -15,15 +15,15 @@ Large companies typically rely on both internal and external information to buil
 \stitle{(3) Updating MVs.} 
 MVs might be created in cascade, and the human effort for data curation might happen in any layer. 
 
-In response to the above three types of updates, Data Civilizer use three strategies correspondingly.
+In response to the above three types of updates, Data Civilizer uses three strategies correspondingly.
 
 \stitle{(i) MV maintenance.}
-In the simplest case of small changes over the source data, such as the case (1) above, Data Civilizer will leverage the mature techniques for maintaining materialized views (see~\cite{DBLP:journals/debu/GuptaM95} for a survey), which has widely deployed in many commercial DBMSs. In such a way, Data Civilizer incrementally propagates the updates through the data curation pipeline to update downstream MVs.  
+In the simplest case of small changes over the source data, such as the case (1) above, Data Civilizer will leverage the mature techniques for maintaining materialized views (see~\cite{DBLP:journals/debu/GuptaM95} for a survey), which has been widely deployed in many commercial DBMSs. In such a way, Data Civilizer incrementally propagates the updates through the data curation pipeline to update downstream MVs.  
 
 \stitle{(ii) Provenance management.}
-In some cases such as the above case (2), the human effort involved may be daunting for updating the MVs. In these scenarios, the MVs should be discarded rather than updated. Naturally, there is need for a component that natively support the versioning or branching of data to enable concurrent analysis, cleaning, integration, or curation of data across data sources. 
+In some cases such as the above case (2), the human effort involved may be daunting for updating the MVs. In these scenarios, the MVs should be discarded rather than updated. Naturally, there is need for a component that natively supports the versioning or branching of data to enable concurrent analysis, cleaning, integration, or curation of data across data sources. 
 %
 Data Civilizer leverages Decibel~\cite{DBLP:journals/pvldb/MaddoxGEMPD16}, a system developed by MIT, for this purpose.
 
 \stitle{(iii) Descriptive and prescriptive data cleaning.}
-Sometimes, a scientists may curate his MV, which triggers some update that must be propagated to other descendent data sets, as well as back upstream to data sources. To perform this, we leverage the technique in~\cite{DBLP:conf/sigmod/ChalamallaIOP14}, a system developed by QCRI and Waterloo. In the MV, the updates will be described based on user actions, which will be transformed at the source level to prescribe actions to solve them. 
+Sometimes, a scientist may curate directly his MV such as the above case (3), which triggers some updates that must be propagated to other descendent data sets, as well as back upstream to data sources. To perform this, we leverage the technique in~\cite{DBLP:conf/sigmod/ChalamallaIOP14}, a system developed by QCRI and Waterloo. In the MV, the updates will be captured based on human data curation, which will be transformed at the source level to prescribe actions to solve them. 
