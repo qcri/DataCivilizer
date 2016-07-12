@@ -190,6 +190,8 @@
 
 \renewcommand*{\UrlFont}{\ttfamily\smaller\relax}
 
+\newcommand{\nan}[1]{\textcolor{magenta}{Nan: #1}}
+
 \begin{document}
 
 % ****************** TITLE ****************************************
@@ -218,11 +220,11 @@
 \input{sections/7-updates}
 \input{sections/8-workflow}
 \input{sections/9-wild}
+\input{sections/10-conclusion}
 
 
 \bibliographystyle{abbrv}
-
-\balance\footnotesize
+\balance%\footnotesize
 \bibliography{main}
 \vskip 1em
 

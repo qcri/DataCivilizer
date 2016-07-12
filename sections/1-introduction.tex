@@ -9,11 +9,11 @@ tasks, that comprise their job description.  One data officer (Mark Schrieber of
 Merck) estimates the number is 98\%, in which case data scientists spend less
 than one hour a week on tasks in their job description.
 
-n this paper we present the architecture of Data Civilizer, a system under
+In this paper we present the architecture of Data Civilizer, a system under
 construction at MIT, QCRI and Waterloo, whose purpose is to lower the ``mung work'' faced by data scientists.  In the rest of this section we present the
 environment at Merck to motivate the components of Data Civilizer.  We also
-indicate an architecture diagram of our system.  Then, Sections~\ref{sec:discovery}--\ref{sec:enhancedstitching} present the
-components of our system, followed in Section~\ref{sec:updates} by experiences ``in the wild'' at
+indicate an architecture diagram of our system.  Then, Sections~\ref{sec:discovery}--\ref{sec:workflow} present the
+components of our system, followed in Section~\ref{sec:wild} by experiences ``in the wild'' at
 both Merck and the M.I.T. Data Warehouse.  We expect to present a demo at CIDR
 of our system running in the MIT environment.   Finally, Section~\ref{sec:workflow} draws
 conclusions and suggests next steps.
@@ -23,7 +23,7 @@ conclusions and suggests next steps.
 Merck is a large decentralized drug company with about XXX employees, of which
 YYY are data scientists.  An exemplar data scientist would come up with a
 hypothesis, for example the drug ritalin causes brain cancer in rats weighing
-more than 1Kg.  His first job is identify data sets, both within the Merck
+more than 1Kg.  His first job is to identify data sets, both within the Merck
 firewall and outside that might contribute to resolving this question.  Inside
 the firewall, Merck has some 4000 Oracle databases and countless other
 repositories in which relevant data might reside.  Data Civilizer has a
@@ -42,27 +42,27 @@ erroneous values from the source data sets, and performing entity consolidation
 on resulting records.  Our Data Tamer system\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} dealt with schema integration
 and entity consolidation.  More recently, we wrote a system DataXformer~\cite{DBLP:conf/icde/AbedjanMIOPS16}
 which supported transformations, and we examined a collection of data cleaning
-systems [ref].  
+systems~\cite{evaluatioin}.
 
 Since Merck has a variety of data storage systems and exascale data volumes, it
-is simply not reasonable to move all data to a central “data lake”.  Also, it is
+is simply not reasonable to move all data to a central ``central lake'. Also, it is
 not reasonable to perform data curation up front on enterprise data, as was
 advocated by Data Tamer.  Instead Data Civilizer must be a pull-based system
 that does data curation on demand, as data scientists need to access data to get
 their work done.  Therefore, Data Civilizer must be based on a polystore
-architecture [ref], that can pull data out of multiple underlying storage
+architecture~\cite{DBLP:journals/sigmod/DugganESBHKMMMZ15}, that can pull data out of multiple underlying storage
 engines on demand.  Obviously, data cleaning, data transformation and entity
 consolidation must be integrated with querying the polystore.  In this way, a
 key technical optimization is to push filters and joins through cleaning
 operations and into the underlying data storage system wherever possible.  The
-merger of polystores and data curation steps is discussed in Section 4, and we
+merger of polystores and data curation steps is discussed in Section~\ref{sec:curating}, and we
 term the resulting system a Curating Polystore.  
 
 Optimizing such a curating polystore is the subject of the next two sections.
 Materializing views is very expensive, because of the human effort involved,
 when automatic algorithms are unsure of what to do.  Therefore, we must estimate
 the cost of constructing the MV, because a scientist may not have the budget to
-pay for the human effort involved.  This is the topic of Section 5.  It entails
+pay for the human effort involved.  This is the topic of Section~\ref{sec:cleanliness}.  It entails
 constructing a model for how dirty the data in the source data sets actually is.
 An ancillary topic is to estimate the cleanliness that can be achieved for a
 given budget for cleaning activities.  In this way, a scientist can decide
@@ -75,20 +75,20 @@ previously constructed ones or on original data sources.  As a result, there may
 be several ways to construct a new MV, with differing costs and available
 accuracy (since each existing MV has some given accuracy, as noted above.
 Therefore, the data stitching problem must be revisited to deal with this
-materializiation cost/accuracy tradeoff.  This is the subject of Sections 6.
+materializiation cost/accuracy tradeoff.  This is the subject of Sections~\ref{sec:enhancedstitching}.
 
-Section 7 than turns to update issues.   If a source data set is updated, then
+Section~\ref{sec:updates} then turns to update issues.   If a source data set is updated, then
 updates must be incrementally propagated through the data curation pipeline to
 update downstream MVs.  In some cases, the human effort involved may be
 daunting, and the MV should be discarded rather than updated.  Lastly, if a
 scientist updates his MV, we must propagate changes to other descendent data
 sets, as well as back upstream to data sources. 
 
-Section 8 then turns to our workflow system, whereby a data scientist can
+Section~\ref{sec:workflow} then turns to our workflow system, whereby a data scientist can
 iterate over our components in whatever order he wishes, undo previous workflow
 steps, and perform alternate branching from given MVs. 
 
-We then turn in Section 9 to the current implementation status of Data Civilizer
+We then turn in Section~\ref{sec:wild} to the current implementation status of Data Civilizer
 and indicate initial user experience at the MIT data warehouse, as well as
 Merck.  Section 10 gives conclusions, and outlines our future research plans.
 
