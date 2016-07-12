@@ -1,5 +1,5 @@
 % !TEX root = ../main.tex
-\section{Data Stitching}
+\section{Data Stitcher}
 \label{sec:stitching}
 
 \newcommand{\eind}{error-robust inclusion dependency\xspace}
@@ -34,7 +34,10 @@
 
 %, which we discuss in Section~\ref{subsec:incremental}
 
-As data in large corporations are typically scattered everywhere, to better manage and use the data, it is crucial to link them together. Given a bunch of related tables without schema information, data stitcher builds a join graph on top of them, where each vertex represents a table and each directed edge represents a join path between two tables with necessary information, such as primary key and foreign key. Inclusion dependency is usually used to find the functional dependency (i.e., the join path or the primary key foreign key relationship) between two tables. There are several challenges in finding inclusion dependency not well solved by existing works. First of all, data in the wild is rather dirty. The dirty data contaminates the inclusion dependency in two ways: make less keys overlap and make keys not exactly match. To tolerate errors, we extend the traditional inclusion dependency by both key coverage and text similarity and propose the \emph{\eind}. %in Section~\ref{subsec:eind}. We design an efficient and scalable algorithm to find the \eind. Secondly, as new data comes to us continuously, inclusion dependency must be found incrementally. %When the join graph is ready, the user can query the join graph explicitly or implicitly. The user can specify several attributes he is interested in, which compose a \emph{query schema}. The result should be a view that contains the query schema. As there are multiple views that contain the query schema and the cost for cleaning each view is different, we discuss how to rank the views by cleanliness in Section~\ref{subsec:query}.
+\nan{It is better to connect the section by using the context of Data Civilizer, not a general motivation. That is, instead of talking about large corporations, it is better to focus on what is the output of Discovery component.}
+As data in large corporations are typically scattered everywhere, to better manage and use the data, it is crucial to link them together. Given a bunch of related tables without schema information, data stitcher builds a join graph on top of them, where each vertex represents a table and each directed edge represents a join path between two tables with necessary information, such as primary key and foreign key. 
+\nan{Do we want to say that {\bf Data Stitcher = (Advanced) Inclusion Dependency discovery}?}
+Inclusion dependency is usually used to find the functional dependency (i.e., the join path or the primary key foreign key relationship) between two tables. There are several challenges in finding inclusion dependency not well solved by existing works. First of all, data in the wild is rather dirty. The dirty data contaminates the inclusion dependency in two ways: make less keys overlap and make keys not exactly match. To tolerate errors, we extend the traditional inclusion dependency by both key coverage and text similarity and propose the \emph{\eind}. %in Section~\ref{subsec:eind}. We design an efficient and scalable algorithm to find the \eind. Secondly, as new data comes to us continuously, inclusion dependency must be found incrementally. %When the join graph is ready, the user can query the join graph explicitly or implicitly. The user can specify several attributes he is interested in, which compose a \emph{query schema}. The result should be a view that contains the query schema. As there are multiple views that contain the query schema and the cost for cleaning each view is different, we discuss how to rank the views by cleanliness in Section~\ref{subsec:query}.
 
 
 %1. Limit the search space
@@ -50,7 +53,9 @@ As data in large corporations are typically scattered everywhere, to better mana
 
 \subsection{Error-Robust Inclusion Dependency}\label{subsec:eind}
 
-\nan{I believe that Table~\ref{table:notation} can be safely removed, since these are standard textbook notations.}
+\nan{I believe that Table~\ref{table:notation} can be safely removed, since these are standard textbook notations. Also, I don't think that to use  $> 1.5$ columns (with more examples later) for error-robust inclusion dependency in a CIDR paper is a good idea.}
+
+\nan{What I want to convey is that the main challenge of Data Stitcher is not inclusion dependency. The challenge should be, given all possible ways of stitching related tables together, how to interact with users to give them the stitched results, i.e., materialized views, that the users want.}
 
 \begin{table}
 \centering
