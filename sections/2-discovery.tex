@@ -33,12 +33,12 @@ data, such as search for a schema, add attributes to a known tables, find
 datasets similar to known ones of interest, etc. Next we describe the general
 steps of data discovery:
 
-\subsection{Data Discovery Architecture}
+\subsection{Data Discovery Layers}
 
-\nan{If we call Data Civilizer a system with one architecture, maybe we should not call each component a system with an architecture. Instead, we can use component and workflow to replace system and architecture.}
+%\nan{If we call Data Civilizer a system with one architecture, maybe we should not call each component a system with an architecture. Instead, we can use component and workflow to replace system and architecture.}
 
-The data discovery system consists of three layers that collaborate with each other:
-\nan{It is better to explicitly give each layer a name. I gave a try below.}
+The data discovery component consists of three layers that collaborate with each other:
+\nan{It is better to explicitly give each layer a name. I gave it a try below.}
 
 \begin{enumerate}
 \item {\bf Profile.} We first accumulate knowledge of the data sources by summarizing them
@@ -60,7 +60,7 @@ queries.
 
 \nan{(1) I will suggest to remove the section number 2.1 since there is no Section~2.2. (2) 2.1.1 and 2.2.2 can be merged with the descriptions in the above item list. Raul, let me know if you need me to make a try.}
 
-\subsubsection{Building profiles}
+\subsection{Building profiles}
 
 The profiling and summarization module is responsible
 for computing signatures for each attribute in the dataset. A signature for
@@ -84,7 +84,7 @@ extensively, which allows for memory-efficient computation. By treating the
 input data as a read-once stream we also avoid throttling the original data
 sources and in general, allows higher performance summary computation.
 
-\subsubsection{Search path creation}
+\subsection{Search path creation}
 
 We use a multigraph representation for the summaries we have, which are nodes in
 the graph, and the different relationships among the nodes, which are edges in
