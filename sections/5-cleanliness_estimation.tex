@@ -8,4 +8,4 @@ In addition to the user query, we assume the following input are given, namely s
 
 Since cleaning usually entails human efforts, we need a (i) way to estimate the cleanliness of the query results and (ii) how is it affected by the type of operations and (iii) how it can be changed by applying cleaning (which entails human efforts) on specific data values. Assuming SPJA (selection, projection, join, aggregation, and grouping) queries, each of the operation will have a different effect on the cleanliness of the results. More specifically,  with selection, the ?amount? of errors will go down, with projection,  the amount of errors will go down, error may even disappear if projection drops erroneous columns and keep clean ones, with join, the amount of errors may increase, and with grouping and aggregate, the amount of errors may decrease. 
 
-{Mourad: It will be good if we can devise some sort of a formula for estimating cleanliness. Maybe we should also move the text on ?disorder metric? here.}
+\mourad{It will be good if we can devise some sort of a formula for estimating cleanliness. Maybe we should also move the text on ?disorder metric? here.}
