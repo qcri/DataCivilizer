@@ -1,3 +1,105 @@
 % !TEX root = ../main.tex
-\section{Enhanced Data Stitching}
-\label{sec:enhancedstitching}
+
+
+\section{Enhanced Data Stitching}\label{sec:enhancedstitching}
+
+
+After we ran the error-robust inclusion dependency analysis and found all the PK-FK relationship, we get a join graph where each vertex is a table and each edge is a FK-PK relationship. Consider a \emph{path query} to be a predicate $P$ on an attribute in one of the tables along with a chain of PK/FK relationships, terminating with a retrieval of a non-key attribute in the final table. 
+In this section we first give a cleanliness model to estimate the coverage of the path query result, i.e., the recall (Section~\ref{subsec:model:recall}) . Then we give another cleanliness model to estimate the quality of the path query result, i.e., the precision (Section~\ref{subsec:model:precision}). Finally we discuss how to achieve the maximum quality/recall gain with a given budget for the path query result (Section~\ref{subsec:gain}).
+
+\subsection{A Cleanliness Model for Recall}\label{subsec:model:recall}
+
+Assume we have K tables, $T_1$, $\cdots$, $T_K$.  Each has a collection of attributes. Assume we run approximate inclusion dependency analysis and find that there are $U$ pairs of attributes that appear to be PK/FK pairs.  For $U_i$, assume that the two attributes are $A_m$ and $A_n$ where $A_m$ (the primary key) has $N_1$ values and $A_n$ (the foreign key) has $N_2$ values. Assume that $N_3$ (out of the $N_2$) values match a key in $A_m$. We define the cleanliness of $U_i$ to be $\frac{N_3}{N_2}$.
+
+For every other attribute, $B$, in the database, assume a human gives us a cleanliness number, which is the percentage of values that he thinks are correct. Consider a \emph{path query} to be a predicate $P$ on an attribute in one of the tables along with a chain of PK/FK relationships, terminating with a retrieval of a non-key attribute in the final table.
+
+The initial predicate finds $Q$ records. If errors are assumed to be random, then $Q \times column-cleanliness$ are correct. The rest are wrong.  Multiply the initial number by the product of the cleanliness of each arc in the path and then multiply by the column cleanliness of the retrieval column. I.e. total cleanliness is a product of all the partials.
+
+
+
+\subsection{A Cleanliness Model wrt Precision}\label{subsec:model:precision}
+
+
+We first give the intuition of our cleanliness model wrt precision. As the result of a \emph{path query} is a view, we estimate a cleanliness score for each record in the view and utilize an aggregation function to combine the cleanliness scores of all the records. The aggregated score is the cleanliness of the result. As each record in the view is a ``chain'' of tuples from different tables, we can estimate the cleanliness of each part in the tuple chain and use their product as the cleanliness score of this record. Next we formally define our cleanliness model.
+
+
+Assume there are $K$ tables, $T_1$, $\cdots$, $T_K$ in the \emph{path query} where the predicate $P$ applies on $T_1$. Let $R_1, R_2, \cdots, R_n$ be the records in the view. For each record $R_i$, suppose that the tuple chain is $(t^i_1, t^i_2, \cdots, t^i_m)$. For the tuple $t^i_1$ where the predicate $P$ applies, we estimate the cleanliness score as $S_{pred}(t^i_1, P)$. For each tuple pair $t^i_j$ and $t^i_k$ in the chain, we can estimate the cleanliness score as $S_{join}(t^i_j,t^i_k)$. This score is achieved either by the error-robust inclusion dependency as described in Section 3 or the cleanliness estimation in Section 5. Then the cleanliness score for the record $R_i$ is $C_{R_i}=S_{pred}(t^i_1,P)\prod_{i=1}^{m-1}S_{join}(t^i_j,t^i_k)$. Suppose we use the aggregation function $\mathbf{A}$ to combine the cleanliness scores of all the records. The quality of the view is $\mathbf{A}(C_{R_1}, C_{R_2}, \cdots, C_{R_n})$.
+
+
+
+\subsection{Maximize Gain with a Budget}\label{subsec:gain}
+
+We first define a cleaning operation and its cost. We involve human to clean the data by asking them question. We ask two kinds of questions. The first one is ``\texttt{Does tuple t satisfy a predicate P?}'' and the second one is ``\texttt{Are tuple t and t' the same object?}''. Assume all the questions have the same cost. Then given a budget, we can only ask the human a limited number of questions.
+
+
+\dong{To develop two dynamic programming methods to maximize the recall or precision gain with a given budget.}
+
+
+
+
+
+
+
+
+
+\iffalse
+We fist discuss As each arc in the query chain has 
+
+To maximize the recall gain with the given budget, we can develop a dynamic programming method
+
+
+In the path query, we assume the error can only happen in the evaluation of the predicate $P$ or in the tuple alignment within two tables. The minimum cleaning unit can be verifying a pair of tuples in the tuple chain or testifying whether a value satisfies the predicate $P$. For ease of presentation, we assume they both has constant cost $c$. In this section, we address the problem of generating the cleaning plan that maximizing the quality gain of the result with a given budget.
+
+
+As the tuple chain of different records in the view can share the same tuple pair. 
+
+
+
+
+Let $A_i$ and $B_i$ respectively be the foreign key and primary key in table $T_i$. Using the error-robust inclusion dependency, we can align (by the maximum bipartite matching) the values in $B_i$ and $A_{i+1}$ where $1\leq i\leq K-1$. Let $b^i$ and $a^{i+1}$ respectively be a value in $B_i$ and $A_{i+1}$. We use $S_{clean}(a_{i+1},b_i)$ to denote the cleanliness score between $a$ and $b$ and $S_{clean}(a_1,P)$ to denote the cleanliss score.
+
+
+Let $a^{i+1}_1, a^{i+1}_2, \cdots, a^{i+1}_y$ and $b^{i}_1, b^{i}_2, \cdots, b^{i}_x$ respectively be the distinct values in  $A_{i+1}$ and $B_i$. Suppose $a^{i+1}$
+
+
+The first thing we should make clear is what is the minimum cleaning unit. 
+
+Let’s first focus on the presence errors. Actually we should first focus on 
+
+Suppose there are three tables T1, T2 and T3 as shown in below.
+
+
+There are FK-PK relations between T1 and T2 and T2 and T3. Note for each attribute we collapse all the rows by the same value. For example, in table 2, the cardinality of the distinct values of the red attributes are all 1 while the cadinality of the distinct values of the green attributes are m1, m2, and m3 respectively.
+
+
+When there is no filter, then R1 will have n1+n4=m2 rows. R2 has n3=m1 rows and R3 has n2=m3 rows. Then we should choose the the maximum of 
+
+\subsection{Improving the Precision}
+Suppose that we have a cleanliness estimation on each edge. Then we can estimate the cleanliness of the record in the view as the product of the cleanliness on each edge.
+
+\subsection{Improving the Recall}
+Consider a view generated by 
+
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|c|c|} \hline
+Name & Age & Dept & School & student no \\\hline
+Mike & 20  & CS   & ENG &  5200 \\\hline
+Samuel & 26  & CS   & ENG &  5200 \\\hline
+Albert & 39  & MATH & SCI &  4100 \\\hline
+James  & 42  & BIO  & SCI &  4100 \\\hline
+David  & 60  & EE   & ENG &  5200 \\\hline
+Robert & 99  & EE   & ENG &  5200 \\\hline
+\end{tabular}
+\end{table}
+
+\lstset{language=SQL}
+\begin{lstlisting}
+Select *
+From Faculty, Dept_School, School
+Where School.student_no > 4000
+\end{lstlisting}
+\fi
+
+
+
