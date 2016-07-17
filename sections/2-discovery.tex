@@ -84,21 +84,22 @@ extensively, which allows for memory-efficient computation. By treating the
 input data as a read-once stream we also avoid throttling the original data
 sources and in general, allows higher performance summary computation.
 
-\subsection{Search path creation}
+\sibo{The details for entity extracting / sematic type analysis are missing.}
 
-We use a multigraph representation for the summaries we have, which are nodes in
-the graph, and the different relationships among the nodes, which are edges in
-the graph. In this way, the multigraph will have an edge of type
+\subsection{Search path creation}
+We use a multigraph representation for the summaries we have, which are nodes in the graph, and the different relationships among the nodes, which are edges in the graph. 
+
+In this way, the multigraph will have an edge of type
 \emph{content-similarity} between nodes A and B if these are similar, and one of
 type \emph{schema-similarity} if the schema names are similar too. Each edge is
-scored with a weight that represents the strenght of the edge: the particular
+scored with a weight that represents the strength of the edge: the particular
 meaning depends on the edge semantics.
 
 Although this search path creates a logically complete graph, in practice it is
 possible to define a minimum similarity threshold to prune edges. Building the
 graph search path requires a pair-wise operation among all attributes in the
 entire dataset, a $N^2$ operation. To scale this process, we are introducing
-approximate nearest neighbor techniques based on locality sensitive hashing [4]
+approximate nearest neighbor techniques based on locality sensitive hashing \cite{DBLP:conf/compgeom/DatarIIM04}
 that helps to scale the process. In addition, we have built a distributed
 prototype that can ingest data and compute signatures and search paths in
 parallel.
