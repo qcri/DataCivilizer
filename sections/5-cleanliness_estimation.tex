@@ -1,5 +1,5 @@
 % !TEX root = ../main.tex
-\section{Cleanliness Estimation}
+\subsection{Cleanliness Estimation}
 \label{sec:cleanliness}
 
 After running the  discovery and stitching, a user identifies a virtual relation (or view) to query.  This includes identifying the subset of each source table of interest.  In other words, the user has defined the join path using stitching and the predicates that subset the tables in some other way.   Directly querying this view or the base tables without any cleaning entails two risks: (i) Missing results (false positives) and (ii) Reporting wrong results (false negatives). For example,  if one has a data value, ?New Yark? in a column city, and wants to perform a join on city, then ?New Yark? should be corrected to ?New York?, otherwise the join will miss some results (False negatives). Now if the column contains wrong but valid values, then these will ?wrongly? be joined. 
