@@ -86,6 +86,7 @@ sources and in general, allows higher performance summary computation.
 
 \sibo{The details for entity extracting / sematic type analysis are missing.}
 
+To extract entity / analyze semantic type for textual data, we use {\em named entity recognizers (NER)} \cite{XXX} to detect typical semantic types, e.g., person, date, and location. However, the cost to invoke the NERs is extremely high, and it is unfavorable to apply NERs to every value in the column. As an alternative, we adopt an early termination approach that stops the NER checking as soon as the module is confident about the semantic type, e.g., consistently identifying the same semantic type with new fed data in the column. This allows much higher performance without significantly scarifying the entity extraction / semantic type analysis accuracy.
 
 \input{sections/5-cleanliness_estimation}
 
