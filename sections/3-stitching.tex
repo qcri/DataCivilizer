@@ -35,9 +35,11 @@
 %, which we discuss in Section~\ref{subsec:incremental}
 
 \nan{It is better to connect the section by using the context of Data Civilizer, not a general motivation. That is, instead of talking about large corporations, it is better to focus on what is the output of Discovery component.}
-As data in large corporations are typically scattered everywhere, to better manage and use the data, it is crucial to link them together. Given a bunch of related tables without schema information, data stitcher builds a join graph on top of them, where each vertex represents a table and each directed edge represents a join path between two tables with necessary information, such as primary key and foreign key. 
 \nan{Do we want to say that {\bf Data Stitcher = (Advanced) Inclusion Dependency discovery}?}
-Inclusion dependency is usually used to find the functional dependency (i.e., the join path or the primary key foreign key relationship) between two tables. There are several challenges in finding inclusion dependency not well solved by existing works. First of all, data in the wild is rather dirty. The dirty data contaminates the inclusion dependency in two ways: make less keys overlap and make keys not exactly match. To tolerate errors, we extend the traditional inclusion dependency by both key coverage and text similarity and propose the \emph{\eind}. %in Section~\ref{subsec:eind}. We design an efficient and scalable algorithm to find the \eind. Secondly, as new data comes to us continuously, inclusion dependency must be found incrementally. %When the join graph is ready, the user can query the join graph explicitly or implicitly. The user can specify several attributes he is interested in, which compose a \emph{query schema}. The result should be a view that contains the query schema. As there are multiple views that contain the query schema and the cost for cleaning each view is different, we discuss how to rank the views by cleanliness in Section~\ref{subsec:query}.
+
+As data in large corporations are typically scattered everywhere, to better manage and use the data, it is crucial to link them together. Given a bunch of related tables without schema information, data stitcher builds a (join) graph on top of them, where each vertex represents a table and each directed edge represents a join path between two tables with necessary information, such as primary key and foreign key. To this end, data stitching first utilizes the inclusion dependency to find the candidate FK-PK relationship and then refines them to build the join graph. However, as we all known, data in the wild is rather dirty. The dirty data contaminates the inclusion dependency in two ways: make fewer keys overlap and make keys not exactly match. To tolerate errors, we extend the traditional inclusion dependency by both key coverage and text similarity and propose the \emph{\eind}. 
+
+%in Section~\ref{subsec:eind}. We design an efficient and scalable algorithm to find the \eind. Secondly, as new data comes to us continuously, inclusion dependency must be found incrementally. 
 
 
 %1. Limit the search space
@@ -48,33 +50,16 @@ Inclusion dependency is usually used to find the functional dependency (i.e., th
 
 %4. Querying the graph
 
-%5. Incremental Includency Dependency Finding
-
 
 \subsection{Error-Robust Inclusion Dependency}\label{subsec:eind}
 
-\nan{I believe that Table~\ref{table:notation} can be safely removed, since these are standard textbook notations. Also, I don't think that to use  $> 1.5$ columns (with more examples later) for error-robust inclusion dependency in a CIDR paper is a good idea.}
-\zia{I also think that we can remove Table 1. Furthermore, I would not formally introduce INDs and FKs. I believe one sentence each suffices for this paper.}
-
+\nan{I don't think that to use  $> 1.5$ columns (with more examples later) for error-robust inclusion dependency in a CIDR paper is a good idea.}
+\zia{Furthermore, I would not formally introduce INDs and FKs. I believe one sentence each suffices for this paper.}
 \nan{What I want to convey is that the main challenge of Data Stitcher is not inclusion dependency. The challenge should be, given all possible ways of stitching related tables together, how to interact with users to give them the stitched results, i.e., materialized views, that the users want.}
 
-\begin{table}
-\centering
-\begin{tabular}{|c|l|}\hline 
- \R & A relational table \\\hline
- \S & Another relational table \\\hline
- \X & A collection of attributes from \R \\\hline
- \Y & A collection of attributes from \S \\\hline
- \RX & The projection of \R on attributes in \X \\\hline
- \SY & The projection of \S on attributes in \Y \\\hline
- $\G=((\U,\V),\E)$  & Bigraph constructed based on \RX and \SY \\\hline
- $\delta$ & Error-ratio that can be tolerated \\\hline
-\end{tabular}
-\caption{Notation Table.}\label{table:notation}
-\end{table}
 
 
-Foreign key is one of the most important schema information in managing and using data, which is typically missing in real world. The foreign key and primary key relations are usually identified by inclusion dependency\footnote{To add reference here}. We first briefly introduce the inclusion dependency. For ease of presentation, we first give some notations, which are shown in Table~\ref{table:notation}. We use \R and \S to denote two different relational tables (without schema information) and \X and \Y to denote two collection of attributes from \R and \S respectively. Note \X and \Y have the same cardinality, i.e., same number of attributes. \RX and \SY are respectively the projection of \R on attributes in \X and the projection of \S on attributes in \Y. There is an inclusion dependency from \X to \Y iff. $\RX\subseteq\SY$. We shall call the values in \RX \emph{dependent values} and the values in \SY \emph{referenced values}. For example, \dong{add an example here.}
+Foreign key is one of the most important schema information in managing and using data, which is typically missing in real world. The foreign key and primary key relations are usually identified by inclusion dependency\footnote{To add reference here}. We first briefly introduce the inclusion dependency. We use \R and \S to denote two different relational tables (without schema information) and \X and \Y to denote two collection of attributes from \R and \S respectively. Note \X and \Y have the same cardinality, i.e., same number of attributes. \RX and \SY are respectively the projection of \R on attributes in \X and the projection of \S on attributes in \Y. There is an inclusion dependency from \X to \Y iff. $\RX\subseteq\SY$. We shall call the values in \RX \emph{dependent values} and the values in \SY \emph{referenced values}. For example, \dong{add an example here.}
 
 However, data in the wild is full of errors, such as inconsistence and format errors. This yields to the requirement of error tolerating in inclusion dependency. We observe that the errors in data can contaminate the inclusion dependency in two ways. First, they make the corresponding dependent value and the referenced value not match exactly. Second, they make the dependent values are not all covered by the referenced values. To address these issues, we design an error-robust inclusion dependency which enhances the traditional inclusion dependency with value coverage and text similarity. Next we discuss the details.
 
@@ -91,15 +76,12 @@ Note as it requires all the values in two instances to be match in inclusion dep
 
 It is easy to see that the domain of $\EIND$ is $[0,1]$ as the combined text similarity is within $[0,1]$. When $\EIND=1$, there is a traditional inclusion dependency from $\RX$ to $\SY$. It is straightforward to construct the join graph using the \eind: each table is a vertex and there is an edge between two vertexes only if there exists an \eind between them. As inclusion dependency does not necessary yields primary key and foreign key relationship, further techniques to eliminates the false positives are needed. Also as the data comes to us gradually while finding the inclusion dependency, especially the error-robust inclusion dependency, is time consuming, it is necessary to have the \eind incrementally founded. %\dong{I will come up with some incremental algorithm here}.
 
+\dong{I think we do not need an algorithm for finding \eind here, right?}
 
-%two projections \RX and \SY such that $\EIND\geq\delta$.
+\subsection{Refine Candidate FK-PK Relationships}
 
 
-\dong{I am gonna to come up with some algorithms here.}
 
-%\dong{scalable inclusion dependency finding algorithm that runs on distributed platform can be a future work.}
-
-%\dong{semantic matching can be another future work.}
 
 %\subsection{Find Inclusion Dependency Incrementally}\label{subsec:incremental}
 
