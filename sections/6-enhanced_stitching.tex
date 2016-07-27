@@ -4,12 +4,23 @@
 \section{Enhanced Data Stitching}\label{sec:enhancedstitching}
 
 
-After we ran the error-robust inclusion dependency analysis and found all the PK-FK relationship, we get a join graph where each vertex is a table and each edge is a FK-PK relationship. Consider a \emph{path query} to be a predicate $P$ on an attribute in one of the tables along with a chain of PK/FK relationships, terminating with a retrieval of a non-key attribute in the final table. 
-In this section we first give a cleanliness model to estimate the coverage of the path query result, i.e., the recall (Section~\ref{subsec:model:recall}) . Then we give another cleanliness model to estimate the quality of the path query result, i.e., the precision (Section~\ref{subsec:model:precision}). Finally we discuss how to achieve the maximum quality/recall gain with a given budget for the path query result (Section~\ref{subsec:gain}).
+After we ran the error-robust inclusion dependency analysis and found all the PK-FK relationship, we get a join graph where each vertex is a table and each edge is a FK-PK relationship. Consider a \emph{path query} to be a predicate $P$ on an attribute in one of the tables along with a chain of PK/FK relationships, terminating with a retrieval of a non-key attribute in the final table. We first give a cleanliness model to estimate the precision and the recall of the query results (Section~\ref{subsec:model:recall}). Then we discuss how to maximize the result quality with a given budget (Section~\ref{subsec:gain}).
 
-\subsection{A Cleanliness Model for Recall}\label{subsec:model:recall}
 
-Assume we have K tables, $T_1$, $\cdots$, $T_K$.  Each has a collection of attributes. Assume we run approximate inclusion dependency analysis and find that there are $U$ pairs of attributes that appear to be PK/FK pairs.  For $U_i$, assume that the two attributes are $A_m$ and $A_n$ where $A_m$ (the primary key) has $N_1$ values and $A_n$ (the foreign key) has $N_2$ values. Assume that $N_3$ (out of the $N_2$) values match a key in $A_m$. We define the cleanliness of $U_i$ to be $\frac{N_3}{N_2}$.
+When the join graph is ready, the user can query the join graph explicitly or implicitly. The user can specify several attributes he is interested in, which compose a \emph{query schema}. The result should be a view that contains the query schema. As there are multiple views that contain the query schema and the cost for cleaning each view is different, we discuss how to rank the views by cleanliness in Section~\ref{subsec:query}.
+
+% In this section we first give a cleanliness model to estimate the recall of the path query result (Section~\ref{subsec:model:recall}). Then we give another cleanliness model to estimate the precision of the path query result (Section~\ref{subsec:model:precision}). Finally we discuss how to achieve the maximum quality gain with a given budget for the path query result (Section~\ref{subsec:gain}).
+
+
+\subsection{The Cleanliness Model}\label{subsec:model:recall}
+
+The result of a path query is a table (or view) by joining all the tables in the path and filtering with the given predicates. Assume $\R$ is the desired table, i.e. the ground truth, and $\R'$ be the one generated from our join graph. Let  $|\R|$ be the number records in $\R$ and $|\R\cap\R'|$ be the number common records shared by $\R$ and $\R'$. We respectively define the precision and the recall of the query result as
+$$Precision=\frac{|\R\cap\R'|}{|\R'|}~and~Recall=\frac{|\R\cap\R'|}{|\R'|}.$$
+Next we give a cleanliness model to estimate the two values.
+
+Assume we have $K$ tables, $T_1$, $\cdots$, $T_K$.  Each has a collection of attributes. Assume we data stitching and find that there are $U$ pairs of attributes that appear to be PK/FK pairs.  For $U_i$, assume that the two attributes are $A_m$ and $A_n$ where $A_m$ (the primary key) has $N_1$ values and $A_n$ (the foreign key) has $N_2$ values. 
+
+Assume that $N_3$ (out of the $N_2$) values match a key in $A_m$. We define the cleanliness of $U_i$ to be $\frac{N_3}{N_2}$.
 
 For every other attribute, $B$, in the database, assume a human gives us a cleanliness number, which is the percentage of values that he thinks are correct. Consider a \emph{path query} to be a predicate $P$ on an attribute in one of the tables along with a chain of PK/FK relationships, terminating with a retrieval of a non-key attribute in the final table.
 
