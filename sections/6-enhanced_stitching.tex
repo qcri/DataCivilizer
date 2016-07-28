@@ -1,56 +1,53 @@
 % !TEX root = ../main.tex
 
 
-\section{Enhanced Data Stitching}\label{sec:enhancedstitching}
+\section{Querying the Join Graph}\label{sec:enhancedstitching}
 
 
-After we ran the error-robust inclusion dependency analysis and found all the PK-FK relationship, we get a join graph where each vertex is a table and each edge is a FK-PK relationship. Consider a \emph{path query} to be a predicate $P$ on an attribute in one of the tables along with a chain of PK/FK relationships, terminating with a retrieval of a non-key attribute in the final table. We first give a cleanliness model to estimate the precision and the recall of the query results (Section~\ref{subsec:model:recall}). Then we discuss how to maximize the result quality with a given budget (Section~\ref{subsec:gain}).
+After we ran the data stitching and get the join graph, the user can query the join graph explicitly or implicitly. The user can specify several attributes he is interested in, which compose a \emph{query schema}, and several predicates on these attributes. The query result is a view that subsumes the query schema and obeys the predicates. To answer a query, data civilizer generates a steiner tree for the query schema from the join graph. As there are multiple steiner trees, to select the best one, we give a cleanliness model to estimate the quality of the corresponding query result in Section~\ref{subsec:model:recall}. Given a steiner tree, we discuss how to maximize the quality of the corresponding result with a given budget in Section~\ref{subsec:gain}.
 
 
-When the join graph is ready, the user can query the join graph explicitly or implicitly. The user can specify several attributes he is interested in, which compose a \emph{query schema}. The result should be a view that contains the query schema. As there are multiple views that contain the query schema and the cost for cleaning each view is different, we discuss how to rank the views by cleanliness in Section~\ref{subsec:query}.
+%Consider a \emph{path query} to be a predicate $P$ on an attribute in one of the tables along with a chain of PK/FK relationships, terminating with a retrieval of a non-key attribute in the final table. 
 
-% In this section we first give a cleanliness model to estimate the recall of the path query result (Section~\ref{subsec:model:recall}). Then we give another cleanliness model to estimate the precision of the path query result (Section~\ref{subsec:model:precision}). Finally we discuss how to achieve the maximum quality gain with a given budget for the path query result (Section~\ref{subsec:gain}).
 
 
 \subsection{The Cleanliness Model}\label{subsec:model:recall}
 
-The result of a path query is a table (or view) by joining all the tables in the path and filtering with the given predicates. Assume $\R$ is the desired table, i.e. the ground truth, and $\R'$ be the one generated from our join graph. Let  $|\R|$ be the number records in $\R$ and $|\R\cap\R'|$ be the number common records shared by $\R$ and $\R'$. We respectively define the precision and the recall of the query result as
-$$Precision=\frac{|\R\cap\R'|}{|\R'|}~and~Recall=\frac{|\R\cap\R'|}{|\R'|}.$$
+The result of a query is a view by joining all the tables in the steiner tree and filtering with the given predicates. Assume $\R$ is the desired table, i.e. the ground truth, and $\R'$ be the one generated from our join graph. Let  $|\R|$ be the number records in $\R$ and $|\R\cap\R'|$ be the number common records shared by $\R$ and $\R'$. We respectively define the precision and the recall of the query result as
+$$Precision=\frac{|\R\cap\R'|}{|\R|}~and~Recall=\frac{|\R\cap\R'|}{|\R'|}.$$
 Next we give a cleanliness model to estimate the two values.
 
-Assume we have $K$ tables, $T_1$, $\cdots$, $T_K$.  Each has a collection of attributes. Assume we data stitching and find that there are $U$ pairs of attributes that appear to be PK/FK pairs.  For $U_i$, assume that the two attributes are $A_m$ and $A_n$ where $A_m$ (the primary key) has $N_1$ values and $A_n$ (the foreign key) has $N_2$ values. 
-
-Assume that $N_3$ (out of the $N_2$) values match a key in $A_m$. We define the cleanliness of $U_i$ to be $\frac{N_3}{N_2}$.
-
-For every other attribute, $B$, in the database, assume a human gives us a cleanliness number, which is the percentage of values that he thinks are correct. Consider a \emph{path query} to be a predicate $P$ on an attribute in one of the tables along with a chain of PK/FK relationships, terminating with a retrieval of a non-key attribute in the final table.
-
-The initial predicate finds $Q$ records. If errors are assumed to be random, then $Q \times column-cleanliness$ are correct. The rest are wrong.  Multiply the initial number by the product of the cleanliness of each arc in the path and then multiply by the column cleanliness of the retrieval column. I.e. total cleanliness is a product of all the partials.
 
 
-
-\subsection{A Cleanliness Model wrt Precision}\label{subsec:model:precision}
-
-
-We first give the intuition of our cleanliness model wrt precision. As the result of a \emph{path query} is a view, we estimate a cleanliness score for each record in the view and utilize an aggregation function to combine the cleanliness scores of all the records. The aggregated score is the cleanliness of the result. As each record in the view is a ``chain'' of tuples from different tables, we can estimate the cleanliness of each part in the tuple chain and use their product as the cleanliness score of this record. Next we formally define our cleanliness model.
+Consider two tables $A$ and $B$ with FK-PK relationship in the steiner tree. Let $A.a$ be the foreign key and $B.b$ be the primary key. Data stitching will give us a maximum bipartite matching between the values in $A.a$ and $B.b$ where the weight of an edge is the likelihood the two end points represent the same entity. We can join all the tables in the steiner tree by the maximum bipartite matching to achieve $\R$ and $|\R|$. Next we estimate $|\R\cap\R'|$. As each record in $\R$ comes from connecting all the nodes in the steiner tree, we multiply all the weights in the edges in the steiner tree as the likelihood that this record is in $\R\cap\R'$. We aggregate all the likelihoods of all the records in $\R$ as an estimation of $|\R\cap\R'|$, such as summation. In this way, we can estimate the precision of the query result.
 
 
-Assume there are $K$ tables, $T_1$, $\cdots$, $T_K$ in the \emph{path query} where the predicate $P$ applies on $T_1$. Let $R_1, R_2, \cdots, R_n$ be the records in the view. For each record $R_i$, suppose that the tuple chain is $(t^i_1, t^i_2, \cdots, t^i_m)$. For the tuple $t^i_1$ where the predicate $P$ applies, we estimate the cleanliness score as $S_{pred}(t^i_1, P)$. For each tuple pair $t^i_j$ and $t^i_k$ in the chain, we can estimate the cleanliness score as $S_{join}(t^i_j,t^i_k)$. This score is achieved either by the error-robust inclusion dependency as described in Section 3 or the cleanliness estimation in Section 5. Then the cleanliness score for the record $R_i$ is $C_{R_i}=S_{pred}(t^i_1,P)\prod_{i=1}^{m-1}S_{join}(t^i_j,t^i_k)$. Suppose we use the aggregation function $\mathbf{A}$ to combine the cleanliness scores of all the records. The quality of the view is $\mathbf{A}(C_{R_1}, C_{R_2}, \cdots, C_{R_n})$.
+\dong{It seems impossible to estimate $|R'|$?}
+
+Next we estimate the recall of the query result, which can be achieved by estimating $|\R'|$. To this end, we traverse the steiner tree in post-order. Suppose we are visiting a node $n$, whose parent is $p$. If $n$ is the foreign key, we set the cardinality of $p$ as the size $|n|$ of table $n$.... \dong{Seems hard to estimate the recall, even if the steiner tree is a 'line'.}
+
+
+%Suppose that the edges in the maximum bipartite matching are $e_1, e_2, \cdots, e_n$ and the weights are $w_1, w_2, \cdots, w_n$. We use an aggregation function $Agg$ to combine all the weights, such as summation, and treat this as an estimation of the number of records $A$ and $B$ shared. As the number of records in the final view is determined by the number of foreign keys, thus we estimate the precision of the edge from $A$ to $B$ as $$\frac{Agg(e_1,e_2,\cdots,e_n)}{Noise(A.a)*|A.a|}$$ where $Noise(A.a)$ is an estimation of the noisiness of $A.a$, i.e., the ratio of irrelevant values in $A.a$. We multiply all the estimated precision of every edge in the steiner tree as our final estimation of the precision.
 
 
 
-\subsection{Maximize Gain with a Budget}\label{subsec:gain}
+
+
+
+\subsection{Maximize Quality Gain with a Budget}\label{subsec:gain}
 
 We first define a cleaning operation and its cost. We involve human to clean the data by asking them question. We ask two kinds of questions. The first one is ``\texttt{Does tuple t satisfy a predicate P?}'' and the second one is ``\texttt{Are tuple t and t' the same object?}''. Assume all the questions have the same cost. Then given a budget, we can only ask the human a limited number of questions.
 
 
-\dong{To develop two dynamic programming methods to maximize the recall or precision gain with a given budget.}
+
+As we only give an estimation of the query result quality, after the user cleans some data, our estimated result quality can decrease in some cases. This is because our estimation on the more clean data is more accurate than our original estimation, which can be over estimated the quality. We would not want this situation to happen. Thus we given three possible solutions to avoid this situation. \dong{Which sounds best?}
 
 
+1) We can come up with a confidence of our estimation. Our original estimation can have a lower confidence (larger quality interval) and the updated estimation has a higher confidence (smaller quality interval). We can show the user the lower bound of the result quality, which must increase when the users clean some data.
 
+2) We give a lower bound of the cleaning effort that the user must spend to make the estimated quality increase.
 
-
-
-
+3) We generate a chain of questions for the users to answer so as to clean the data. We guarantee the estimated quality cannot go down at any time when the users clean the data using our plan.
 
 
 \iffalse
@@ -110,6 +107,20 @@ Select *
 From Faculty, Dept_School, School
 Where School.student_no > 4000
 \end{lstlisting}
+
+
+
+
+
+\subsection{A Cleanliness Model wrt Precision}\label{subsec:model:precision}
+
+
+We first give the intuition of our cleanliness model wrt precision. As the result of a \emph{path query} is a view, we estimate a cleanliness score for each record in the view and utilize an aggregation function to combine the cleanliness scores of all the records. The aggregated score is the cleanliness of the result. As each record in the view is a ``chain'' of tuples from different tables, we can estimate the cleanliness of each part in the tuple chain and use their product as the cleanliness score of this record. Next we formally define our cleanliness model.
+
+
+Assume there are $K$ tables, $T_1$, $\cdots$, $T_K$ in the \emph{path query} where the predicate $P$ applies on $T_1$. Let $R_1, R_2, \cdots, R_n$ be the records in the view. For each record $R_i$, suppose that the tuple chain is $(t^i_1, t^i_2, \cdots, t^i_m)$. For the tuple $t^i_1$ where the predicate $P$ applies, we estimate the cleanliness score as $S_{pred}(t^i_1, P)$. For each tuple pair $t^i_j$ and $t^i_k$ in the chain, we can estimate the cleanliness score as $S_{join}(t^i_j,t^i_k)$. This score is achieved either by the error-robust inclusion dependency as described in Section 3 or the cleanliness estimation in Section 5. Then the cleanliness score for the record $R_i$ is $C_{R_i}=S_{pred}(t^i_1,P)\prod_{i=1}^{m-1}S_{join}(t^i_j,t^i_k)$. Suppose we use the aggregation function $\mathbf{A}$ to combine the cleanliness scores of all the records. The quality of the view is $\mathbf{A}(C_{R_1}, C_{R_2}, \cdots, C_{R_n})$.
+
+
 \fi
 
 
