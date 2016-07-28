@@ -116,6 +116,17 @@ The three layers in \dcv have different scale and response time constraints, whi
 \label{fig:arch}
 \end{figure}
 
+\subsection{\nan{\dcv Schema}}
+
+\nan{I would suggest to add here the global schema of \dcv. We need to emphasize the followings.}
+
+\stab
+\nan{(1): \dcv has a schema management module that is different from traditional ER-diagram. It has richer semantics. It is highly dynamic.}
     
+\stab
+\nan{(2): If the above (1) is agreed, then in Figure 1, the ``Graph Builder'' should not be a part of Discovery. Instead, it should be, together with Linkage Graph, an independent module that supports all the others. I am thinking to change this module to be right above the data, but below all the other modules.}
 
+\stab
+\nan{(3): We should merge the concepts of profiles, search path and multigraph representation (Section 3), FK-PK (Section 4), and the join graph (Section 6) here.}
 
+\nan{The other Sections can be significantly simplified then.}
