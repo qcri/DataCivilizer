@@ -2,19 +2,19 @@
 \section{Introduction}
 \label{introduction}
 
-There is overwhelming anecdotal evidence that data scientists spend at least 80\%
-of their time finding, preparing, integrating and cleaning data sets.
+There is overwhelming anecdotal evidence that data scientists spend at least
+80\% of their time finding, preparing, integrating and cleaning data sets.
 % that they wish to analyze. 
-The remaining 20\% of their time is spend doing the actual desired 
-analysis tasks.
+The remaining 20\% of their time is spend doing the actual desired analysis
+tasks.
 % which comprise their job description.  
-One data officer (Mark Schreiber\mourad{Maybe, we should add him as a co-author?} of
-Merck) estimates the number is 98\%, in which case data scientists spend less
-than one hour a week on tasks in their job description.
+One data officer (Mark Schreiber\mourad{Maybe, we should add him as a
+co-author?} of Merck) estimates the number is 98\%, in which case data
+scientists spend less than one hour a week on tasks in their job description.
 %
-In this paper, we present the architecture of \dcv, a system under
-construction at MIT, QCRI and Waterloo, whose purpose is to lower the ``mung work''  faced by data scientists.  
-We present the need of \dcv and the challenges it entails
+In this paper, we present the architecture of \dcv, a system under construction
+at MIT, QCRI and Waterloo, whose purpose is to lower the ``mung work''  faced by
+data scientists.  We present the need of \dcv and the challenges it entails
 through use cases from the environment at Merck.
 
 %In the rest of this section we present overall architecture of the \dcv system, and we describe the
@@ -103,30 +103,81 @@ Merck.  Section 10 gives conclusions, and outlines our future research plans.
 
 \section{Architecture}
 
-\dcv is a stack of modules that address three main tasks: {\em Discovery}, 
-{\em Linkage} and  {\em Polystore Query Processing}. Figure~\ref{fig:arch} shows the general architecture of the \dcv system. The discovery layer to the underlying slew of available data sets and data bases is what search engines is to the internet; the module is responsible for defining meaningful data units, collecting meta data and other semantic information around each of these units, and provide basic relationship among these units to build a data fabric similar in spirit to a web knowledge graph \cite{DBLP:conf/semweb/AuerBKLCI07,DBLP:conf/sigmod/BollackerEPST08,DBLP:conf/www/SuchanekKW07}. The output graph is later used by the linkage layer to find more complex relationship that allow stitching these units together to answer a wide range of analytic queries against ad-hoc schemas. The linkage layer focuses primarily on exploring the large space of possible ``join graphs'' that connect the underlying data sets. For example, discovering (often fuzzy) Primary key-foreign key relationship between tables, and more generally various forms of inclusion dependency, which allow for joining or stitching these raw data sources together to populate an analytics schema or a view. Since these raw data sets often live in a variety of systems (often know as a ploystore) and have different levels of trustworthiness and soundness (how clean they are), the query answering layer in \dcv uses the space of possible join graphs constructed by the linkage layer, and the available meta data from the discovery layer to populate an specific schema or a view on-demand in the polystore environment.   
+\dcv is a stack of modules that address three main tasks: {\em Discovery}, {\em
+Linkage} and  {\em Polystore Query Processing}. Figure~\ref{fig:arch} shows the
+general architecture of the \dcv system. The discovery layer to the underlying
+slew of available data sets and data bases is what search engines are to the
+internet; the module is responsible for taming the scale of the underlying
+sources by defining data units of appropriate granularities, e.g., fields in
+relations, with a high-performance \code{profiler}. When those profiles are
+available, it finds relations such as schema or content similarity among them by
+using the \code{graph builder} component. These relationships are then
+represented in a data fabric similar in spirit to a knowledge graph
+\cite{DBLP:conf/semweb/AuerBKLCI07,DBLP:conf/sigmod/BollackerEPST08,DBLP:conf/www/SuchanekKW07}.
 
+The output graph is later used by the linkage layer to find more complex
+relationship that allow stitching these units together to answer a wide range of
+analytic queries against ad-hoc schemas. The linkage layer focuses primarily on
+exploring the large space of possible ``join relationships'' that connect the
+underlying data sets. For example, discovering (often fuzzy) Primary key-foreign
+key relationship between tables with a \code{cleanliness estimator}. More
+generally it extracts inclusion dependencies through the \code{FK-PK refiner},
+which allow for joining or stitching these raw data sources together to populate
+an analytics schema or a view. 
 
-The three layers in \dcv have different scale and response time constraints, which greatly affect the design and the choice of algorithms in each layer: The discovery layer is ``always on'' working in the background to find, index and mine connections among large number of data sets, hence, almost-linear algorithms that work on a Big data scale is a key requirement. At the same time, the discovery layer is not expected to have on-line response time and will be mostly performing off-line batch data processing workflows focusing primarily on discovering simple and basic connections and relationships among the various data artefacts. On the other hand, the linkage layer has to find more complex relationships, such as inclusion dependencies, which are too expensive to run on the full scale raw data. Hence, the linkage layer has to judiciously use the graph output of the discovery layer to scope the search space. While the linkage layer has an off-line component that focuses on mining these complex join relationships, efficient use of the query submitted o the query processing layer can help pruning the large space of possible join graphs. Finally, the polystore query processing layer has the tightest response time constraints to respond within reasonable time to ad-hoc analytics against often continuously changing analytics schemas (views). Limiting the space of possible data stitching strategies, while taking into account the polystore execution environment is a key technical challenge. 
+The query answering layer has the goal of answering queries posed by users.
+Queries must be answered despite the heterogeneity and different levels of
+trustworthiness and cleanliness of the underlying sources. This is possible
+because the previous layer provide the capability of creating schema views
+on-demand for the query to process by using the graph structure populated by
+the discovery and linkage layer. To create the right view, a module
+called \code{workflow orchestrator} is responsible for coordinating discovery
+and linkage. After executing a query (\code{query processor}), the results will
+be accompanied of certain quality, which can be improved by, for example,
+performing some data cleaning on key tables that contribute to the results. The
+module responsible for assessing the result quality and recommending improvement
+strategies is called \code{quality controller}.
 
+The three layers in \dcv have different scale and response time constraints,
+which greatly affect the design and the choice of algorithms in each layer: The
+discovery layer is ``always on'' working in the background to find, index and
+mine connections among large number of data sets, hence, almost-linear
+algorithms that work on a Big data scale is a key requirement. 
+On the other hand, the linkage layer has to find more complex
+relationships, such as inclusion dependencies, which are too expensive to run on
+the full scale raw data. Hence, the linkage layer has to judiciously use the
+graph output of the discovery layer to scope the search space. While the linkage
+layer has an off-line component that focuses on mining these complex join
+relationships, efficient use of the query submitted o the query processing layer
+can help pruning the large space of possible join graphs. Finally, the polystore
+query processing layer has the tightest response time constraints to respond
+within reasonable time to ad-hoc analytics against often continuously changing
+analytics schemas (views). Limiting the space of possible data stitching
+strategies, while taking into account the polystore execution environment is a
+key technical challenge. 
 
 \begin{figure}
-\includegraphics[width=3.5in]{arch2.pdf}
+\includegraphics[width=3.5in]{arch3.pdf}
 \caption{\dcv Architecture}
 \label{fig:arch}
 \end{figure}
 
-\subsection{\nan{\dcv Schema}}
+\stab \nan{(3): We should merge the concepts of profiles, search path and
+multigraph representation (Section 3), FK-PK (Section 4), and the join graph
+(Section 6) here.}
 
-\nan{I would suggest to add here the global schema of \dcv. We need to emphasize the followings.}
-
-\stab
-\nan{(1): \dcv has a schema management module that is different from traditional ER-diagram. It has richer semantics. It is highly dynamic.}
-    
-\stab
-\nan{(2): If the above (1) is agreed, then in Figure 1, the ``Graph Builder'' should not be a part of Discovery. Instead, it should be, together with Linkage Graph, an independent module that supports all the others. I am thinking to change this module to be right above the data, but below all the other modules.}
-
-\stab
-\nan{(3): We should merge the concepts of profiles, search path and multigraph representation (Section 3), FK-PK (Section 4), and the join graph (Section 6) here.}
-
-\nan{The other Sections can be significantly simplified then.}
+%\subsection{\nan{\dcv Schema}}
+%
+%\nan{I would suggest to add here the global schema of \dcv. We need to
+%emphasize the followings.}
+%
+%\stab \nan{(1): \dcv has a schema management module that is different from
+%traditional ER-diagram. It has richer semantics. It is highly dynamic.}
+%    
+%\stab \nan{(2): If the above (1) is agreed, then in Figure 1, the ``Graph
+%Builder'' should not be a part of Discovery. Instead, it should be, together
+%with Linkage Graph, an independent module that supports all the others. I am
+%thinking to change this module to be right above the data, but below all the
+%other modules.}
+%
+%\nan{The other Sections can be significantly simplified then.}
