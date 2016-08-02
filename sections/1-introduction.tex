@@ -4,101 +4,47 @@
 
 There is overwhelming anecdotal evidence that data scientists spend at least
 80\% of their time finding, preparing, integrating and cleaning data sets.
-% that they wish to analyze. 
-The remaining 20\% of their time is spend doing the actual desired analysis
+The remaining 20\% of their time is spent doing the actual desired analysis
 tasks.
-% which comprise their job description.  
-One data officer (Mark Schreiber\mourad{Maybe, we should add him as a
-co-author?} of Merck) estimates the number is 98\%, in which case data
+One data officer (Mark Schreiber
+\eat{\mourad{Maybe, we should add him as a co-author?} }
+of Merck) estimates the number is 98\%, in which case data
 scientists spend less than one hour a week on tasks in their job description.
-%
+
+%----------------------------------
+% Positioning Civilzer with respect to other systems early on
+% to focus on dcv components more
+%----------------------------------------
+
+To address this problem, several systems and tools have been developed to for example,  to automate systematic transformations and data sources preparation for analytics (e.g., Data Wrangler System~\cite{2011-wrangler}, and the DataXFormer System~\cite{DBLP:conf/icde/AbedjanMIOPS16}); to integrate and unify large disparate data sources via schema mappings and record linkage exercises to help scientists work with data sets across silos (e.g., the Data Tamer System~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13}); or to extract facts and structured information from large corpora of text, images and other unstructured sources (e.g., DeepDive~\cite{DBLP:journals/pvldb/ShinWWSZR15}). However data scientists still face serious challenges when dealing with the large number of heterogeneous and ill-specified data sets in the enterprise data lake, where even the question of ''where to start looking?" is hard to answer. 
+
 In this paper, we present the architecture of \dcv, a system under construction
-at MIT, QCRI and Waterloo, whose purpose is to lower the ``mung work''  faced by
-data scientists.  We present the need of \dcv and the challenges it entails
-through use cases from the environment at Merck.
+at MIT, QCRI and Waterloo, whose main purpose  is to lower the ``mung work''  faced by
+data scientists.  We present the main  design requirements of \dcv and the challenges it entails through use cases from the environment at Merck,  a large decentralized drug company with about XXX employees, of which YYY are data scientists.
 
-%In the rest of this section we present overall architecture of the \dcv system, and we describe the
-%environment at Merck to motivate the components of Data Civilizer.  
-%%We also indicate an architecture diagram of our system.   
-%Sections~\ref{sec:discovery}--\ref{sec:workflow} present the
-%components of our system, followed in Section~\ref{sec:wild} by experiences ``in the wild'' at
-%both Merck and the MIT Data Warehouse.  We expect to present a demo at CIDR
-%of our system running in the MIT environment.  Finally, Section~\ref{sec:workflow} draws
-%conclusions and suggests next steps.
-%
-%
-%\subsection{Merck Environment}
 
-Merck is a large decentralized drug company with about XXX employees, of which
-YYY are data scientists.  An exemplar data scientist would come up with a
-hypothesis, for example the drug Ritalin causes brain cancer in rats weighing
-more than 1Kg.  His first job is to identify data sets, both within and outside the Merck
-firewall that might contribute to resolving this question.  Inside
-the firewall, Merck has some 4,000 Oracle databases and countless other
-repositories in which relevant data might reside.  \dcv has a
-Discovery component, discussed in Section~\ref{sec:discovery}, 
-to assist the scientist with finding data sets of interest.
+{\bf[Discovery]} An exemplar data scientist at Merck would come up with a hypothesis, for example {\it the drug Ritalin causes brain cancer in rats weighing more than 1Kg}.  His first job is to first identify relevant data sets, both within and outside the Merck firewall that might contribute to testing this hypothesis.  Inside the firewall, Merck has in the order of  4,000 Oracle databases and countless other repositories.  A {\it Discovery} component in \dcv (cf. Section~\ref{sec:discovery}) has to assist the scientist with finding data sets of interest.
 
-Data sets identified by the Discovery module are invariably linked together by
-intermediary data sets.  Hence, the next step is to construct ``data stitching''
-paths among all of the data sets identified during discovery.  This task is the
-job of the Data Stitcher, which is discussed in Section~\ref{sec:stitching}. One can think of the
-output of the data stitcher as one or more views on the underlying data. It is
-now necessary to perform data curation on these multiple views.  This entails
-extracting data from source data storage systems, performing schema integration
-on the multiple views, transforming data into a common representation, cleaning
-erroneous values from the source data sets, and performing entity consolidation
-on resulting records.  Our Data Tamer system~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} dealt with schema integration
-and entity consolidation.  More recently, we wrote a system DataXformer~\cite{DBLP:conf/icde/AbedjanMIOPS16}
-which supported transformations, and we examined a collection of data cleaning systems~\cite{evaluatioin}.
+{\bf[Stitching]} The relevant data sets discovered by \dcv  are most likely  linked together by other intermediary data sets.  Hence, the next step is to construct ``data stitching'' paths among all of the data sets identified during discovery.  We discuss data stitching in detail when we discuss the {\it Data Stitcher} module in \dcv in Section~\ref{sec:stitching}. One can think of the output of the data stitcher as views on the underlying data sources. It is now necessary to perform data curation on these views by, for example, extracting data from source data storage systems, performing schema integration on the multiple views, transforming data into a common representation, cleaning erroneous values from the source data sets, and performing entity consolidation on resulting records. Multiple tools, such as Data Tamer, DataXFormer and the other example tools we mentioned earlier, can be used in tackling these curation and extraction challenges. We have recently evaluated some of the available cleaning tools on multiple data sets~\cite{evaluatioin} to identify the main challenges in this domain.
 
-Since Merck has a variety of data storage systems and exascale data volumes, it
-is simply not reasonable to move all data to a  ``central lake'. Also, it is
-not reasonable to perform data curation up front on enterprise data, as was
-advocated by Data Tamer.  Instead \dcv  must be a pull-based system
-that does data curation on demand, as data scientists need to access data to get
-their work done.  Therefore, \dcv must be based on a polystore
-architecture~\cite{DBLP:journals/sigmod/DugganESBHKMMMZ15}, that can pull data out of multiple underlying storage
-engines on demand.  Obviously, data cleaning, data transformation and entity
-consolidation must be integrated with querying the polystore.  In this way, a
-key technical optimization is to push filters and joins through cleaning
-operations and into the underlying data storage systems wherever possible.  The
-merger of polystores and data curation steps is discussed in Section~\ref{sec:curating}, and we
-term the resulting system a Curating Polystore.  
+{\bf[Curating Polystore]} Since Merck has a variety of data storage systems and exascale data volumes, it is simply not reasonable to move all data to a  central data warehouse. Also, it is not economically, nor technically feasible  to perform data curation up front on the whole available enterprise data. Instead \dcv  must be a pull-based  system that perform stitching and data curation on demand, and  as data scientists need to access data to get
+their work done.  Therefore, \dcv must be based on a polystore architecture~\cite{DBLP:journals/sigmod/DugganESBHKMMMZ15}, which  can pull data out of multiple underlying storage engines as needed and as dictated by the current analytics task.  Obviously, data cleaning, data transformation and entity consolidation must be integrated with querying the polystore.  In this way, a key technical optimization is to push filters and joins through cleaning operations and into the underlying data storage systems wherever possible.  The
+merger of polystores and data curation steps is discussed in Section~\ref{sec:curating}, and we term the resulting system a {\it Curating Polystore}.  
 
-Optimizing such a curating polystore is the subject of the two following sections (~\ref{} and~\ref{}).
-Materializing views is very expensive, because of the human effort involved,
-when automatic algorithms are unsure of what to do.  Therefore, we must estimate
-the cost of constructing the materialized views, because a scientist may not have the budget to
-pay for the human effort involved.  This is the topic of Section~\ref{sec:cleanliness}.  It entails
-constructing a model for how dirty the data in the source data sets actually is.
-An ancillary topic is to estimate the cleanliness that can be achieved for a
-given budget for cleaning activities.  In this way, a scientist can decide
+{\bf[Cleanliness Estimation]}  Because of the human effort involved, the expensive processes of creating and curating materialized views during can be very disruptive to the human interaction experience (e.g., validating the view definitions and the stitching results, and validating the automatic cleaning decisions and suggestions).  Therefore, \dcv must estimate the cost of constructing and curating such materialized views  to reason about their feasibility within the scientists budget.  Estimating the cleanliness of a view  entails constructing a model for how dirty the data in the source data sets actually is, which we discuss in Section~\ref{sec:cleanliness}. An ancillary topic is to estimate the cleanliness that can be achieved for a given budget for cleaning activities.  In this way, a scientist can decide
 whether or not he wishes to proceed with the project at hand.
 
-Moreover, it is silly to discard expensive-to-construct materialized views (MV)
-after their initial use by a data scientist.  Hence, we assume that they are
-generally retained for future use.  Moreover, future MVs may be based off
-previously constructed ones or on original data sources.  As a result, there may
-be several ways to construct a new MV, with differing costs and available
-accuracy (since each existing MV has some given accuracy, as noted above.
-Therefore, the data stitching problem must be revisited to deal with this
-materializiation cost/accuracy tradeoff.  This is the subject of Sections~\ref{sec:enhancedstitching}.
+{\bf [Optimizing Stitching]} It is highly inefficient and wasteful to  discard expensive-to-construct materialized views after their initial use by a data scientist.  Hence, we assume that they are generally retained for future use.  Moreover, future materialized views  may be based off previously constructed ones or on original data sources.  As a result, there may be several ways to construct a new view, with different  costs and accuracy. Therefore, the data stitching problem must be revisited to deal with this materialization cost/accuracy trade-off.  This is the subject of Sections~\ref{sec:enhancedstitching}.
 
-Section~\ref{sec:updates} then turns to update issues.   If a source data set is updated, then
+{\bf [Handling Updates]}  If a source data set is updated, then
 updates must be incrementally propagated through the data curation pipeline to
-update downstream MVs.  In some cases, the human effort involved may be
-daunting, and the MV should be discarded rather than updated.  Lastly, if a
-scientist updates his MV, we must propagate changes to other descendent data
-sets, as well as back upstream to data sources. 
+update downstream materialized views.  In some cases, the human effort involved may be
+daunting, and the materialized view should be discarded rather than updated.  Lastly, if a
+scientist updates a view, we must propagate changes to other derived views, as well as back upstream to data sources. Section~\ref{sec:updates} discusses the update issues and \dcv handles it.
 
-Section~\ref{sec:workflow} then turns to our workflow system, whereby a data scientist can
-iterate over our components in whatever order he wishes, undo previous workflow
-steps, and perform alternate branching from given MVs. 
+{\bf [Workflow]} To have end-to-end functionality, \dcv has to offer a workflow engine whereby data scientists can iterate over our components in whatever order they wish; they can  undo previous workflow steps, and perform alternate branching from given materialized views. Section~\ref{sec:workflow} discusses the  workflow management in \dcv.
 
-We then turn in Section~\ref{sec:wild} to the current implementation status of Data Civilizer
-and indicate initial user experience at the MIT data warehouse, as well as
-Merck.  Section 10 gives conclusions, and outlines our future research plans.
+We describe the  current implementation of \dcv  in Section~\ref{sec:wild}, and indicate initial user experience in two use cases: the  MIT data warehouse and Merck. We conclude with final remarks and an  outline of  our future research plans in Section~\ref{sec:conclusion}.
 
 
 \section{Architecture}
