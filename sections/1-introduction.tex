@@ -2,13 +2,13 @@
 \section{Introduction}
 \label{introduction}
 
-There is overwhelming anecdotal evidence that data scientists spend at least
-80\% of their time finding, preparing, integrating and cleaning data sets.
-The remaining 20\% of their time is spent doing the actual desired analysis
-tasks.
-One data officer (Mark Schreiber
+An oft cited statistic is that that data scientists spend at least
+$X$\% of their time finding, preparing, integrating and cleaning data set
+The remaining 100-$X$\% of their time is spent doing the actual desired analysis
+tasks.  $X$ is reputed to be 80, 90, 95, or even higher;  in fact,  
+a data officer (Mark Schreiber
 \eat{\mourad{Maybe, we should add him as a co-author?} }
-of Merck) estimates the number is 98\%, in which case data
+of Merck) estimates $X$ to 98\%, in which case data
 scientists spend less than one hour a week on tasks in their job description.
 
 %----------------------------------
@@ -16,33 +16,34 @@ scientists spend less than one hour a week on tasks in their job description.
 % to focus on dcv components more
 %----------------------------------------
 
-To address this problem, several systems and tools have been developed, for example, 
-to automate systematic transformations and data sources preparation for analytics (e.g., Data Wrangler System~\cite{2011-wrangler}, and the DataXFormer System~\cite{DBLP:conf/icde/AbedjanMIOPS16}); 
-to integrate and unify large disparate data sources via schema mappings and record linkage exercises to help scientists work with data sets across silos (e.g., the Data Tamer System~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13}); 
-or to extract facts and structured information from large corpora of text, images and other unstructured sources (e.g., DeepDive~\cite{DBLP:journals/pvldb/ShinWWSZR15}). 
-However, data scientists still face serious challenges when dealing with the large number of heterogeneous and ill-specified data sets in the enterprise data lake, where even the question of ''where to start looking?" is hard to answer. 
+To address various aspects of this problem, several systems have been developed.  For example, 
+  Data Wrangler~\cite{2011-wrangler} and DataXFormer ~\cite{DBLP:conf/icde/AbedjanMIOPS16} automate data preparation by enabled systematic data sources; 
+Data Tamer~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} attempts to integrate and unify large disparate data sources via schema mappings and record linkage exercises to help scientists work with data sets across silos; 
+DeepDive~\cite{DBLP:journals/pvldb/ShinWWSZR15} extract facts and structured information from large corpora of text, images and other unstructured sources.
+However, these prior system all assume that the
+data scientist already has a small number of tables he or she wants to clean, integrate, or extract data from, leaving a key challenge unaddressed: finding the data of interest.  Since a typical enterprise data lake contains {\it thousands} of heterogeneous and ill-specified tables, even answering simple questions about where to start looking is hard to do.  
 
 In this paper, we present 
 %the architecture of 
-\dcv, a system under construction
-at MIT, QCRI and Waterloo, whose main purpose  is to lower the ``mung work''  faced by
-data scientists.  We present the main  design requirements of \dcv and the challenges it entails through use cases from the environment at Merck,  a large decentralized drug company with about XXX employees, of which YYY are data scientists.
+\dcv, a system we are building
+at MIT, QCRI and Waterloo, whose main purpose  is to decrease $X$, by helping data scientists quickly find and query data of interest from large numbers of tables, allowing 
+data scientists to spend more of their time on productive data analysis.  We present the main  design requirements of \dcv and the challenges it entails through use cases from the environment at Merck,  a large multi-site drug company with about XXX employees, of which YYY are data scientists.
 
 
-{\bf[Discovery]} An exemplar data scientist at Merck would come up with a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 1Kg}.  His first job is to first identify relevant data sets, both within and outside the Merck firewall that might contribute to testing this hypothesis.  Inside the firewall, Merck has in the order of  4,000 Oracle databases and countless other repositories.  A {\it Discovery} component in \dcv (cf. Section~\ref{sec:discovery}) has to assist the scientist with finding data sets of interest.
+{\bf[Discovery]} An data scientist at Merck has a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 1 kg \srm{that's a big rat!}}.  His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis.  Inside the company alone, Merck has approximately  4,000 Oracle databases and countless other repositories.  A {\it Discovery} component in \dcv (cf. Section~\ref{sec:discovery}) has to assist the scientist with finding data sets of interest.
 
-{\bf[Stitching]} The relevant data sets discovered by \dcv  are most likely  linked together by other intermediary data sets.  Hence, the next step is to construct ``data stitching'' paths among all of the data sets identified during discovery\mourad{Dong, are you getting dataset from outside the discovered set?}.  We discuss data stitching in detail 
+{\bf[Stitching]} The relevant data sets discovered by \dcv  need to be  linked together, often by joining with other intermediary data sets.  Hence, the next step is to construct ``data stitching'' paths among all of the data sets identified during discovery\mourad{Dong, are you getting dataset from outside the discovered set?}.  We discuss data stitching in detail 
 %when we discuss the {\it Data Stitcher} module in \dcv 
-in Section~\ref{sec:stitching}. One can think of the output of the data stitcher as views on the underlying data sources. It is now necessary to perform data curation on these views by, for example, extracting data from source data storage systems, performing schema integration on the multiple views, transforming data into a common representation, cleaning erroneous values from the source data sets, and performing entity consolidation on resulting records. Multiple tools, such as Data Tamer, DataXFormer and the other example tools we mentioned earlier, can be used in tackling these curation and extraction challenges. We have recently evaluated some of the available cleaning tools on multiple data sets~\cite{evaluatioin} to identify the main challenges in this domain.
+in Section~\ref{sec:stitching}. One can think of the output of the data stitcher as views on the underlying data sources. It is now necessary to perform data curation on these views by, for example, extracting data from source data storage systems, performing schema integration on the multiple views, transforming data into a common representation, cleaning erroneous values from the source data sets, and performing entity consolidation on resulting records. Multiple tools, including the tools we mentioned earlier, can be used in tackling these curation and extraction challenges. We have recently evaluated some of the available cleaning tools on multiple data sets~\cite{evaluatioin} to identify the main challenges in this domain.
 
-{\bf[Curating Polystore]} Since Merck has a variety of data storage systems at exascale volumes, it is simply not reasonable to move all data to a  central data warehouse. Also, it is not economically, nor technically feasible, to perform data curation up front.
+{\bf[Curation Polystore]} Since Merck has a variety of massive-scale data storage systems, it is  not feasible to move all data to a  central data warehouse. Also, it is not economically, nor technically practical, to perform data curation of all of the thousands of databases up front.
 % on the whole available enterprise data. 
- Instead \dcv  must be a pull-based  system that performs stitching and data curation on demand, and  as data scientists need to access data to get
-their work done.  Therefore, \dcv must be based on a polystore architecture~\cite{DBLP:journals/sigmod/DugganESBHKMMMZ15}, which  can pull data out of multiple underlying storage engines as needed and as dictated by the current analytics task.  Obviously, data cleaning, data transformation and entity consolidation must be integrated with querying the polystore.  In this way, a key technical optimization is to push filters and joins through cleaning operations and into the underlying data storage systems wherever possible.  The
+ Instead stitching and data curation in \dcv must be done on-demand, as data scientists need to access data to get
+their work done.  Therefore, we are building \dcv using a polystore architecture~\cite{DBLP:journals/sigmod/DugganESBHKMMMZ15}, which  can pull data out of multiple underlying storage engines as needed and as dictated by the current analytics task.  Obviously, data cleaning, data transformation and entity consolidation must be integrated with querying the polystore.  In this way, a key technical optimization is to push filters and joins through cleaning operations and into the underlying data storage systems wherever possible.  The
 merger of polystores and data curation steps is discussed in Section~\ref{sec:curating}.
 %, and we term the resulting system a {\it Curating Polystore}.  
 
-{\bf[Cleanliness Estimation]}  Because of the human effort involved, the expensive processes of creating and curating materialized views  can be very disruptive to the human interaction experience (e.g., validating the view definitions and the stitching results, and validating the automatic cleaning decisions and suggestions).  Therefore, \dcv must estimate the cost of constructing and curating such materialized views  to reason about the feasibility of these operations within the scientists budget.  Estimating the cleanliness of a view  entails constructing a model for how dirty the data in the source data sets actually is, which we discuss in Section~\ref{sec:cleanliness}. An ancillary topic is to estimate the cleanliness that can be achieved for a given budget for cleaning activities.  In this way, a scientist can decide
+{\bf[Cleanliness Estimation]}  Because of the human effort involved, the expensive processes of creating and curating materialized views  can be very disruptive to the human interaction experience (e.g., validating the view definitions and the stitching results, and validating the automatic cleaning decisions and suggestions).  Therefore, \dcv must estimate the cost of constructing and curating such materialized views  to reason about the feasibility of these operations within the scientists' time budget.  Estimating the cleanliness of a view  entails constructing a model for how dirty the data in the source data sets actually is, which we discuss in Section~\ref{sec:cleanliness}. A related topic is estimating the cleanliness level that can be achieved for a given cleaning budget.  In this way, a scientist can decide
 whether or not he wishes to proceed with the project at hand.
 
 {\bf [Optimizing Stitching]} It is highly inefficient and wasteful to  discard expensive-to-construct materialized views after their initial use by a data scientist.  Hence, we assume that they are generally retained for future use.  Moreover, future materialized views  may be based off previously constructed ones or on original data sources.  As a result, there may be several ways to construct a new view, with different  costs and accuracy. Therefore, the data stitching problem must be revisited to deal with this materialization cost/accuracy trade-off.  This is the subject of Sections~\ref{sec:enhancedstitching}.\mourad{Why not merge this section with Data Stitching?}
@@ -63,14 +64,14 @@ We describe the  current implementation of \dcv  in Section~\ref{sec:wild}, and 
 
 \dcv adopts the main design principles mentioned in the introduction. %Section~\ref{introduction}. 
 It is built as a stack of modules: {\em Discovery}, {\em Stitching}, and finally 
-a {\em Query Processing and a Workflow Management} layer. All layers are assuming a polystore computing environment. Figure~\ref{fig:arch} shows the
+a {\em Query Processing and a Workflow Management} layer. All layers assume a polystore computing environment. Figure~\ref{fig:arch} shows the
 general architecture of the \dcv system. 
-The discovery layer to the underlying slew of available data sources is what search engines are to the
-internet; the discovery module is responsible for taming the scale of the underlying
-sources by defining data units of appropriate granularities, e.g., fields in
-relations, with a high-performance \code{profiler}. When those profiles are
-available, it finds relations such as schema or content similarity among them by
-using the \code{graph builder} component. These relationships are then
+The discovery layer provides search facilities over the underlying slew of available data sources.
+It manages the scale of the underlying data using a high-performance \code{profiler} that
+operates on data at different granularities using summarization and statisical profiling techniques.
+ Once profiles are build, the discovery engine find related groups of relations using
+ measures  such as schema or content similarity;  this is responsibility of the
+ \code{graph builder} component. These relationships are
 represented in a data fabric similar in spirit to a knowledge graph
 \cite{DBLP:conf/semweb/AuerBKLCI07,DBLP:conf/sigmod/BollackerEPST08,DBLP:conf/www/SuchanekKW07}.
 
@@ -79,7 +80,7 @@ relationships to stitch these units together and answer a wide range of
 analytic queries against ad-hoc schemas. The stitching layer focuses primarily on
 exploring the large space of possible ``join relationships'' that connect the
 underlying data sets. For example, discovering (often fuzzy) primary key-foreign
-key relationship between tables with a \code{cleanliness estimator}. More
+key relationships between tables with a \code{cleanliness estimator}. More
 generally it extracts inclusion dependencies through the \code{FK-PK refiner},
 which allow for joining or stitching these raw data sources together to populate
 an analytics schema or a view\mourad{Not sure what an analytics schema/view mean?}. 
