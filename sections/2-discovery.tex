@@ -25,30 +25,35 @@ discovery:
 
 \subsection{Data Discovery Layers}
 
-%\nan{If we call Data Civilizer a system with one architecture, maybe we should not call each component a system with an architecture. Instead, we can use component and workflow to replace system and architecture.}
-
-The data discovery component consists of three layers that collaborate with each other:
-\nan{It is better to explicitly give each layer a name. I gave it a try below.}
+The data discovery module consists of three conceptually different components
+that collaborate with each other:
 
 \begin{enumerate}
-\item {\bf Profile.} We first accumulate knowledge of the data sources by summarizing them
-into concise profiles. A profile contains a signature---domain-dependent,
-compact representation of the original content---cardinality information, data
-type, entity or semantic type represented by the data. This module creates a
-summary per field, \ie column or attribute, in the original data.
-\item {\bf Search path.} We create search paths over the signatures that reflect different relatedness
-measurements and allows one to navigate the sources, such as similarity measures
-between data sources. Such similarity measures may refer to the content, the
-schema, the semantic type, but also to the hierarchy in which data sources were
-read, \ie if they are part of the same schema.
-\item {\bf Discovery primitives.} Finally we expose the built knowledge through a set of data discovery
-primitives that can be used interactively to explore and find relevant data.
-Data discovery primitives can be composed into more complex data functions, and
-all of these combine through combinator operators to build expressive discovery
-queries.
+\item {\bf Data profiler.} We first accumulate knowledge of the data sources by
+summarizing them into concise profiles. A profile contains a signature, which is
+a domain-dependent, compact representation of the original content. It also
+contains information about the data cardinality, data type, and numerical ranges
+when it applies. This module creates a summary profile per field, \ie column or
+attribute, in the original data, but this granularity can be fine-tuned as
+required.
+\item {\bf Search path builder.} We create search paths over the signatures that
+reflect different relatedness measurements and allows one to navigate the
+sources, such as similarity measures between data sources. Such similarity
+measures may refer to the content, the schema, the semantic type, but also to
+the hierarchy in which data sources were read, \ie if they are part of the same
+schema. Creating these search paths require in general a pairwise comparison
+that would render the module too slow.  We discuss next some techniques we use
+to tame the scale.  
+\item {\bf Discovery API.} The search paths are accessed by a set of data
+discovery primitives that can be used interactively to explore and find relevant
+data by both users and other modules. Data discovery primitives can be composed
+into more complex data discovery functions, and all of these combine through
+combinator operators to build expressive discovery queries.  
 \end{enumerate}
 
-\nan{(1) I will suggest to remove the section number 2.1 since there is no Section~2.2. (2) 2.1.1 and 2.2.2 can be merged with the descriptions in the above item list. Raul, let me know if you need me to make a try.}
+%\nan{(1) I will suggest to remove the section number 2.1 since there is no
+%Section~2.2. (2) 2.1.1 and 2.2.2 can be merged with the descriptions in the
+%above item list. Raul, let me know if you need me to make a try.}
 
 \subsection{Building profiles}
 
