@@ -2,36 +2,26 @@
 \section{Discovery}
 \label{sec:discovery}
 
-\notera{add paragraph to explain discovery in the context of running example
-introduced in evaluation. }
+The goal of the data discovery module is to find relevant data among the
+millions of datasets spread across many storage systems of modern organizations.
+Suppose an analyst wants to answer the question: what is the monthly sales trend
+by department? The analyst knows conceptually what data is needed to answer this
+question (a table of sales, a table of departments, a table of products sold by
+each department), but not which specific data sources (which relations in a
+schema or what files in an HDFS deployment) contain such data. The typical
+solution is to 1) ask an expert (if such a person is available), or to perform
+manual exploration, inspecting datasets one by one (which is time-consuming and
+prone to missing relevant data sources). We say this analyst is facing a data
+discovery challenge.
 
-\nan{The following paragraph is redundant, which basically repeats what is mentioned in introduction.}
-Modern organizations organize their data into thousands of heterogeneous
-databases and data lakes that are managed by different teams and departments. In
-such an environment, a data analyst is faced with the problem of finding which
-datasets contain the data needed to answer their questions. As data processing
-systems be- come ever faster, analysts will spend more and more of their time
-finding relevant data to answer the question at hand than the spend actually
-analyzing it.
-
-Finding relevant data is difficult because no single person in an organization
-knows about all the data sources~\cite{XXX}. Suppose an analyst wants to answer the
-question: what is the monthly sales trend by department? The analyst knows
-conceptually what data is needed to answer this question (a table of sales, a
-table of departments, a table of products sold by each department), but not
-which specific data sources (relations in a schema or files in an HDFS
-deployment) contain such data. The typical solution is to 1) ask an expert (if
-such a person is available), or to perform manual exploration, inspecting
-datasets one by one (which is time-consuming and prone to missing relevant data
-sources). We say this analyst is facing a data discovery challenge.
-
-The role of the data discovery component is to narrow down the search of
-relevant data from the thousands and millions of data sources to a handful of
-them that can then be fed to stitching---that performs the final preparation
-before processing. Users have different APIs available to search for relevant
-data, such as search for a schema, add attributes to a known tables, find
-datasets similar to known ones of interest, etc. Next we describe the general
-steps of data discovery:
+The data discovery module narrows down the search of relevant data from the
+thousands and millions of data sources to a handful of them that can then be fed
+to stitching---that performs the final preparation before processing. Discovery
+exports an API that can be used by users directly to search for relevant data,
+e.g., schema search, similar content, etc, as well as by other modules in Data
+Civilizer, such as stitching, to retrieve additional data that can be used, for
+example, to enrich a table. Next we describe the general steps of data
+discovery:
 
 \subsection{Data Discovery Layers}
 
