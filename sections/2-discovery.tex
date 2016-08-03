@@ -23,10 +23,10 @@ Civilizer, such as stitching, to retrieve additional data that can be used, for
 example, to enrich a table. Next we describe the general steps of data
 discovery:
 
-\subsection{Data Discovery Layers}
+\subsection{Data Discovery Components}
 
-The data discovery module consists of three conceptually different components
-that collaborate with each other:
+The data discovery module consists of two conceptually different components
+that collaborate with each other, as shown in Figure~\ref{fig:arch}:
 
 \begin{enumerate}
 \item {\bf Data profiler.} We first accumulate knowledge of the data sources by
@@ -36,7 +36,7 @@ contains information about the data cardinality, data type, and numerical ranges
 when it applies. This module creates a summary profile per field, \ie column or
 attribute, in the original data, but this granularity can be fine-tuned as
 required.
-\item {\bf Search path builder.} We create search paths over the signatures that
+\item {\bf Graph builder.} We create search paths over the signatures that
 reflect different relatedness measurements and allows one to navigate the
 sources, such as similarity measures between data sources. Such similarity
 measures may refer to the content, the schema, the semantic type, but also to
@@ -44,59 +44,67 @@ the hierarchy in which data sources were read, \ie if they are part of the same
 schema. Creating these search paths require in general a pairwise comparison
 that would render the module too slow.  We discuss next some techniques we use
 to tame the scale.  
-\item {\bf Discovery API.} The search paths are accessed by a set of data
-discovery primitives that can be used interactively to explore and find relevant
-data by both users and other modules. Data discovery primitives can be composed
-into more complex data discovery functions, and all of these combine through
-combinator operators to build expressive discovery queries.  
 \end{enumerate}
 
-%\nan{(1) I will suggest to remove the section number 2.1 since there is no
-%Section~2.2. (2) 2.1.1 and 2.2.2 can be merged with the descriptions in the
-%above item list. Raul, let me know if you need me to make a try.}
+Once the graph has been built, it can be accessed by a set of data
+discovery primitives that can be used interactively to explore and find relevant
+data by both users and other modules, such as stitching. Data discovery primitives can be composed
+into more complex data discovery functions, and all of these combine through
+combinator operators to build expressive discovery queries.  
 
-\subsection{Building profiles}
+\subsection{Data Profiler}
 
-The profiling and summarization module is responsible
-for computing signatures for each attribute in the dataset. A signature for
-finding similar attributes must: (i) represent the attribute values in a compact
-way; and (ii) be compatible with a similarity metric. Currently we have
-primitives for numerical and textual values. For numerical values the module
-learns the probability distribution of the data. We use non-parametric methods
-for this, as it is in general impossible to tune the learning process for every
-attribute in the dataset due to the scale. We use kernel density estimators and
-we are also exploring one-dimensional support vector machines, which are robust
-to noise: a desirable property when learning a signature over dirty data. For
-textual values we first represent each attribute as a bag of words and then
-compute its TF-IDF vector.
+The profiling and summarization module is responsible for computing signatures
+for each attribute in the dataset. A signature for finding similar attributes
+must: (i) represent the attribute values in a compact way; and (ii) be
+compatible with a similarity metric. 
 
-The module is also in charge of computing data type, cardinality as well as
-extracting the entity or semantic type represented by the original data. We
-perform some basic denoising to avoid common data errors such as empty values
-that can hamper the data type detection. For efficient cardinality and quantile
-estimation---that we need to summarize numerical data---we use sketches
-extensively, which allows for memory-efficient computation. By treating the
-input data as a read-once stream we also avoid throttling the original data
-sources and in general, allows higher performance summary computation.
+Currently we have primitives for numerical and textual values. For numerical
+values the module learns the probability distribution of the data. We use
+non-parametric methods for this, as it is in general impossible to tune the
+learning process for every attribute in the dataset due to the scale. We use
+kernel density estimators for numerical values.  For textual values, we first
+represent each attribute as a bag of words and then compute its TF-IDF vector.
 
-\sibo{The details for entity extracting / sematic type analysis are missing.}
+\textbf{Data quality estimation.} As part of the profiling process and aside
+from the signature extraction, the component is also responsible for detecting
+data type, cardinality and performing some basic denoising to avoid common data
+errors. All this information serves as a data quality estimation for other
+modules in Data Civilizer, such as stitching and the query processor \ref{sec:4,
+sec:5}). 
 
-To extract entity / analyze semantic type for textual data, we use {\em named entity recognizers (NER)} \cite{XXX} to detect typical semantic types, e.g., person, date, and location. However, the cost to invoke the NERs is extremely high, and it is unfavorable to apply NERs to every value in the column. As an alternative, we adopt an early termination approach that stops the NER checking as soon as the module is confident about the semantic type, e.g., consistently identifying the same semantic type with new fed data in the column. This allows much higher performance without significantly scarifying the entity extraction / semantic type analysis accuracy.
+For efficient cardinality and quantile estimation, required to summarize
+numerical data, we use sketches extensively. This allows for memory-efficient
+computation. By treating the input data as a read-once stream we also avoid
+throttling the original data sources and in general, allows higher performance
+summary computation.
 
-\input{sections/5-cleanliness_estimation}
+%\sibo{The details for entity extracting / sematic type analysis are missing.}
+%
+%To extract entity / analyze semantic type for textual data, we use {\em named
+%entity recognizers (NER)} \cite{XXX} to detect typical semantic types, e.g.,
+%person, date, and location. However, the cost to invoke the NERs is extremely
+%high, and it is unfavorable to apply NERs to every value in the column. As an
+%alternative, we adopt an early termination approach that stops the NER checking
+%as soon as the module is confident about the semantic type, e.g., consistently
+%identifying the same semantic type with new fed data in the column. This allows
+%much higher performance without significantly scarifying the entity extraction /
+%semantic type analysis accuracy.
 
-\subsection{Search path creation}
-We use a multigraph representation for the summaries we have, which are nodes in the graph, and the different relationships among the nodes, which are edges in the graph. 
+%\input{sections/5-cleanliness_estimation}
 
-In this way, the multigraph will have an edge of type
-\emph{content-similarity} between nodes A and B if these are similar, and one of
-type \emph{schema-similarity} if the schema names are similar too. Each edge is
-scored with a weight that represents the strength of the edge: the particular
-meaning depends on the edge semantics.
+\subsection{Graph Builder} The input of the graph builder is a set of profiles,
+that are represented as nodes in a multigraph. The goal of the builder component
+is to find content and schema similarity relationships among these nodes, which
+are then represented as edges. In this way, the multigraph will have an edge of
+type \emph{content-similarity} between nodes A and B if these are similar, and
+one of type \emph{schema-similarity} if the schema names are similar too. Each
+edge is scored with a weight that represents the strength of the relationship:
+the particular meaning depends on the edge semantics.
 
-Although this search path creates a logically complete graph, in practice it is
+Although this approach creates a logically complete graph, in practice it is
 possible to define a minimum similarity threshold to prune edges. Building the
-graph search path requires a pair-wise operation among all attributes in the
+graph requires a pair-wise operation among all attributes in the
 entire dataset, a $N^2$ operation. To scale this process, we are introducing
 approximate nearest neighbor techniques based on locality sensitive hashing \cite{DBLP:conf/compgeom/DatarIIM04}
 that helps to scale the process. In addition, we have built a distributed
