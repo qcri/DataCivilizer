@@ -20,7 +20,7 @@ To address various aspects of this problem, several systems have been developed.
   Data Wrangler~\cite{2011-wrangler} and DataXFormer ~\cite{DBLP:conf/icde/AbedjanMIOPS16} automate data preparation by enabled systematic data sources; 
 Data Tamer~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} attempts to integrate and unify large disparate data sources via schema mappings and record linkage exercises to help scientists work with data sets across silos; 
 DeepDive~\cite{DBLP:journals/pvldb/ShinWWSZR15} extract facts and structured information from large corpora of text, images and other unstructured sources.
-However, these prior system all assume that the
+However, these prior systems all assume that the
 data scientist already has a small number of tables he or she wants to clean, integrate, or extract data from, leaving a key challenge unaddressed: finding the data of interest.  Since a typical enterprise data lake contains {\it thousands} of heterogeneous and ill-specified tables, even answering simple questions about where to start looking is hard to do.  
 
 In this paper, we present 
@@ -30,7 +30,7 @@ at MIT, QCRI, Waterloo, and TU Berlin, whose main purpose  is to decrease $X$, b
 data scientists to spend more of their time on productive data analysis.  We present the main  design requirements of \dcv and the challenges it entails through use cases from the environment at Merck,  a large multi-site drug company with about XXX employees, of which YYY are data scientists.
 
 
-{\bf[Discovery]} An data scientist at Merck has a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 1 kg \srm{that's a big rat!}}.  His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis.  Inside the company alone, Merck has approximately  4,000 Oracle databases and countless other repositories.  A {\it Discovery} component in \dcv (cf. Section~\ref{sec:discovery}) has to assist the scientist with finding data sets of interest.
+{\bf[Discovery]} A data scientist at Merck has a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 1 kg \srm{that's a big rat!}}.  His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis.  Inside the company alone, Merck has approximately  4,000 Oracle databases and countless other repositories.  A {\it Discovery} component in \dcv (cf. Section~\ref{sec:discovery}) has to assist the scientist with finding data sets of interest.
 
 {\bf[Stitching]} The relevant data sets discovered by \dcv  need to be  linked together, often by joining with other intermediary data sets.  Hence, the next step is to construct ``data stitching'' paths among all of the data sets identified during discovery\mourad{Dong, are you getting dataset from outside the discovered set?}.  We discuss data stitching in detail 
 %when we discuss the {\it Data Stitcher} module in \dcv 
