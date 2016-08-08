@@ -34,8 +34,8 @@
 
 %, which we discuss in Section~\ref{subsec:incremental}
 
-\nan{It is better to connect the section by using the context of Data Civilizer, not a general motivation. That is, instead of talking about large corporations, it is better to focus on what is the output of Discovery component.}
-\nan{Do we want to say that {\bf Data Stitcher = (Advanced) Inclusion Dependency discovery}?}
+%\nan{It is better to connect the section by using the context of Data Civilizer, not a general motivation. That is, instead of talking about large corporations, it is better to focus on what is the output of Discovery component.}
+%\nan{Do we want to say that {\bf Data Stitcher = (Advanced) Inclusion Dependency discovery}?}
 
 As data in large corporations are typically scattered everywhere, to better manage and use the data, it is crucial to link them together. Given a bunch of related tables without schema information, data stitcher builds a (join) graph on top of them, where each vertex represents a table and each directed edge represents a join path between two tables with necessary information, such as primary key and foreign key. To this end, data stitching first utilizes the inclusion dependency to find the candidate FK-PK relationship and then refines them to build the join graph. However, as we all known, data in the wild is rather dirty. The dirty data contaminates the inclusion dependency in two ways: make fewer keys overlap and make keys not exactly match. To tolerate errors, we extend the traditional inclusion dependency by both key coverage and text similarity and propose the \emph{\eind}. 
 
@@ -53,37 +53,34 @@ As data in large corporations are typically scattered everywhere, to better mana
 
 \subsection{Error-Robust Inclusion Dependency}\label{subsec:eind}
 
-\nan{I don't think that to use  $> 1.5$ columns (with more examples later) for error-robust inclusion dependency in a CIDR paper is a good idea.}
-\zia{Furthermore, I would not formally introduce INDs and FKs. I believe one sentence each suffices for this paper.}
-\nan{What I want to convey is that the main challenge of Data Stitcher is not inclusion dependency. The challenge should be, given all possible ways of stitching related tables together, how to interact with users to give them the stitched results, i.e., materialized views, that the users want.}
+%\nan{What I want to convey is that the main challenge of Data Stitcher is not inclusion dependency. The challenge should be, given all possible ways of stitching related tables together, how to interact with users to give them the stitched results, i.e., materialized views, that the users want.}
 
 
 
-Foreign key is one of the most important schema information in managing and using data, which is typically missing in real world. The foreign key and primary key relations are usually identified by inclusion dependency\footnote{To add reference here}. We first briefly introduce the inclusion dependency. We use \R and \S to denote two different relational tables (without schema information) and \X and \Y to denote two collection of attributes from \R and \S respectively. Note \X and \Y have the same cardinality, i.e., same number of attributes. \RX and \SY are respectively the projection of \R on attributes in \X and the projection of \S on attributes in \Y. There is an inclusion dependency from \X to \Y iff. $\RX\subseteq\SY$. We shall call the values in \RX \emph{dependent values} and the values in \SY \emph{referenced values}. For example, \dong{add an example here.}
-
-However, data in the wild is full of errors, such as inconsistence and format errors. This yields to the requirement of error tolerating in inclusion dependency. We observe that the errors in data can contaminate the inclusion dependency in two ways. First, they make the corresponding dependent value and the referenced value not match exactly. Second, they make the dependent values are not all covered by the referenced values. To address these issues, we design an error-robust inclusion dependency which enhances the traditional inclusion dependency with value coverage and text similarity. Next we discuss the details.
+Foreign key is one of the most important schema information in managing and using data, which is typically missing in real world. The foreign key and primary key relations are usually identified by inclusion dependency. However, data in the wild is full of errors, such as inconsistence and different formats. This yields to the requirement of error tolerating in inclusion dependency. We observe that the errors in data can contaminate the inclusion dependency in two ways. First, they make the corresponding primary keys and foreign keys not match exactly. Second, they make the foreign keys not all covered by the primary keys. To address these issues, we design an error-robust inclusion dependency which enhances the traditional inclusion dependency with value coverage and text similarity. The main idea behind the error-robust inclusion dependency is that we use the text similarity between the keys to estimate the possibility of they represent the same object. As each distinct foreign key can only be mapped to one primary key and vice versa, we further use the maximum weighted bipartite matching to align the primary keys and the foreign keys. Note it is challenging to efficiently find all the error-robust inclusion dependencies within a bunch of tables, as the input tables can be large and both finding the maximum weighted bipartite matching and calculating the text similarities between all the primary keys and foreign keys are time consuming.
 
 
-Given two projections \RX and \SY, we build a weighted bigraph $\G=((\U,\V),\E)$ based on the projections. There is a bijection between the vertexes in \U and the distinct instances in \RX, i.e., each vertex $u$ in $\U$ maps to a distinct instance in \RX and vice versa. This also applies to the vertex set \V and the distinct instances in \SY. For any vertexes $u\in\U$ and $v\in\V$, there is a weighted edge $e=(u,v)\in\E$ where the weight $w_e$ is defined by the text similarity between their corresponding instance values, such as Jaccard similarity and edit similarity. The \emph{maximum bipartite matching} of \G is a set of edges $\E_{max}\subseteq\E$ which satisfies (1) any two edges in it share no common vertex and (2) the sum of edge weights is maximum. Let $\EIND=\frac{\sum_{e\in\E_{max}}w_e}{|\U|}$. Then \EIND is proportional to the chance of an inclusion dependency from $\RX$ to $\SY$. Given an error-tolerating threshold $\delta$, we formally define the \eind as follows.
 
+%Given two projections \RX and \SY, we build a weighted bigraph $\G=((\U,\V),\E)$ based on the projections. There is a bijection between the vertexes in \U and the distinct instances in \RX, i.e., each vertex $u$ in $\U$ maps to a distinct instance in \RX and vice versa. This also applies to the vertex set \V and the distinct instances in \SY. For any vertexes $u\in\U$ and $v\in\V$, there is a weighted edge $e=(u,v)\in\E$ where the weight $w_e$ is defined by the text similarity between their corresponding instance values, such as Jaccard similarity and edit similarity. The \emph{maximum bipartite matching} of \G is a set of edges $\E_{max}\subseteq\E$ which satisfies (1) any two edges in it share no common vertex and (2) the sum of edge weights is maximum. Let $\EIND=\frac{\sum_{e\in\E_{max}}w_e}{|\U|}$. Then \EIND is proportional to the chance of an inclusion dependency from $\RX$ to $\SY$. Given an error-tolerating threshold $\delta$, we formally define the \eind as follows.
+
+\iffalse
 \begin{definition}[Error-Robust Inclusion Dependency]
 Given two projections \RX and \SY on relational tables and an error-tolerating threshold $\delta$, there is an error-robust inclusion dependency from \X to \Y when $\EIND\geq\delta$.
 \end{definition}
 
 \dong{To add an example here.}
+\fi
 
-Note as it requires all the values in two instances to be match in inclusion dependency, we combine the text  similarities in different fields of the instances by multiplying them. For example, given two instances \textsf{(SIGMOD Conference, Sam Madden, San Francisco)} and \textsf{(SIGMOD Conference 2016, Samuel Madden, San Francisco)} and we uses Jaccard similarity to evaluate the first field and edit similarity to evaluate the second field. Then we combine the text similarities as $\frac{2}{3}*\frac{7}{10}*1=0.47$.
+We can apply different text similarity functions on different fields of the key. As it requires all the fields in two keys to be match in inclusion dependency, we combine the text similarities in different fields of the instances by multiplying them. For example, given two keys \textsf{(SIGMOD Conference, Sam Madden, San Francisco)} and \textsf{(SIGMOD Conference 2016, Samuel Madden, San Francisco)}. Suppose that we uses Jaccard similarity to evaluate the first field and edit similarity to evaluate the second field. Then we can combine the text similarities as $\frac{2}{3}*\frac{7}{10}*1=0.47$.
 
-It is easy to see that the domain of $\EIND$ is $[0,1]$ as the combined text similarity is within $[0,1]$. When $\EIND=1$, there is a traditional inclusion dependency from $\RX$ to $\SY$. It is straightforward to construct the join graph using the \eind: each table is a vertex and there is an edge between two vertexes only if there exists an \eind between them. As inclusion dependency does not necessary yields primary key and foreign key relationship, further techniques to eliminates the false positives are needed. Also as the data comes to us gradually while finding the inclusion dependency, especially the error-robust inclusion dependency, is time consuming, it is necessary to have the \eind incrementally founded. %\dong{I will come up with some incremental algorithm here}.
 
-\dong{I think we do not need an algorithm for finding \eind here, right?}
+As the data comes to us gradually while finding the inclusion dependency, especially the error-robust inclusion dependency, is time consuming, it is necessary to have the \eind incrementally founded. Moreover, the inclusion dependency does not necessary yields primary key and foreign key relationship, further techniques to eliminates the false positives are needed. After that, it is straightforward to construct the join graph using the primary keys and foreign keys: each table is a vertex and there is an edge between two vertexes only if there exists a primary key and foreign key relationship between them. 
+
 
 \subsection{Refine Candidate FK-PK Relationships}
 
 
 
-
-%\subsection{Find Inclusion Dependency Incrementally}\label{subsec:incremental}
 
 
 
