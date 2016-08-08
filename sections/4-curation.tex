@@ -2,7 +2,7 @@
 \section{Polystore Query Processing}
 \label{sec:curating}
 
-Our local polystore system is called BigDAWG.  It consists of a middleware query
+Our local polystore system is called BigDAWG. It consists of a middleware query
 optimizer and executor, and shims to various local storage systems, as noted
 in~\cite{DBLP:journals/sigmod/DugganESBHKMMMZ15,
 DBLP:journals/pvldb/ElmoreDSBCGHHKK15}.  Assume that a user has run discovery
@@ -12,7 +12,7 @@ is interested.  In other words, he has defined the join path using stitching and
 the predicates that subset the tables in some other way.  This will translate
 directly to a BigDAWG query.  In general, a user will want to retrieve a subset
 of the view, which is merely an extra predicate(s) attached to the BigDAWG
-query.   In this section we address how to integrate data cleaning and
+query. In this section we address how to integrate data cleaning and
 transformation operations with this query plan.
 
 In general, one needs to clean the data prior to performing transformations.
@@ -33,54 +33,62 @@ whatever it takes to get to the point.
 willing to spend M and wishes to make the data as clean as possible.
 \end{enumerate}
 
-Sometimes the user is the one actually cleaning the data.  In this case, he can
-use P and M to quantify the value of his time.  In other cases, cleaning is done
-by other domain experts, who generally need to be paid.  In this case, P and M
+Sometimes the user is the one actually cleaning the data. In this case, he can
+use P and M to quantify the value of his time. In other cases, cleaning is done
+by other domain experts, who generally need to be paid. In this case, P and M
 are statements about budget priorities.
 
 Obviously one want to perform expensive cleaning on as few records as possible.
 Hence, one would like to insert cleaning operations as late in the query plan as
-possible.  Unfortunately, if one runs a query that has the predicate:
+possible. Unfortunately, if one runs a query that has the predicate:
 
 …where name = “New York”
 
 then the misspelled city name will not be found, and accuracy will suffer.  One
 solution is to clean the entire source data sets to avoid such errors, an
-expensive proposition indeed.  In Data Civilizer, we support a third
-alternative; namely more information about the errors in each data set.  First,
-we assume that each data set owner gives us accuracy metrics for each column,
+expensive proposition indeed. In Data Civilizer, we support a third
+alternative; namely more information about the errors in each data set. First,
+we assume that each data set owner gives us accuracy metrics for each
+column\notera{the estimation comes from the profiler},
 namely an estimate for the percentage of the column which is erroneous.  Second,
 the same data set owner is required to specify a “disorder metric”, which
 indicates the average and variance of the lexical distance between an incorrect
-value and its ground truth.  For example, if salary errors average 5% with
-variance 2%, then 2/3 of the errors are less than 7% off.  If an address field
+value and its ground truth. For example, if salary errors average 5\% with
+variance 2\%, then 2/3 of the errors are less than 7\% off. If an address field
 routinely confuses “road” and “street”, but very rarely gets the name of the
-street wrong, then the lexical distance is again very small.   If the penalty is
-small, then we can insert cleaning “late” in the query plan.  On the other hand,
+street wrong, then the lexical distance is again very small. If the penalty is
+small, then we can insert cleaning “late” in the query plan. On the other hand,
 if the penalty is large, then we must insert cleaning earlier, of course at much
-higher cost.  The next section analyzes this tradeoff in more detail.
+higher cost. Next we introduce Data Civilizer's cleanliness model
+and then we discuss how to achieve a target result quality.
 
-\section{Querying the Join Graph}\label{sec:enhancedstitching}
-
-After we ran the data stitching and get the join graph, the user can query the
-join graph explicitly or implicitly. The user can specify several attributes he
-is interested in, which compose a \emph{query schema}, and several predicates on
-these attributes. The query result is a view that subsumes the query schema and
-obeys the predicates. To answer a query, data civilizer generates a steiner tree
-for the query schema from the join graph. As there are multiple steiner trees,
-to select the best one, we give a cleanliness model to estimate the quality of
-the corresponding query result in Section~\ref{subsec:model:recall}. Given a
-steiner tree, we discuss how to maximize the quality of the corresponding result
-with a given budget in Section~\ref{subsec:gain}.
+%\section{Querying the Join Graph}\label{sec:enhancedstitching}
 
 %Consider a \emph{path query} to be a predicate $P$ on an attribute in one of
 %the tables along with a chain of PK/FK relationships, terminating with a
 %retrieval of a non-key attribute in the final table. 
 
-\subsection{The Cleanliness Model}\label{subsec:model:recall}
+\subsection{The Cleanliness Model}
+\label{subsec:model:recall}
 
-The result of a query is a view by joining all the tables in the steiner tree
-and filtering with the given predicates. Assume $\R$ is the desired table, i.e.
+A user of Data Civilizer can specify attributes of interest that compose a
+\emph{query schema} and predicates on the schema to select the data of interest.
+To answer a query, data civilizer generates a steiner tree for the query schema
+from the join graph. For a given query, there may be multiple steiner trees.
+Data Civilizer chooses the best one according to the following cleanliness
+model.
+
+%To answer a query, data civilizer generates a steiner tree
+%for the query schema from the join graph. As there are multiple steiner trees,
+%to select the best one, we give a cleanliness model to estimate the quality of
+%the corresponding query result in Section~\ref{subsec:model:recall}. Given a
+%steiner tree, we discuss how to maximize the quality of the corresponding result
+%with a given budget in Section~\ref{subsec:gain}.
+
+%The result of a query is a view by joining all the tables in the steiner tree
+%and filtering with the given predicates. 
+
+Assume $\R$ is the desired table, i.e.
 the ground truth, and $\R'$ be the one generated from our join graph. Let
 $|\R|$ be the number records in $\R$ and $|\R\cap\R'|$ be the number common
 records shared by $\R$ and $\R'$. We respectively define the precision and the
@@ -108,7 +116,6 @@ Suppose we are visiting a node $n$, whose parent is $p$. If $n$ is the foreign
 key, we set the cardinality of $p$ as the size $|n|$ of table $n$....
 \dong{Seems hard to estimate the recall, even if the steiner tree is a 'line'.}
 
-
 %Suppose that the edges in the maximum bipartite matching are $e_1, e_2, \cdots,
 %e_n$ and the weights are $w_1, w_2, \cdots, w_n$. We use an aggregation
 %function $Agg$ to combine all the weights, such as summation, and treat this as
@@ -122,8 +129,12 @@ key, we set the cardinality of $p$ as the size $|n|$ of table $n$....
 
 \subsection{Maximize Quality Gain with a Budget}\label{subsec:gain}
 
+After the result for a query is generated, the user may want to improve the
+quality of the results, \ie the quality of the steiner tree. Improving quality
+has a cost: we discuss in this section three alternatives to achieve such goal.
+
 We first define a cleaning operation and its cost. We involve human to clean the
-data by asking them question. We ask two kinds of questions. The first one is
+data by asking them questions. We ask two kinds of questions. The first one is
 ``\texttt{Does tuple t satisfy a predicate P?}'' and the second one is
 ``\texttt{Are tuple t and t' the same object?}''. Assume all the questions have
 the same cost. Then given a budget, we can only ask the human a limited number
@@ -132,10 +143,10 @@ of questions.
 As we only give an estimation of the query result quality, after the user cleans
 some data, our estimated result quality can decrease in some cases. This is
 because our estimation on the more clean data is more accurate than our original
-estimation, which can be over estimated the quality. We would not want this
+estimation, which may have overestimated the quality. We would not want this
 situation to happen. Thus we given three possible solutions to avoid this
-situation. \dong{Which sounds best?}
-
+situation. \notera{say that depends on the situation one would choose a
+different one}
 
 1) We can come up with a confidence of our estimation. Our original estimation
 can have a lower confidence (larger quality interval) and the updated estimation
@@ -150,100 +161,99 @@ the estimated quality increase.
 data. We guarantee the estimated quality cannot go down at any time when the
 users clean the data using our plan.
 
-
-\iffalse
-We fist discuss As each arc in the query chain has 
-
-To maximize the recall gain with the given budget, we can develop a dynamic programming method
-
-In the path query, we assume the error can only happen in the evaluation of the
-predicate $P$ or in the tuple alignment within two tables. The minimum cleaning
-unit can be verifying a pair of tuples in the tuple chain or testifying whether
-a value satisfies the predicate $P$. For ease of presentation, we assume they
-both has constant cost $c$. In this section, we address the problem of
-generating the cleaning plan that maximizing the quality gain of the result with
-a given budget.
-
-As the tuple chain of different records in the view can share the same tuple
-pair. 
-
-Let $A_i$ and $B_i$ respectively be the foreign key and primary key in table
-$T_i$. Using the error-robust inclusion dependency, we can align (by the maximum
-bipartite matching) the values in $B_i$ and $A_{i+1}$ where $1\leq i\leq K-1$.
-Let $b^i$ and $a^{i+1}$ respectively be a value in $B_i$ and $A_{i+1}$. We use
-$S_{clean}(a_{i+1},b_i)$ to denote the cleanliness score between $a$ and $b$ and
-$S_{clean}(a_1,P)$ to denote the cleanliss score.
-
-Let $a^{i+1}_1, a^{i+1}_2, \cdots, a^{i+1}_y$ and $b^{i}_1, b^{i}_2, \cdots,
-b^{i}_x$ respectively be the distinct values in  $A_{i+1}$ and $B_i$. Suppose
-$a^{i+1}$
-
-The first thing we should make clear is what is the minimum cleaning unit. 
-
-Let’s first focus on the presence errors. Actually we should first focus on 
-
-Suppose there are three tables T1, T2 and T3 as shown in below.
-
-There are FK-PK relations between T1 and T2 and T2 and T3. Note for each
-attribute we collapse all the rows by the same value. For example, in table 2,
-the cardinality of the distinct values of the red attributes are all 1 while the
-cadinality of the distinct values of the green attributes are m1, m2, and m3
-respectively.
-
-When there is no filter, then R1 will have n1+n4=m2 rows. R2 has n3=m1 rows and
-R3 has n2=m3 rows. Then we should choose the the maximum of 
-
-\subsection{Improving the Precision} Suppose that we have a cleanliness
-estimation on each edge. Then we can estimate the cleanliness of the record in
-the view as the product of the cleanliness on each edge.
-
-\subsection{Improving the Recall}
-Consider a view generated by 
-
-\begin{table}
-\centering
-\begin{tabular}{|c|c|c|c|c|} \hline
-Name & Age & Dept & School & student no \\\hline
-Mike & 20  & CS   & ENG &  5200 \\\hline
-Samuel & 26  & CS   & ENG &  5200 \\\hline
-Albert & 39  & MATH & SCI &  4100 \\\hline
-James  & 42  & BIO  & SCI &  4100 \\\hline
-David  & 60  & EE   & ENG &  5200 \\\hline
-Robert & 99  & EE   & ENG &  5200 \\\hline
-\end{tabular}
-\end{table}
-
-\lstset{language=SQL}
-\begin{lstlisting}
-Select *
-From Faculty, Dept_School, School
-Where School.student_no > 4000
-\end{lstlisting}
-
-\subsection{A Cleanliness Model wrt Precision}\label{subsec:model:precision}
-
-We first give the intuition of our cleanliness model wrt precision. As the
-result of a \emph{path query} is a view, we estimate a cleanliness score for
-each record in the view and utilize an aggregation function to combine the
-cleanliness scores of all the records. The aggregated score is the cleanliness
-of the result. As each record in the view is a ``chain'' of tuples from
-different tables, we can estimate the cleanliness of each part in the tuple
-chain and use their product as the cleanliness score of this record. Next we
-formally define our cleanliness model.
-
-Assume there are $K$ tables, $T_1$, $\cdots$, $T_K$ in the \emph{path query}
-where the predicate $P$ applies on $T_1$. Let $R_1, R_2, \cdots, R_n$ be the
-records in the view. For each record $R_i$, suppose that the tuple chain is
-$(t^i_1, t^i_2, \cdots, t^i_m)$. For the tuple $t^i_1$ where the predicate $P$
-applies, we estimate the cleanliness score as $S_{pred}(t^i_1, P)$. For each
-tuple pair $t^i_j$ and $t^i_k$ in the chain, we can estimate the cleanliness
-score as $S_{join}(t^i_j,t^i_k)$. This score is achieved either by the
-error-robust inclusion dependency as described in Section 3 or the cleanliness
-estimation in Section 5. Then the cleanliness score for the record $R_i$ is
-$C_{R_i}=S_{pred}(t^i_1,P)\prod_{i=1}^{m-1}S_{join}(t^i_j,t^i_k)$. Suppose we
-use the aggregation function $\mathbf{A}$ to combine the cleanliness scores of
-all the records. The quality of the view is $\mathbf{A}(C_{R_1}, C_{R_2},
-\cdots, C_{R_n})$.
-
-\fi
+%\iffalse
+%We fist discuss As each arc in the query chain has 
+%
+%To maximize the recall gain with the given budget, we can develop a dynamic programming method
+%
+%In the path query, we assume the error can only happen in the evaluation of the
+%predicate $P$ or in the tuple alignment within two tables. The minimum cleaning
+%unit can be verifying a pair of tuples in the tuple chain or testifying whether
+%a value satisfies the predicate $P$. For ease of presentation, we assume they
+%both has constant cost $c$. In this section, we address the problem of
+%generating the cleaning plan that maximizing the quality gain of the result with
+%a given budget.
+%
+%As the tuple chain of different records in the view can share the same tuple
+%pair. 
+%
+%Let $A_i$ and $B_i$ respectively be the foreign key and primary key in table
+%$T_i$. Using the error-robust inclusion dependency, we can align (by the maximum
+%bipartite matching) the values in $B_i$ and $A_{i+1}$ where $1\leq i\leq K-1$.
+%Let $b^i$ and $a^{i+1}$ respectively be a value in $B_i$ and $A_{i+1}$. We use
+%$S_{clean}(a_{i+1},b_i)$ to denote the cleanliness score between $a$ and $b$ and
+%$S_{clean}(a_1,P)$ to denote the cleanliss score.
+%
+%Let $a^{i+1}_1, a^{i+1}_2, \cdots, a^{i+1}_y$ and $b^{i}_1, b^{i}_2, \cdots,
+%b^{i}_x$ respectively be the distinct values in  $A_{i+1}$ and $B_i$. Suppose
+%$a^{i+1}$
+%
+%The first thing we should make clear is what is the minimum cleaning unit. 
+%
+%Let’s first focus on the presence errors. Actually we should first focus on 
+%
+%Suppose there are three tables T1, T2 and T3 as shown in below.
+%
+%There are FK-PK relations between T1 and T2 and T2 and T3. Note for each
+%attribute we collapse all the rows by the same value. For example, in table 2,
+%the cardinality of the distinct values of the red attributes are all 1 while the
+%cadinality of the distinct values of the green attributes are m1, m2, and m3
+%respectively.
+%
+%When there is no filter, then R1 will have n1+n4=m2 rows. R2 has n3=m1 rows and
+%R3 has n2=m3 rows. Then we should choose the the maximum of 
+%
+%\subsection{Improving the Precision} Suppose that we have a cleanliness
+%estimation on each edge. Then we can estimate the cleanliness of the record in
+%the view as the product of the cleanliness on each edge.
+%
+%\subsection{Improving the Recall}
+%Consider a view generated by 
+%
+%\begin{table}
+%\centering
+%\begin{tabular}{|c|c|c|c|c|} \hline
+%Name & Age & Dept & School & student no \\\hline
+%Mike & 20  & CS   & ENG &  5200 \\\hline
+%Samuel & 26  & CS   & ENG &  5200 \\\hline
+%Albert & 39  & MATH & SCI &  4100 \\\hline
+%James  & 42  & BIO  & SCI &  4100 \\\hline
+%David  & 60  & EE   & ENG &  5200 \\\hline
+%Robert & 99  & EE   & ENG &  5200 \\\hline
+%\end{tabular}
+%\end{table}
+%
+%\lstset{language=SQL}
+%\begin{lstlisting}
+%Select *
+%From Faculty, Dept_School, School
+%Where School.student_no > 4000
+%\end{lstlisting}
+%
+%\subsection{A Cleanliness Model wrt Precision}\label{subsec:model:precision}
+%
+%We first give the intuition of our cleanliness model wrt precision. As the
+%result of a \emph{path query} is a view, we estimate a cleanliness score for
+%each record in the view and utilize an aggregation function to combine the
+%cleanliness scores of all the records. The aggregated score is the cleanliness
+%of the result. As each record in the view is a ``chain'' of tuples from
+%different tables, we can estimate the cleanliness of each part in the tuple
+%chain and use their product as the cleanliness score of this record. Next we
+%formally define our cleanliness model.
+%
+%Assume there are $K$ tables, $T_1$, $\cdots$, $T_K$ in the \emph{path query}
+%where the predicate $P$ applies on $T_1$. Let $R_1, R_2, \cdots, R_n$ be the
+%records in the view. For each record $R_i$, suppose that the tuple chain is
+%$(t^i_1, t^i_2, \cdots, t^i_m)$. For the tuple $t^i_1$ where the predicate $P$
+%applies, we estimate the cleanliness score as $S_{pred}(t^i_1, P)$. For each
+%tuple pair $t^i_j$ and $t^i_k$ in the chain, we can estimate the cleanliness
+%score as $S_{join}(t^i_j,t^i_k)$. This score is achieved either by the
+%error-robust inclusion dependency as described in Section 3 or the cleanliness
+%estimation in Section 5. Then the cleanliness score for the record $R_i$ is
+%$C_{R_i}=S_{pred}(t^i_1,P)\prod_{i=1}^{m-1}S_{join}(t^i_j,t^i_k)$. Suppose we
+%use the aggregation function $\mathbf{A}$ to combine the cleanliness scores of
+%all the records. The quality of the view is $\mathbf{A}(C_{R_1}, C_{R_2},
+%\cdots, C_{R_n})$.
+%
+%\fi
 
