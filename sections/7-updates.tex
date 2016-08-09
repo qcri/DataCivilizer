@@ -27,3 +27,6 @@ Data Civilizer leverages Decibel~\cite{DBLP:journals/pvldb/MaddoxGEMPD16}, a sys
 
 \stitle{(iii) Descriptive and prescriptive data cleaning.}
 Sometimes, a scientist may curate directly his MV such as the above case (3), which triggers some updates that must be propagated to other descendent data sets, as well as back upstream to data sources. To perform this, we leverage the technique in~\cite{DBLP:conf/sigmod/ChalamallaIOP14}, a system developed by QCRI and Waterloo. In the MV, the updates will be captured based on human data curation, which will be transformed at the source level to prescribe actions to solve them. 
+
+
+As the data comes to us gradually while finding the inclusion dependency, especially the error-robust inclusion dependency, is time consuming, it is necessary to have the \eind incrementally founded. Moreover, the inclusion dependency does not necessary yields primary key and foreign key relationship, further techniques to eliminates the false positives are needed. After that, it is straightforward to construct the join graph using the primary keys and foreign keys: each table is a vertex and there is an edge between two vertexes only if there exists a primary key and foreign key relationship between them. 
