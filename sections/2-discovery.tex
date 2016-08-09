@@ -25,32 +25,47 @@ discovery:
 
 \subsection{Data Discovery Components}
 
-The data discovery module consists of two conceptually different components
-that collaborate with each other, as shown in Figure~\ref{fig:arch}:
+The data discovery module consists of two conceptually different components that
+collaborate with each other to build a skeleton of the linkage graph shown in
+Figure~\ref{fig:arch}. The linkage graph is defined as $G=(V,E)$, where $E$ is a
+multiset, as we permit different types of edges, \ie relationships, betweeen
+$V$. To build this multigraph, discovery consists of two modules, the first one,
+the \code{data profiler} is in charge of finding the $V$ in the graph, and the
+second one, the \code{graph builder} is reponsible for finding $E$.
 
 \begin{enumerate}
 \item {\bf Data profiler.} We first accumulate knowledge of the data sources by
-summarizing them into concise profiles. A profile contains a signature, which is
-a domain-dependent, compact representation of the original content. It also
-contains information about the data cardinality, data type, and numerical ranges
-when it applies~\cite{profiling_survey}. This module creates a summary profile per field, \ie column or
-attribute, in the original data, but this granularity can be fine-tuned as
-required.
-\item {\bf Graph builder.} We create search paths over the signatures that
-reflect different relatedness measurements and allows one to navigate the
-sources, such as similarity measures between data sources. Such similarity
-measures may refer to the content, the schema, the semantic type, but also to
-the hierarchy in which data sources were read, \ie if they are part of the same
-schema. Creating these search paths require in general a pairwise comparison
-that would render the module too slow.  We discuss next some techniques we use
-to tame the scale.  
+summarizing them into concise profiles. We can choose the granularity of those
+profilers. In practice, we have found that building a profile per attribute is
+sufficient for most use cases. A profile contains a signature, which is a
+domain-dependent, compact representation of the original content. One example of
+signature for numerical data is its distribution, and for textual data a vector
+with the most significative terms. A profile also contains information about the
+data cardinality, data type, and numerical ranges when it
+applies~\cite{profiling_survey}.  
+
+\item {\bf Graph builder.} The data profiler generates a set of $V$, and the
+graph builder reponsibility is to find relationships among these, and represent
+them as $E$, building the skeleton of the linkage graph. These relationships
+help to navigate through the different sources ($V$). Examples of relationships
+that the graph builder finds are \emph{content similarity} based on measuring
+the similarity distance among the signatures that represent each $v$. Another
+relationship is \emph{schema similarity} that captures the similarity of the
+names of the different $v$. Other kind of relationships capture the hierarchical
+relationship among $v$, for example, all attributes of a same relation are
+connected, permitting quick navigation. Creating these relationships require in
+general a pairwise comparison that would render the module too slow. We discuss
+next some techniques we use to tame the scale.
 \end{enumerate}
 
-Once the graph has been built, it can be accessed by a set of data
-discovery primitives that can be used interactively to explore and find relevant
-data by both users and other modules, such as stitching. Data discovery primitives can be composed
-into more complex data discovery functions, and all of these combine through
-combinator operators to build expressive discovery queries.  
+Once the linkage graph skeleton has been built, it can be accessed by a set of
+data discovery primitives to explore and find relevant data. These primitives
+are used by users and by other modules, such as stitching. In particular,
+stitching also has write access to the linkage graph, that uses to add a new $e$
+to the multiset of relationships, the expensive-to-compute FK-PK relationships.
+Data discovery primitives can be composed into more complex data discovery
+functions, and all of these combine through combinator operators to build
+expressive discovery queries.  
 
 \subsection{Data Profiler}
 
