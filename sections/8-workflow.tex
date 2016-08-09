@@ -2,8 +2,14 @@
 \section{Tractable Curation Workflow}
 \label{sec:workflow}
 
-The process of data curation on demand might entail various iterations of data discovery, data stitching, and data curation steps. Especially the data curation requirement might consist of various cleaning and transformation procedures that have to be guided by a user. To facilitate the user in this is process, Data Civilizer will propose ETL sequences that best fit the current data set.
+The process of data curation on demand might entail multiple iterations of data discovery, data stitching, and data curation routines. Especially the data curation requirement might consist of various cleaning and transformation procedures that have to be guided by a user. 
+To facilitate the user in this is process, the workflow orchestrator of Data Civilizer will propose operation sequences that best fit the current data set.
 To this end, we exploit the fact that the type of data curation and preparation steps  inside a company might follow repetitive patterns.
-We will store the sequence of data curation operations in a workflow registry together with the meta-data and signatures provided by the data discovery component for comparison with future data discovery scenarios. 
 
-During later data discovery tasks, the signatures will be compared to those stored in the workflow registry and accordingly the related curation and preparation procedures will be proposed to the user. Furthermore, the workflow registry will be able to identify redundant and subsuming curation steps by profiling the input and output of each operation.
+The workflow orchestrator stores the user query, the sequence of component operations and data curation steps into central workflow registry together with the meta-data and signatures provided by the data discovery component.
+These information will be evaluated during future data discovery scenarios. 
+The orchestrator will evaluate the current user query and the initial results of the data discovery component against the workflow registry. Similar queries and similar data profiles are likely to demand similar cleaning procedures. The workflow orchestrator leverages the same similarity metrics that are used by the data discovery system.
+Previous workflows will be ranked based on the similarity of the user query and retrieved discovery results. 
+Accordingly the related curation and preparation procedures will be shown in a ranked overview to the user. 
+As several workflows might be generated through different users for the same query the orchestrator will filter workflows that can be subsumes by existing simpler workflows. 
+For this purpose, the workflow orchestrator tracks the profile change of discovered and stitched datasets after each operation to be able to identify the impact of each operation in transforming a data set. Additionally it will take into consideration at which point the results of a component were accepted by the user.
