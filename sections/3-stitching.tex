@@ -71,7 +71,8 @@ Note the value domain of $\EIND$ is $[0,1]$. there is an \emph{exact} inclusion 
 
 \subsection{Refine Candidate FK-PK Relationships}
 
-The error-robust inclusion dependency gives us a bunch of candidate foreign key and primary key (PK-FK) relationships. We can apply existing machine learning method to remove the false positives from the results. 
+The error-robust inclusion dependency gives us a bunch of candidate foreign key and primary key (PK-FK) relationships. We can apply existing machine learning method to remove the false positives from the results.  Rostin et al.~\cite{WebDB2009} proposed 10 different features to distinguish the foreign key constraints from the `spurious' inclusion dependency. These features include coverage, which is the ratio of distinct values in $\R[X]$ that are contained in that of $S[Y]$, column name similarity, which is the similarity between the attribute names of $X$ and $Y$, and the out of domain range, which is the percentage of values in $\S[Y]$ not within $[min(\R[X]), max(\R[X])]$. They utilized four different classification algorithms, Naive Bayes, Support Vector Machines, J48, and Decision Tables. The experimental results on six datasets from three different domains (life science, movies, and TPC-H benchmark) shows their method consistently achieved F-measures above 80\% and often close to 100\%.
+
 
 
 
