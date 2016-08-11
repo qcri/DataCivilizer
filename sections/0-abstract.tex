@@ -1,0 +1,5 @@
+% !TEX root = ../main.tex
+
+\begin{abstract}
+In this paper, we present an end-to-end big data management system, named \dcv, whose main purpose is to decrease the ``mung work'' for analyzing the data in the wild. We observe that in large company it is usually hard for the users to find the relevant data for his specific task, the data are often scattered everywhere, inconsistent, and updated frequently. To solve these problems, we build a data discovery module in the system to help the users identify his interesting data. We develop a data stitching module to link all the relevant data for better usage of the data. We propose to build the system on top of a ploystore architecture and place the data cleaning operations in the query plan. In addition, as the data preprocessing conducted by the users are often repetitively, we design a workflow engine to iterate the above modules and handle updates. We deployed our preliminary \dcv system on two institutions, MIT and Merck. The users gave us positive feedbacks and indicated that the system indeed shortened their time and effort to prepare the data.
+\end{abstract}
