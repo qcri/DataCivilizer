@@ -2,131 +2,44 @@
 \section{Discovery}
 \label{sec:discovery}
 
-The goal of the data discovery module is to find relevant data among the
-millions of datasets spread across many storage systems of modern organizations.
-Suppose an analyst wants to answer the question: what is the monthly sales trend
-by department? The analyst knows conceptually what data is needed to answer this
-question (a table of sales, a table of departments, a table of products sold by
-each department), but not which specific data sources (which relations in a
-schema or what files in an HDFS deployment) contain such data. The typical
-solution is to 1) ask an expert (if such a person is available), or to perform
-manual exploration, inspecting datasets one by one (which is time-consuming and
-prone to missing relevant data sources). We say this analyst is facing a data
-discovery challenge.
+The goal of the data discovery module is to find relevant data among the perhaps millions of datasets spread across the storage systems of an enterprise. 
 
-The data discovery module narrows down the search of relevant data from the
-thousands and millions of data sources to a handful of them that can then be fed
-to stitching---that performs the final preparation before processing. Discovery
-exports an API that can be used by users directly to search for relevant data,
-e.g., schema search, similar content, etc, as well as by other modules in Data
-Civilizer, such as stitching, to retrieve additional data that can be used, for
-example, to enrich a table. Next we describe the general steps of data
-discovery:
+A typical solution is to ask an expert (if one is available), or to perform manual exploration, inspecting datasets one by one (which is obviously time-consuming and prone to missing relevant data sources). Recently, we are witnessing efforts to automate this process, such as \texttt{Goods}~\cite{DBLP:conf/sigmod/HalevyKNOPRW16} or \texttt{InfoGather}~\cite{ref}. Unlike these systems that are designed to answer a particular use case, discovery aims to collect enough information about the datasets and expose them to upper layers of \dcv require to orchestrate query execution, which is the ultimate goal.
+
+The data discovery module narrows down the search for relevant data from millions of data sources to a handful of them, upon which stitching can be performed. Data civilizer discovery supports a user-level API to search for relevant data using a variety of techniques such as schema search, similar content. Discovery is extensible: an engineer can extend the supported relationships to cover other relevant use cases.
 
 \subsection{Data Discovery Components}
 
-The data discovery module consists of two conceptually different components that
-collaborate with each other to build a skeleton of the linkage graph shown in
-Figure~\ref{fig:arch}. The linkage graph is defined as $G=(V,E)$, where $E$ is a
-multiset, as we permit different types of edges, \ie relationships, betweeen
-$V$. To build this multigraph, discovery consists of two modules, the first one,
-the \code{data profiler} is in charge of finding the $V$ in the graph, and the
-second one, the \code{graph builder} is reponsible for finding $E$.
+The data discovery module consists of two conceptually different components, a data profiler and a graph builder, that collaborate with each other to build the linkage graph indicated in Figure~\ref{fig:arch}.
 
 \begin{enumerate}
-\item {\bf Data profiler.} We first accumulate knowledge of the data sources by
-summarizing them into concise profiles. We can choose the granularity of those
-profilers. In practice, we have found that building a profile per attribute is
-sufficient for most use cases. A profile contains a signature, which is a
-domain-dependent, compact representation of the original content. One example of
-signature for numerical data is its distribution, and for textual data a vector
-with the most significative terms. A profile also contains information about the
-data cardinality, data type, and numerical ranges when it
-applies~\cite{profiling_survey}.  
+\item {\bf Data profiler.} We summarize each column of each table into a profile. Each profile contains a signature, which is a domain-dependent, compact representation of the original content. Our signature for numerical data is a data distribution, and for textual data it is a vector of the most significant words in the column. Our profiles also contains information about data cardinality, data type, and numerical ranges if applicable~\cite{profiling_survey}.  
 
-\item {\bf Graph builder.} The data profiler generates a set of $V$, and the
-graph builder reponsibility is to find relationships among these, and represent
-them as $E$, building the skeleton of the linkage graph. These relationships
-help to navigate through the different sources ($V$). Examples of relationships
-that the graph builder finds are \emph{content similarity} based on measuring
-the similarity distance among the signatures that represent each $v$. Another
-relationship is \emph{schema similarity} that captures the similarity of the
-names of the different $v$. Other kind of relationships capture the hierarchical
-relationship among $v$, for example, all attributes of a same relation are
-connected, permitting quick navigation. Creating these relationships require in
-general a pairwise comparison that would render the module too slow. We discuss
-next some techniques we use to tame the scale.
+\item {\bf Graph builder.} Using profiles, the graph builder finds relationships among nodes, and represents them as edges. Examples of relationships are \emph{content similarity} based on measuring the similarity distance between signatures and \emph{schema similarity} that captures the similarity of the names of the different nodes. Another kind of relationship capture the hierarchical relationship between a table and its columns.
+
 \end{enumerate}
 
-Once the linkage graph skeleton has been built, it can be accessed by a set of
-data discovery primitives to explore and find relevant data. These primitives
-are used by users and by other modules, such as stitching. In particular,
-stitching also has write access to the linkage graph, that uses to add a new $e$
-to the multiset of relationships, the expensive-to-compute FK-PK relationships.
-Data discovery primitives can be composed into more complex data discovery
-functions, and all of these combine through combinator operators to build
-expressive discovery queries.  
 
-\subsection{Data Profiler}
+\subsection{Data Profiles at Scale}
 
-The profiling module of data discovery is responsible for computing signatures
-for each attribute in the dataset, as well as data types, cardinalities and an
-estimation of the \emph{cleanliness} of the data, \ie a measure of its data
-quality. Signatures are type-dependent and must exhibit two properties: (i)
-represent the attribute values in a compact way; and (ii) be compatible with a
-similarity metric. 
+To run at scale, discovery relies on sampling to estimate the cardinality of columns and the quantiles for numerical data. This avoids having to sort each column, which is not a linear computation.  More generally, this avoids a requirement to copy or update the data, reducing memory consumption. 
 
-Signatures can be of two types, numerical and textual. For numerical values the
-module learns the probability distribution of the data and it also computes the
-data range by estimating the median and inter-quantile range, \ie the $75p -
-25p$. In the case of textual data, the module computes the TF-IDF vector for
-each profile of data, capturing the terms that better represent the attribute.
+The data profiler architecture is a pipeline of stages, with each stage responsible for performing a different computation. For example, the first stage performs basic denoising of the data, such as removing empty values and dealing with potential formatting issues of the underlying files, e.g. figuring out the separator for a CSV file. The second stage determines the data type, information that is propagated along with the data to the next stages. The rest of the stages are responsible for computing cardinalities, performing quantile estimation, i.e. to determine numerical ranges, etc. 
 
-\textbf{Fast cardinality and quantile estimation.} Due to the sheer volumes of
-data, discovery relies heavily on sketches to estimate the cardinality of the
-attributes as well as the quantiles in the case of numerical data. This avoids
-ordering the data. More in general, this permits the module to compute the
-profiles following a \emph{read-once} principle, saving memory and computation
-time. By treating the input data as a read-once stream we also avoid putting too
-much pressure on the original data sources.
+The profiler has connectors to read data from different data sources, such as HDFS files, RDBMS or CSV files. The data is then streamed through the profiler pipeline and at the end the resulting attribute profile is sent to a store from where it is later consumed by the graph builder. At the same time, the profiler works in a distributed environment, with a lightweight coordinator that splits the work among multiple processors, helping to scale the computation.
 
-\textbf{Data quality estimation.} Along with data cardinalities and quantiles,
-that can help to identify candidate outliers, the profiling module also collects
-information about common data errors, such as empty values. When safe, it
-performs some denoising, \ie removing empty values, leading to better quality profiles, and then it
-includes this \emph{cleanliness} information as part of the profile. This serves
-as a preliminary step to other more-expensive cleaning operations performed by
-other modules in data civilizer, such as stitching and the query processor \ref{sec:4,
-sec:5}). 
 
-\subsection{Graph Builder} The input of the graph builder is a set of profiles,
-$V$, that are the nodes of the multigraph represented by the linkage graph. Its
-reponsibility is to compute the multiset $E$ of relationships among each pair of
-$v$. In particular, the graph builder component finds content and schema
-similarity relationships. In this way, the multigraph will have an edge of type
-\emph{content-similarity} between $v$ A and B if these are similar, and one of
-type \emph{schema-similarity} if the schema names are similar. Each edge is
-scored with a weight that represents the strength of the relationship: the
-particular meaning depends on the edge semantics.
 
-This approach creates a logically complete graph, where all nodes in the graph
-are connected with at least some similarity among them. In practice, it is
-possible to define a minimum similarity threshold that must be surpassed for an
-edge to exist in the graph.
+\subsection{Graph Builder} 
 
-Finding the edges among $V$ requires a pairwise comparison among all $v$ in $V$,
-which is computationally very expensive ($O(N^2)$), and due to the large scale
-of datasets that discovery must process, irrealizable. To tame the scale we rely
-on approximate clustering techniques such as locality sensitive hashing (LSH)
-\cite{DBLP:conf/compgeom/DatarIIM04}. With this approach we hash the signature
-that represents each $v$ in $V$ and we group together those that collide, \ie
-that are more likely to be similar. Then we perform a comparison among the $v$
-in each of the clusters to finally determine whether a relationship exists or
-not. This approach avoids the $N^2$ operation and still achieves high accuracy.
 
-The entire discovery layer benefits from a distributed architecture that helps
-to parallelize the profiling as well as the graph building module, further
-speeding up the process. Other kind of relationships such as finding FK-PK are
-too expensive to compute by discovery, and are left to stitching, that follows a
-more judicious approach to choose which ones to compute, as explained next.
+
+The input to the graph builder is a set of profiles, V, that are the attached to nodes of the graph. The graph builder then computes the arcs among pairs of nodes. In particular, the graph builder component finds content and schema similarity relationships. Each edge is scored with a weight that represents the strength of the relationship: the particular meaning depends on the edge semantics.  Also, edges with a similarity less than a user-defined threshold are discarded, to avoid having a graph with many edges that are not significant. 
+
+
+Finding edges in the graph is an $O(n^2)$ computation, which will not scale.  Hence, we rely on locality sensitive hashing (LSH)~\cite{DBLP:conf/compgeom/DatarIIM04}. Specifically, we hash each signature and group together those that collide.  These are more likely to be similar, so we perform a comparison among the nodes in each cluster, ignoring cross cluster comparisons.  This approach avoids $n^2$ operations and appears to perform well in practice.
+
+
+The discovery module benefits from our distributed architecture that allows us to parallelize profiling as well as graph building, further speeding up execution times. Other kind of relationships such as finding FK-PKs are too expensive to compute at scale for the whole graph.  These are left to the stitching module, which is described next. 
+
 

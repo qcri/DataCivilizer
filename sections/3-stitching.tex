@@ -28,67 +28,30 @@
 
 
 
+Data stitching links together all of the tables discovered by a user and adds these linkages to the graph for future use. Data stitching utilizes an implementation of inclusion dependency to find candidate PK-FK relationships and then refines the candidates using advanced techniques. However, as is well known, data in the wild is quite dirty, which makes discovering inclusion dependencies difficult.  Specifically, foreign keys may not match a primary key, because of errors in either the PK or the FK. To tolerate errors, we extend traditional inclusion dependency by both key coverage and text similarity and propose an \emph{\eind} as discussed in Section~\ref{subsec:eind}.
 
-The linkages between different data can be extremely helpful for the users to find the interesting data. Data stitching links all the data together and adds these linkage into the graph. Among all the data linkages, the primary key and foreign key (PK-FK) relationship is one of the most important. Data stitching first utilizes the inclusion dependency to find the candidate PK-FK relationship and then refine the candidates by advanced techniques. However, as we all known, data in the wild is rather dirty. The dirty data contaminates the inclusion dependency in two ways: make fewer keys overlap and make keys not exactly match. To tolerate errors, we extend the traditional inclusion dependency by both key coverage and text similarity and propose the \emph{\eind}. 
-
-Note it is time consuming to find the \eind. To address this issue, data stitching leverage the data profiling results from data discovery to reduce the search space. Moreover, as the advanced techniques that refine the PK-FK candidates are computation intensive, we only apply them after the users identified his interesting data.
-
-Data stitching also estimates the cleanliness of the linkage in the graph, which can help curate the ploystore query.
-
-%1. Limit the search space
-
-%2. Tolerate errors in includency dependency
-
-%3. Estimate the cleanings in join path
-
-%4. Querying the graph
+In Section~\ref{subsec:refine} we consider techniques to improve the accuracy of candidate PK/FK relationships using machine learning techniques.
 
 
 \subsection{Error-Robust Inclusion Dependency}\label{subsec:eind}
 
+Foreign key/primary key relationships are usually identified by inclusion dependency techniques. To address dirty data, we have designed an error-robust inclusion dependency scheme, which enhances traditional inclusion dependency.
 
-Foreign key is one of the most important schema information in managing and using data, which is typically missing in real world. The foreign key and primary key relations are usually identified by inclusion dependency. However, data in the wild is full of errors, such as inconsistence and different formats. This yields to the requirement of error tolerating in inclusion dependency. We observe that the errors in data can contaminate the inclusion dependency in two ways. First, they make the corresponding primary keys and foreign keys not match exactly. Second, they make the foreign keys not all covered by the primary keys. To address these issues, we design an error-robust inclusion dependency which enhances the traditional inclusion dependency with value coverage and text similarity. Next we give the details.
+Consider two columns (or compound columns) from two tables \R and \S denoted by \RX and \SY. If there is a foreign key constraint on \RX with reference \SY, all the values in \RX must appear in \SY, which yields an inclusion dependency from \RX to \SY. However, in the real world, values in foreign key fields may not exist in the primary key field due to errors.  In this case an inclusion dependency from foreign key to primary key does no hold. 
 
+To address this issue, for each distinct value in \RX, we calculate the text similarity to values in \SY and use the maximum value as the strength of a value matching. Then we compute the total strength of the maximum matching divided by the number of values in \RX. This is the overall strength of the inclusion dependency.  If this number exceeds a predefined threshold $\delta$, we specify an inclusion dependency from \RX to \SY in our linkage graph. 
 
-%The main idea behind the error-robust inclusion dependency is that we use the text similarity between the keys to estimate the possibility of they represent the same object. As each distinct foreign key can only be mapped to one primary key and vice versa, we further use the maximum weighted bipartite matching to align the primary keys and the foreign keys. Note it is challenging to efficiently find all the error-robust inclusion dependencies within a bunch of tables, as the input tables can be large and both finding the maximum weighted bipartite matching and calculating the text similarities between all the primary keys and foreign keys are time consuming.
-
-
-
-Given two projections \RX and \SY, we build a weighted bipartite $\G=((\U,\V),\E)$ based on the projections. There is a bijection between the vertexes in \U and the distinct instances in \RX, i.e., each vertex $u$ in $\U$ maps to a distinct instance in \RX and vice versa. This also applies to the vertex set \V and the distinct instances in \SY. For any vertexes $u\in\U$ and $v\in\V$, there is a weighted edge $e=(u,v)\in\E$ where the weight $w_e$ is defined by the text similarity between their corresponding instance values, such as Jaccard similarity and edit similarity. Let $\E_{max}\subseteq\E$ be the \emph{maximum weighted bipartite matching} of \G and $\EIND=\frac{\sum_{e\in\E_{max}}w_e}{|\U|}$. Then \EIND is proportional to the chance of an inclusion dependency from $\RX$ to $\SY$. Given an error-tolerating threshold $\delta$, we formally define the \eind as follows.
-%is a set of edges $\E_{max}$ which satisfies (1) any two edges in it share no common vertex and (2) the sum of edge weights is maximum. 
+When dealing with compound columns, we can utilize different text similarity functions on different fields. Also, we must multiply the individual column scores to achieve an overall strength.
 
 
-\begin{definition}[Error-Robust Inclusion Dependency]
-Given two projections \RX and \SY on relational tables and an error-tolerating threshold $\delta$, there is an error-robust inclusion dependency from \X to \Y when $\EIND\geq\delta$.
-\end{definition}
-
-\iffalse
-\dong{To add an example here.}
-\fi
+\subsection{Refine Candidate FK-PK Relationships}\label{subsec:refine}
 
 
-Note the value domain of $\EIND$ is $[0,1]$. there is an \emph{exact} inclusion dependency among the two projections if and only if $\EIND=1$. When the projections cross multiple fields, we can utilizes different text similarity functions on different fields. As it requires all the fields to be match in inclusion dependency, we combine the text similarities in different fields by multiplying them. For example, given two instances \textsf{(SIGMOD Conference, Sam Madden, San Francisco)} and \textsf{(SIGMOD Conference 2016, Samuel Madden, San Francisco)}. Suppose that we uses Jaccard similarity to evaluate the first field and edit similarity to evaluate the second field. Then we can combine the text similarities as $\frac{2}{3}*\frac{7}{10}*1=0.47$. The score \EIND can also serve as the cleanliness estimation of the linkage between \RX and \SY	.
+The error-robust inclusion dependency algorithm gives us a collection of candidate PK-FK relationships. We then apply the algorithms in~\cite{DBLP:conf/webdb/RostinABNL09} to refine our candidate selection. Here, Rostin et. al. propose 10 different features to distinguish foreign key constraints from spurious inclusion dependencies. Consider two columns \RX and \SY with an inclusion dependency from the first one to the second one. In~\cite{DBLP:conf/webdb/RostinABNL09}, the specified features include \emph{coverage}, which is the ratio of distinct values in \RX that are contained in \SY, \emph{column name similarity}, which is the similarity between the attribute names of X and Y, and the \emph{out-of-domain range}, which is the percentage of values in \SY not within $[\min(\RX), \max(\RX)]$ where $\min(\RX)$ and $\max(\RX)$ are respectively the minimum and maximum values in \RX. 
 
-\subsection{Refine Candidate FK-PK Relationships}
+Using these features, we have implemented the four machine learning classification algorithms in~\cite{DBLP:conf/webdb/RostinABNL09}. These allow us with high accuracy to distinguish spurious inclusion dependencies from real one.
 
-The error-robust inclusion dependency gives us a bunch of candidate foreign key and primary key (PK-FK) relationships. We can apply existing machine learning method to remove the false positives from the results.  Rostin et al.~\cite{WebDB2009} proposed 10 different features to distinguish the foreign key constraints from the `spurious' inclusion dependency. These features include coverage, which is the ratio of distinct values in $\R[X]$ that are contained in that of $S[Y]$, column name similarity, which is the similarity between the attribute names of $X$ and $Y$, and the out of domain range, which is the percentage of values in $\S[Y]$ not within $[min(\R[X]), max(\R[X])]$. They utilized four different classification algorithms, Naive Bayes, Support Vector Machines, J48, and Decision Tables. The experimental results on six datasets from three different domains (life science, movies, and TPC-H benchmark) shows their method consistently achieved F-measures above 80\% and often close to 100\%.
+The result of data stitching is a collection of PK-FK relationships that can be used to link the tables identified by the user. However, there may exist multiple subgraphs in the linkage graph that can connect all the interesting tables, which we call \emph{join paths}. In the next section we discuss the choice of which one(s) to use to materialize a view for the user.
 
 
 
-
-
-\iffalse
-\subsection{Query the Join Graph}\label{subsec:query}
-
-Once the join graph is constructed, the users can query it in various way. Among them, one of the most important one is to.
-
-The essential way to query the join graph is taking several vertexes and find an subgraph containing all the query vertexes.
-
-The user can specify several attributes which compose a \emph{query schema}. 
-
-Given a collection of attributes, we aim to find a subgraph that contains all the corresponding vertexes. 
-
-%\subsection{Cleanliness Estimation}
-%finding ind in a scalable way
-%column de-duplication
-\fi
