@@ -5,18 +5,22 @@
 
 
 
-Data stitching links together all of the tables discovered by a user \nan{These tables should not be discovered by a user?} and adds these linkages to the graph for future use. Data stitching utilizes an implementation of inclusion dependency to find candidate PK-FK relationships and then refines the candidates using advanced techniques. However, as is well known, data in the wild is quite dirty, which makes discovering inclusion dependencies difficult.  Specifically, foreign keys may not match a primary key, because of errors in either the PK or the FK. To tolerate errors, we extend traditional inclusion dependency by both key coverage and text similarity and propose an \emph{\eind} as discussed in Section~\ref{subsec:eind}.
+Data stitching links together all the tables that are 
+returned by the discovery module
+%discovered by a user \nan{These tables should not be discovered by a user?} 
+and adds these linkages to the graph for future use. 
+Data stitching utilizes an implementation of inclusion dependency to find candidate PK-FK relationships and then refines the candidates using advanced techniques\mourad{A bit hand-waving}. However, as is well known, data in the wild is quite dirty, which makes discovering inclusion dependencies difficult.  Specifically, foreign keys may not match a primary key, because of errors in either the PK or the FK\mourad{We could consider other interesting cases; something like http://www.vldb.org/pvldb/vol8/p1358-he.pdf}. To tolerate errors, we extend traditional inclusion dependency by both key coverage and text similarity and propose an \emph{\eind} as discussed in Section~\ref{subsec:eind}.
 
-In Section~\ref{subsec:refine} we consider techniques to improve the accuracy of candidate PK/FK relationships using machine learning techniques.
+In Section~\ref{subsec:refine}, we consider techniques to improve the accuracy of candidate PK/FK relationships using machine learning techniques.
 
 
 \subsection{Error-Robust Inclusion Dependency}\label{subsec:eind}
 
-Foreign key/primary key relationships are usually identified by inclusion dependency techniques. To address dirty data, we have designed an error-robust inclusion dependency scheme, which enhances traditional inclusion dependency.
+Foreign key/primary key relationships are usually identified by inclusion dependency techniques. To address dirty data, we have designed an error-robust inclusion dependency scheme, which enhances traditional inclusion dependency techniques.
 
 Consider two columns (or compound columns) from two tables \R and \S denoted by \RX and \SY. If there is a foreign key constraint on \RX with reference \SY, all the values in \RX must appear in \SY, which yields an inclusion dependency from \RX to \SY. However, in the real world, values in foreign key fields may not exist in the primary key field due to errors.  In this case an inclusion dependency from foreign key to primary key does no hold. 
 
-To address this issue, for each distinct value in \RX, we calculate the text similarity to values in \SY and use the maximum value as the strength of a value matching. Then we compute the total strength of the maximum matching divided by the number of values in \RX. This is the overall strength of the inclusion dependency.  If this number exceeds a predefined threshold $\delta$, we specify an inclusion dependency from \RX to \SY in our linkage graph. \nan{This is very weak. We can also tolerate errors by saying if $> x\%$ \RX appears in \SY, then there is a related inclusion dependency.}
+To address this issue, for each distinct value in \RX, we calculate the text similarity to values in \SY and use the maximum value as the strength of a value matching. We then compute the total strength of the maximum matching value divided by the number of values in \RX. This is the overall strength of the inclusion dependency.  If this number exceeds a predefined threshold $\delta$, we specify an inclusion dependency from \RX to \SY in our linkage graph. \nan{This is very weak. We can also tolerate errors by saying if $> x\%$ \RX appears in \SY, then there is a related inclusion dependency.}
 
 When dealing with compound columns, we can utilize different text similarity functions on different fields. Also, we must multiply the individual column scores to achieve an overall strength.
 
@@ -24,11 +28,11 @@ When dealing with compound columns, we can utilize different text similarity fun
 \subsection{Refine Candidate FK-PK Relationships}\label{subsec:refine}
 
 
-The error-robust inclusion dependency algorithm gives us a collection of candidate PK-FK relationships. We then apply the algorithms in~\cite{DBLP:conf/webdb/RostinABNL09} to refine our candidate selection. Here, Rostin et. al. propose 10 different features to distinguish foreign key constraints from spurious inclusion dependencies. Consider two columns \RX and \SY with an inclusion dependency from the first one to the second one. In~\cite{DBLP:conf/webdb/RostinABNL09}, the specified features include \emph{coverage}, which is the ratio of distinct values in \RX that are contained in \SY, \emph{column name similarity}, which is the similarity between the attribute names of X and Y, and the \emph{out-of-domain range}, which is the percentage of values in \SY not within $[\min(\RX), \max(\RX)]$ where $\min(\RX)$ and $\max(\RX)$ are respectively the minimum and maximum values in \RX. 
-
+The error-robust inclusion dependency algorithm gives us a collection of candidate PK-FK relationships. 
+We apply the algorithms in~\cite{DBLP:conf/webdb/RostinABNL09} to refine our candidate selection. The authors proposed 10 different features to distinguish foreign key constraints from spurious inclusion dependencies. Consider two columns \RX and \SY with an inclusion dependency from the first one to the second one. In~\cite{DBLP:conf/webdb/RostinABNL09}, the specified features include \emph{coverage}, which is the ratio of distinct values in \RX that are contained in \SY, \emph{column name similarity}, which is the similarity between the attribute names of X and Y, and the \emph{out-of-domain range}, which is the percentage of values in \SY not within $[\min(\RX), \max(\RX)]$ where $\min(\RX)$ and $\max(\RX)$ are respectively the minimum and maximum values in \RX. 
 Using these features, we have implemented the four machine learning classification algorithms in~\cite{DBLP:conf/webdb/RostinABNL09}. These allow us with high accuracy to distinguish spurious inclusion dependencies from real one.
 
-The result of data stitching is a collection of PK-FK relationships that can be used to link the tables identified by the user. However, there may exist multiple subgraphs in the linkage graph that can connect all the interesting tables, which we call \emph{join paths}. In the next section we discuss the choice of which one(s) to use to materialize a view for the user.
+The result of data stitching is a collection of PK-FK relationships that can be used to link the tables from the discovery module. However, there may exist multiple subgraphs in the linkage graph that can connect all the interesting tables, which we call \emph{join paths}. In the next section we discuss the choice of which one(s) to use to materialize a view for the user.
 
 \nan{So far, this section only talks about FK-PK relationships. In my opinion, these should be merged with graph builder.}
 
