@@ -2,46 +2,49 @@
 \section{Introduction}
 \label{introduction}
 
-An often cited statistic is that data scientists spend 80\% of their time finding, preparing, integrating and cleaning data sets. The remaining 20\% is spent doing useful work (i.e., the desired analytic tasks). In fact, 80\% may be a lower bound; for example one data officer (Mark Schreiber of Merck) estimates data scientists in Merck spend 98\% of their time on the ``grunt work'' and only one hour per week on ``useful work''.
+An often cited statistic is that data scientists spend 80\% of their time finding, preparing, integrating and cleaning data sets. The remaining 20\% time is spent doing the desired analytic tasks such as data mining and machine learning. In fact, 80\% may be a lower bound; for example one data officer, Mark Schreiber of Merck, estimates that data scientists in Merck spend 98\% of their time on the ``grunt work'' and only one hour per week on ``useful work''.
 
-In this paper, we present \dcv, a system we are building at MIT, QCRI, Waterloo, and TU Berlin, whose main purpose is to decrease the ``grunt work factor'' by helping data scientists:
+In this paper, we present \dcv, a system we are building at MIT, QCRI, Waterloo, and TU Berlin, whose main purpose is to decrease the ``grunt work factor'' by helping data scientists in 
+(i) performing data discovery, i.e., quickly find data of interest from large numbers of tables;
+(ii) computing join paths, i.e., find ways to connect data sets of interest;
+(iii) executing queries to fetch desired data from disparate data stores;
+(iv) cleaning the required data, as it is often cited that 20\% of a typical data source is incorrect or missing; and
+(v) performing these tasks iteratively using a workflow system since data scientists often iterate through these steps in different orders.
 
 %\vspace{.5em} %Mourad: It's ugly with this space thing!
 %\begin{itemize} \\
 
-
-\begin{enumerate}[label=\roman*)]
-
-%\noindent i)
-\item perform data discovery; i.e., quickly find data of interest from large numbers of tables,
-
-%\vspace{.5em}
-%\noindent ii)
-
-\item perform data stitching; i.e., find ways to connect data sets of interest,
-%\vspace{.5em}
-
-%\noindent iii)
-\item execute queries to fetch desired data from disparate data stores,
-
-%\vspace{.5em}
-
-%\noindent iv)
-\item clean the required data, as it is often cited that 20\% of a typical data source is incorrect or missing,
-
-%\vspace{.5em}
-
-%\noindent v)
-\item perform these tasks iteratively using a workflow system since data scientists often iterate through these steps in different orders.
-
-%\vspace{.5em}
-\end{enumerate}
+%
+%\begin{enumerate}[label=\roman*)]
+%
+%%\noindent i)
+%\item perform data discovery; i.e., quickly find data of interest from large numbers of tables,
+%
+%%\vspace{.5em}
+%%\noindent ii)
+%
+%\item perform data stitching; i.e., find ways to connect data sets of interest,
+%%\vspace{.5em}
+%
+%%\noindent iii)
+%\item execute queries to fetch desired data from disparate data stores,
+%
+%%\vspace{.5em}
+%
+%%\noindent iv)
+%\item clean the required data, as it is often cited that 20\% of a typical data source is incorrect or missing,
+%
+%%\vspace{.5em}
+%
+%%\noindent v)
+%\item perform these tasks iteratively using a workflow system since data scientists often iterate through these steps in different orders.
+%
+%%\vspace{.5em}
+%\end{enumerate}
 
 \dcv consists of a collection of modules with a workflow scheduling system, as noted in the architecture diagram of Figure \ref{fig:arch}. We elaborate on each module in the remainder of this section, using Merck as an example.
 We should note that \dcv focuses on structured data, which is represented as a collection of (sparse or dense) tables.
-We assume that the text has been parsed in advance into a structured representation, and that the file data can be “tableized” by an adaptor.\mourad{This sentence is not really needed.}
-
-
+%We assume that the text has been parsed in advance into a structured representation, and that the file data can be “tableized” by an adaptor.\mourad{This sentence is not really needed.}
 
 
 \begin{figure}[!t]
@@ -51,12 +54,14 @@ We assume that the text has been parsed in advance into a structured representat
 \end{figure}
 
 
-\stitle{[Discovery]} A data scientist at Merck has usually a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 300 grams}.
-His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv, discussed in Section~\ref{sec:discovery}, will assist the scientist in finding data sets of interest.  Since discovery must be run on millions of columns, we assume that only linear algorithms are computational feasible, and any needed data structures must be built in advance.
+\stitle{[Discovery.]} 
+A data scientist at Merck has usually a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 300 grams}.
+His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv, discussed in Section~\ref{sec:discovery}, will assist the scientist in finding data sets of interest.  Since discovery must be run on millions of columns, we assume that only linear algorithms are computationally feasible, and any needed data structures must be built in advance.
 
 
-\stitle{[Stitching]} The linkage between different data is extremely helpful in constructing the composite \textsf{SQL} query to access the discovered data sets.
-Given $n$ datasets, in the worst case there are $O(n^2)$ linkages among them.
+\stitle{[Join Path Computation.]} 
+The linkage between different data is extremely helpful in constructing the composite \textsf{SQL} query to access the discovered data sets.
+Given $n$ data sets, in the worst case there are $O(n^2)$ linkages among them.
 Fortunately, $n$ is not a large number since it is the result from the discovery process. Thus, this process can be run dynamically. Obviously, we want to run stitching in the background in advance to deliver the best possible response time. As noted in Section~\ref{sec:stitching}, our current prototype leverages PK-FK relationships (inclusion dependencies).
 We also plan to explore other possible relationships in the future such as ???.
 Effectively, the result of stitching is a ``view'' of multiple data sources that contains the composite data of interest to the scientist.
