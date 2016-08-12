@@ -2,31 +2,36 @@
 \section{Updates}
 \label{sec:updates}
 
-Real-world data is rarely static, which is exactly the scenario that Data Civilizer faces in Merck and the M.I.T. Data Warehouse.
+Real-world data is rarely static, which is exactly the scenario that \dcv faces at Merck and the M.I.T. Data Warehouse.  We consider three types of updates.
 
-We categorize three types of updates managed by Data Civilizer.
-
-\stitle{(1) Insertions/deletions on source tables.} 
-This happens when there is a change of the table, e.g., insertions of new procurement records in the M.I.T. Data Warehouse. This may also happen when some data sources get cleaned or transformed on demand (see Section~\ref{sec:curating}).
-
-\stitle{(2) Replacement of source tables.} 
-Large companies typically rely on both internal and external information to build their knowledge. For instance, Merck will collect published standard medical names from the World Health Organization (WHO) to help construct their own ontology. These information will be updated periodically by WHO. Sometimes, even the format will be changed, e.g., from a JSON file to a CSV file.
-
-\stitle{(3) Updating MVs.} 
-MVs might be created in cascade, and the human effort for data curation might happen in any layer. 
-
-In response to the above three types of updates, Data Civilizer uses three strategies correspondingly.
-
-\stitle{(i) MV maintenance.}
-In the simplest case of small changes over the source data, such as the case (1) above, Data Civilizer will leverage the mature techniques for maintaining materialized views (see~\cite{DBLP:journals/debu/GuptaM95} for a survey), which has been widely deployed in many commercial DBMSs. In such a way, Data Civilizer incrementally propagates the updates through the data curation pipeline to update downstream MVs.  
-
-\stitle{(ii) Provenance management.}
-In some cases such as the above case (2), the human effort involved may be daunting for updating the MVs. In these scenarios, the MVs should be discarded rather than updated. Naturally, there is need for a component that natively supports the versioning or branching of data to enable concurrent analysis, cleaning, integration, or curation of data across data sources. 
-%
-Data Civilizer leverages Decibel~\cite{DBLP:journals/pvldb/MaddoxGEMPD16}, a system developed by MIT, for this purpose.
-
-\stitle{(iii) Descriptive and prescriptive data cleaning.}
-Sometimes, a scientist may curate directly his MV such as the above case (3), which triggers some updates that must be propagated to other descendent data sets, as well as back upstream to data sources. To perform this, we leverage the technique in~\cite{DBLP:conf/sigmod/ChalamallaIOP14}, a system developed by QCRI and Waterloo. In the MV, the updates will be captured based on human data curation, which will be transformed at the source level to prescribe actions to solve them. 
+\stitle{(1) Insertions/deletions on source tables.} This happens when there is a change to a table, e.g., an insertions of new procurement record in the M.I.T. Data Warehouse. This may also happen when some data sources get cleaned (see Section~\ref{sec:curating}).
 
 
-As the data comes to us gradually while finding the inclusion dependency, especially the error-robust inclusion dependency, is time consuming, it is necessary to have the \eind incrementally founded. Moreover, the inclusion dependency does not necessary yields primary key and foreign key relationship, further techniques to eliminates the false positives are needed. After that, it is straightforward to construct the join graph using the primary keys and foreign keys: each table is a vertex and there is an edge between two vertexes only if there exists a primary key and foreign key relationship between them. 
+
+\stitle{(2) Replacement of source tables.} Large companies typically rely on both internal and external information to build their knowledge base. For instance, Merck collects published standard medical names from the World Health Organization (WHO) to help construct their own ontology. These information sources are updated periodically by WHO.  Sometimes, even the format will be changed, e.g., from a JSON file to a CSV file.
+
+
+
+\stitle{(3) Updating MVs.} MVs might be created which depend on other MVs.  Since cleaning effort can happen at any place in a query plan, MVs may be updated.
+
+
+
+In response to the above three types of updates, \dcv uses three corresponding strategies.
+
+
+
+\stitle{(i) MV maintenance.} \dcv will leverage mature techniques for maintaining materialized views (see~\cite{DBLP:journals/debu/GuptaM95} for a survey).  In this way, \dcv incrementally propagates updates through the data curation pipeline to update downstream MVs.
+
+
+
+
+\stitle{(ii) Provenance management.}  In case (2) above, the human effort to update and clean MVs may be daunting. In these cases, MVs should be discarded rather than updated. Naturally, there is need for a workflow component that supports data versioning and branching operations \dcv will leverage Decibel~\cite{DBLP:journals/pvldb/MaddoxGEMPD16}, a system developed at MIT for this purpose.
+
+
+
+
+\stitle{(iii) Descriptive and prescriptive data cleaning.}When a scientist updates an MV (case 3) above), this will trigger update propagation to descendent data sets, as well as back upstream to data sources. To perform this propagation, we plan to leverage the techniques in~\cite{DBLP:conf/sigmod/ChalamallaIOP14}, a system developed by QCRI and Waterloo.
+
+
+As data appears incrementally, we need an incremental inclusion dependency algorithm. Extending our algorithms in Section~\ref{subsec:eind} is a project we are currently working on.
+

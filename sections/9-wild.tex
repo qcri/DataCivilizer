@@ -2,18 +2,12 @@
 \section{Data Civilizer in the Wild}
 \label{sec:wild}
 
-We have deployed a preliminary prototype of Data Civilizer in two different
-organizations. The MIT Datawarehouse is a group inside MIT responsible for
-building and maintaining a data warehouse that integrates data from multiple
-source systems. Merck, a big pharmaceutical company, manages large volumes of
-data, which are managed by different storage systems. Some characteristics of
-both organizations' data are shown in Table~\ref{tab:dataCivInTheWild}. Next we
-provide detail on each organizations' requirements, and how we are using Data
-Civilizer to help them.
+We have built a prototype of discovery and we are working on one on stitching at the moment. The ultimate goal is to integrate \dcv with \texttt{BigDawg}, our implementation of a Polystore to realize the end to end system depicted in this paper. Before that, we have been working closely with customers to adapt our prototypes to relevant real problems. In particular, we have deployed a preliminary prototype of discovery in two different organizations. The MIT Datawarehouse is a group inside MIT responsible for building and maintaining a data warehouse that integrates data from multiple source systems. Merck, a big pharmaceutical company, manages large volumes of data, which are managed by different storage systems. Next we provide detail on each organizations’ requirements, and how we are using \dcv to help them.
+
 
 \begin{table}
-\caption{Deployment environments of Data Civilizer\notera{I'd remove use cases
-from here}}\label{tab:dataCivInTheWild}
+\caption{Deployment environments of \dcv\notera{I'd remove use cases
+from here}\dong{Raul, shall we keep this table or not?}}\label{tab:dataCivInTheWild}
 \begin{tabular}{|l|l|l|l|}
 \hline
 Organization & \# databases & \# tables & Use cases\\
@@ -24,56 +18,29 @@ Merck & & & \\
 \end{tabular}
 \end{table}
 
+
 \subsection{MIT Data warehouse}
 
-The MIT Datawarehouse is a team within MIT that manages a warehouse that
-integrates data from hundreds of source databases from around the campus. One of
-the key tasks of the team is to assist its customers---any personnel from within
-MIT---in answering questions they have, for example, to create reports. The
-warehouse contains around 1TB of data spread across 3K tables aproximately.
 
-A typical customer of the warehouse will present a question, for whith the
-members will need to find relevant tables manually. They create a view that is
-accessed by the customer to solve the question at hand. We describe next some of
-the common use cases we have found:
+One of the key tasks of the MIT DWH team is to assist its customers—any personnel from within MIT—in answering questions they have, for example, staff usually wants to create reports, for which they need access to various kinds of data. The warehouse contains around 1TB of data spread across 3K tables approximately.
 
-\mypar{Fill in virtual schema} When a customer arrives with a question such as:
-\emph{I need to create a report with the \textbf{gender distribution of the faculty per
-department and year}}, the data warehouse personnel can use Data Civilizer to
-find all the tables that contain schema names similar to the attributes exposed
-by the query, \eg gender, faculty name, department, year. 
+A typical customer of the warehouse will present a question, for which the members will need to find relevant tables manually. Once they have determined the tables of interest, they create a view that is accessed by the customer to solve the question at hand. We describe next some of the common use cases we have found:
 
-\mypar{Table redundancy} Multiple views are created for different customers.
-Many of them contain typically very similar data, as multiple customers are
-interested in similar items. To reduce the redundancy of data, Data Civilizer
-helps to detect complementary as well as repeated sources. This sheds light on
-the status of the warehouse and helps to maintain it tidy and minimal.
+\mypar{Fill in virtual schema}. When a customer arrives with a question such as: \emph{I need to create a report with the \textbf{gender distribution of the faculty per department and year}}, the data warehouse personnel can use \dcv to find all the tables that contain schema names similar to the attributes exposed by the query, \eg gender, faculty name, department, year.
 
-We deployed Data Civilizer as a \ldots service and allowed the users to interact
-with the system through the graphical interface. Data Civilizer was able to
-\ldots
+\mypar{Table redundancy}. Multiple views are created for different customers. Many of them contain typically very similar data, as multiple customers are interested in similar items. To reduce the redundancy of data, \dcv helps to detect complementary as well as repeated sources. This sheds light on the status of the warehouse and helps to maintain it tidy and minimal.
+
+In the future, we aim to deploy the entire \dcv system to enable running queries directly over the hundreds of data sources, by using the curating polystore and stitching to create the necessary views on demand. 
 
 \subsection{Merck}
 
-Merck is a big pharmaceutical company that manages large volumes of data spread
-across around 4K databases, plus several data lakes. The use cases are varied,
-however there is a common case. One of the data assets of any pharmaceutical
-company are internal databases of chemical compounds and structures. Usually,
-these are more valuable when integrated with external, well-known and curated
-databases, such as PubChem \cite{pubchem}, Chembl \cite{chembl} or Drugbank
-\cite{drugbank}. We describe two common use cases that occur in this context:
 
-\mypar{Identify entities} One single chemical entity may be referred to with
-different identifier format in different databases. Chemical identifiers have
-been a subject of research in the bioinformatics community: multiple different
-formats have been proposed with different properties desirable according to the
-scenario. Data Civilizer helps by mapping the multiple representations of the
-identifiers, therefore facilitating the identification of entities across
-multiple databases, public and internal.
+Merck is a big pharmaceutical company that manages large vol- umes of data spread across around 4K databases, plus several data lakes. The use cases are varied, however there is a common case. One of the data assets of any pharmaceutical company are internal databases of chemical compounds and structures. Usually, these are more valuable when integrated with external, well-known and curated databases, such as PubChem~\cite{pubchem}, ChEMBL~\cite{ChEMBL}, or DrugBank~\cite{DrugBank}. We describe two common use cases that occur in this context:
 
-\mypar{Enrich data} One of the reasons for the existence of multiple chemical
-databases is that each puts an emphasis on different information. Analysts
-typically face situations in which they are interested in a set of attributes
-that are spread across different tables on different databases. Data Civilizer
-helps to detect such attributes and bring them together \emph{on-demand} to
-serve the users' purpose. 
+
+\mypar{Identify entities}. One single chemical entity may be referred to with different identifier format in different databases. Chemical identifiers have been a subject of research in the bioinformatics community: multiple different formats have been proposed with different properties desirable according to the scenario. \dcv helps by mapping the multiple representations of the identifiers, therefore facilitating the identification of entities across multiple databases, public and internal.
+
+
+
+\mypar{Enrich data}. One of the reasons for the existence of multiple chemical databases is that each puts an emphasis on different information. Analysts typically face situations in which they are interested in a set of attributes that are spread across different tables on different databases. \dcv helps to detect such attributes and bring them together \emph{on-demand}  to serve the users' purpose.
+
