@@ -15,7 +15,7 @@ The data discovery module consists of two conceptually different components, a d
 \begin{enumerate}
 \item {\bf Data profiler.} We summarize each column of each table into a profile. Each profile contains a signature, which is a domain-dependent, compact representation of the original content. Our signature for numerical data is a data distribution, and for textual data it is a vector of the most significant words in the column. Our profiles also contains information about data cardinality, data type, and numerical ranges if applicable~\cite{profiling_survey}.  
 
-\item {\bf Graph builder.} Using profiles, the graph builder finds relationships among nodes, and represents them as edges. Examples of relationships are \emph{content similarity} based on measuring the similarity distance between signatures and \emph{schema similarity} that captures the similarity of the names of the different nodes. Another kind of relationship capture the hierarchical relationship between a table and its columns.
+\item {\bf Graph builder.} Using profiles, the graph builder finds relationships among nodes, and represents them as edges. Examples of relationships are \emph{content similarity} based on measuring the similarity distance between signatures and \emph{schema similarity} that captures the similarity of the names of the different nodes. Another kind of relationship capture the hierarchical relationship between a table and its columns. \nan{Each node is a column, or a table? The graph is not formally defined.}
 
 \end{enumerate}
 
