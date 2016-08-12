@@ -56,44 +56,67 @@ We should note that \dcv focuses on structured data, which is represented as a c
 
 \stitle{[Discovery.]} 
 A data scientist at Merck has usually a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 300 grams}.
-His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv, discussed in Section~\ref{sec:discovery}, will assist the scientist in finding data sets of interest.  Since discovery must be run on millions of columns, we assume that only linear algorithms are computationally feasible, and any needed data structures must be built in advance.
+His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv, , will assist the scientist in finding $m$ tables of interest from all $n$ tables such that $m \ll n$, where $n$ is the number of all tables thus $n$ is much bigger than 4000.  
+%
+The process of discovering relevant tables is typically in the granularity of columns. Assuming that each table has up to $c$ columns, only linear algorithms, i.e., those run in $O(c\cdot n)$ time, are computationally feasible. If we also assume w.l.o.g. that $c$ is a constant, the discovery has to run in $O(n)$ time.
+%
+This module, together with its needed data structures, will be discussed in Section~\ref{sec:discovery}.
 
+%Since discovery must be run on millions of columns, we assume that only linear algorithms are computationally feasible, and any needed data structures must be built in advance.
 
 \stitle{[Join Path Computation.]} 
-The linkage between different data is extremely helpful in constructing the composite \textsf{SQL} query to access the discovered data sets.
-Given $n$ data sets, in the worst case there are $O(n^2)$ linkages among them.
-Fortunately, $n$ is not a large number since it is the result from the discovery process. Thus, this process can be run dynamically. Obviously, we want to run stitching in the background in advance to deliver the best possible response time. As noted in Section~\ref{sec:stitching}, our current prototype leverages PK-FK relationships (inclusion dependencies).
-We also plan to explore other possible relationships in the future such as ???.
-Effectively, the result of stitching is a ``view'' of multiple data sources that contains the composite data of interest to the scientist.
+The semantic linkage between attributes of discovered tables is extremely helpful in constructing a composite \textsf{SQL} query to access the discovered data sets. 
+%
+Our current prototype leverages primary key-foreign key relationships (inclusion dependencies).
+It may has up to $O(c^2 \cdot m^2)$ linkage among different attributes, or simply $O(m^2)$ if we consider $c$ as a constant.
+%
+%Given $n$ data sets and each has up to $c$ attributes, in the worst case there are $O(n^2)$ linkages among different attributes, by treating $c$ as a constant.
+Fortunately, $m$ is typically small, as a consequence of data discovery.
+Hence, this process can be run dynamically, and is addressed in Section~\ref{sec:stitching}.
+
+%The discovery and stitching modules share a common graph structure. Such structure has a node for each column in each table with various kinds of links such as data similarity, schema similarity, and inclusion dependency.  These links are maintained in a data fabric similar in spirit to a knowledge graph~\cite{DBLP:conf/semweb/AuerBKLCI07,DBLP:conf/sigmod/BollackerEPST08,DBLP:conf/www/SuchanekKW07}. Building and maintaining this graph is the responsibility of the graph builder component.
 
 
-The discovery and stitching modules share a common graph structure. Such structure has a node for each column in each table with various kinds of links such as data similarity, schema similarity, and inclusion dependency.  These links are maintained in a data fabric similar in spirit to a knowledge graph~\cite{DBLP:conf/semweb/AuerBKLCI07,DBLP:conf/sigmod/BollackerEPST08,DBLP:conf/www/SuchanekKW07}. Building and maintaining this graph is the responsibility of the graph builder component.
+\stitle{[Polystore Query Processing.]}
+Since organizations like Merck have a variety of massive-scale data storage systems, it is not feasible to move all data to a central data warehouse. Also, it is neither economically nor technically practical to perform data processing on all of the thousands of databases in advance. 
+\dcv is built using a polystore architecture~\cite{DBLP:journals/sigmod/DugganESBHKMMMZ15}, where all modules assume a polystore computing environment.
+On top of the \texttt{BigDAWG} polystore system~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15}, we can pull data out of multiple underlying storage engines as needed to compute the final result (or a {\em view}) to meet the user specification, i.e., his/her hypothesis. 
+
+%\stitle{[Curation Polystore]} 
+
+%In fact, we are building on the \texttt{BigDAWG} polystore system~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15}. The polystore architecture can pull data out of multiple underlying storage engines as needed. Obviously, data cleaning, data transformation and entity consolidation must be integrated with querying the polystore.  The merger of polystores and data curation steps is discussed in Section~\ref{sec:curating}.
+
+%Obviously, we want to run stitching in the background in advance to deliver the best possible response time. As noted in Section~\ref{sec:stitching}, our current prototype leverages PK-FK relationships (inclusion dependencies).
+%We also plan to explore other possible relationships in the future such as ???.
+%Effectively, the result of stitching is a ``view'' of multiple data sources that contains the composite data of interest to the scientist.
 
 
-\stitle{[Curation Polystore]} Since organizations like Merck have a variety of massive-scale data storage systems, it is not feasible to move all data to a central data warehouse. Also, it is not economically or technically practical to perform data curation on all of the thousands of databases in advance.  Therefore, we are building \dcv using a polystore architecture~\cite{DBLP:journals/sigmod/DugganESBHKMMMZ15}, where all modules assume a polystore computing environment. In fact, we are building on the \texttt{BigDAWG} polystore system~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15}. The polystore architecture can pull data out of multiple underlying storage engines as needed. Obviously, data cleaning, data transformation and entity consolidation must be integrated with querying the polystore.  The merger of polystores and data curation steps is discussed in Section~\ref{sec:curating}.
-
-
-
-\stitle{[Cleanliness Estimation]} Because of the human effort involved, the expensive process in constructing the view mentioned above is the human effort required to validate cleaning decisions. Since there may be multiple views that ``solve'' a data scientist's query, each with different accuracy and human validation cost, \dcv must estimate the cost of curating the possible views,
+%\stitle{[Cleanliness Estimation]} 
+Indeed, \dcv is an iterative process, the human effort will be involved in various modules. The expensive process in constructing the view mentioned above is the human effort required to validate cleaning decisions. Since there may be multiple views that ``solve'' a data scientist's query, each with different accuracy and human validation cost, \dcv must estimate the cost of curating the possible views,
 %to reason about the feasibility of using each one,
-given a scientist's time budget. Estimating the cleanliness of a view entails constructing a model for the dirtiness of the data in each source data set, which we discuss in Section~\ref{sec:curating}. Also discussed in Section~\ref{sec:curating} is where in a query plan we should allocate a cleaning budget.
+given a scientist's time budget. 
+
+The above two aspects will be discussed together in Section~\ref{sec:curating}.
+%Estimating the cleanliness of a view entails constructing a model for the dirtiness of the data in each source data set, which we discuss in Section~\ref{sec:curating}. Also discussed in Section~\ref{sec:curating} is where in a query plan we should allocate a cleaning budget.
 
 
 %\stitle{[Optimizing Stitching]} It is highly inefficient and wasteful to  discard expensive-to-construct materialized views after their initial use by a data scientist.  Hence, we assume that they are generally retained for future use.  Moreover, future materialized views  may be based off previously constructed ones or on original data sources.  As a result, there may be several ways to construct a new view, with different  costs and accuracy. Therefore, the data stitching problem must be revisited to deal with this materialization cost/accuracy trade-off.  This is the subject of Sections~\ref{sec:enhancedstitching}.\mourad{Why not merge this section with Data Stitching?}
 
-\stitle{[Handling Updates]}  If a source data set is updated, then updates must be incrementally propagated through the data curation pipeline to update downstream materialized views. In some cases, the human effort involved may be daunting, and the materialized view should be discarded rather than updated. Lastly, if a scientist updates a view, we must \mourad{we may need to?} propagate changes to other derived views, as well as back upstream to data sources, if this is possible. Section~\ref{sec:updates} discusses these update issues.
+\stitle{[Updates.]}  
+If a source data set is updated, these updates must be incrementally propagated through the data curation pipeline to update downstream materialized views. In some cases, the human effort involved may be daunting, and the materialized view should be discarded rather than updated. Lastly, if a scientist updates a view, we may need to propagate changes to other derived views, as well as back upstream to data sources, if this is possible. Section~\ref{sec:updates} discusses these update issues.
 
 
 
-\stitle{[Workflow]} \dcv offers a workflow engine whereby data scientists can iterate over its components in whatever order they wish,  Moreover, they need to be able to undo previous workflow steps and perform alternate branching from the result of a workflow step.  Section~\ref{sec:workflow} discusses workflow management in \dcv.
+\stitle{[Workflow.]} 
+\dcv offers a workflow engine whereby data scientists can iterate over its components in whatever order they wish,  Moreover, they need to be able to undo previous workflow steps and perform alternate branching from the result of a workflow step.  Section~\ref{sec:workflow} discusses our workflow management.
 
 
 We describe the current implementation of \dcv in Section~\ref{sec:wild}. We also report on initial user experience for two use cases: the MIT data warehouse and Merck. We conclude with final remarks and an outline of our future research plans in Section~\ref{sec:conclusion}.
 
 
-%In our opinion,
+\stitle{Our contributions.}
 The main contribution of \dcv is that it is an ``end-to-end'' system. In contrast, there has been much work on ``point solutions'' that solve small pieces of the overall problem. For example, Data Wrangler~\cite{2011-wrangler} and DataXFormer~\cite{DBLP:conf/icde/AbedjanMIOPS16} automate some aspects of cleaning and transforming data.
 However, we recently studied data cleaning tools on a collection of data sources ``from the wild''~\cite{DBLP:journals/pvldb/AbedjanCDFIOPST16}. We found that there was no cleaning Esperanto, and multiple tools are required to achieve reasonable accuracy.  Hence, point solutions do not achieve acceptable performance, and an ensemble approach is required.
 %
-Data Tamer~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} performs schema mappings and record linkage. DeepDive~\cite{DBLP:journals/pvldb/ShinWWSZR15} extracts facts and structured information from large corpora of text, images and other unstructured sources. However, neither solution performs data discovery, stitching or polystore operation.
+Data Tamer~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} performs schema mappings and record linkage. DeepDive~\cite{DBLP:journals/pvldb/ShinWWSZR15} extracts facts and structured information from large corpora of text, images and other unstructured sources. However, neither solution performs  discovery, join path computation or polystore operation.
 
