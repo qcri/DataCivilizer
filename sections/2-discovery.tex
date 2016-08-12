@@ -6,55 +6,69 @@ The goal of the data discovery module is to find relevant data among multiple,
 perhaps millions of, datasets that spread across the storage systems of an
 enterprise.
 
-A typical solution is to ask an expert (if one is available), or to perform
+A naive solution is to ask an expert (if one is available), or to perform
 manual exploration by inspecting datasets one by one, which is obviously
 time-consuming and prone to missing relevant data sources.  Recently, we are
 witnessing efforts to automate this process, such as
-\texttt{Goods}~\cite{DBLP:conf/sigmod/HalevyKNOPRW16} or
-\texttt{InfoGather}~\cite{ref}\dong{to add reference here}. Unlike these systems
+Goods~\cite{DBLP:conf/sigmod/HalevyKNOPRW16} or
+InfoGather~\cite{DBLP:conf/sigmod/YakoutGCC12}. Unlike these systems
 that are designed to answer a particular use case, our discovery module aims to
 collect enough information about the datasets and to expose them to upper layers
 of \dcv allowing the orchestration of query execution, which is the ultimate
 goal.
 
 The data discovery module narrows down the search for relevant data from
-millions of data sources to a handful, upon which stitching can be performed.
+$n$ data sources to a handful number of $m$ data sources, upon which we can afford to compute finer-grained relationships.
 \dcv discovery supports a user-level API to search for relevant data using a
-variety of techniques such as schema search and similar content. Discovery is
-extensible; an engineer can extend the supported relationships to cover other
-relevant use cases.
+variety of techniques such as schema search and similar content. 
+%Discovery is extensible; an engineer can extend the supported relationships to cover other relevant use cases.
 
-\subsection{Data Discovery Components}
+\subsection{Data Profiler}
 
-The data discovery module consists of two conceptually different components, a
-data profiler and a graph builder, that collaborate to build the linkage graph
-indicated in Figure~\ref{fig:arch}. 
-
-
-\begin{enumerate}
-\item {\bf Data profiler.} This component summarizes each column of each table
-into a profile. Each profile contains a signature, which is a domain-dependent,
+We summarize each column of each table into a {\em profile}. Each profile contains a signature, which is a domain-dependent,
 compact representation of the original content.  For numerical data, we use the
 data distribution, and for textual data,  a vector of the most significant words
 in the column.  Our profiles also contain information about data cardinality,
 data type, and numerical ranges if applicable~\cite{profiling_survey}.
 
-\item {\bf Graph builder.} Using the profiles, the graph builder finds
-relationships among nodes and represents them as edges. Examples of
-relationships are \emph{content similarity} based on measuring the similarity
-distance between signatures and \emph{schema similarity} that captures the
-similarity of the labels of the different nodes. Another kind of relationship
-captures the hierarchical relationship between a table and its columns.
-\nan{Each node is a column, or a table? The graph is not formally defined.}
-\sibo{The definition of node appears in Section \ref{introduction}, but it will
-be better to recap the definition again.}
+Note that finding pairwise relationships between each attribute profile is an $O(n^2)$ computation, which will not scale.  
+We thus rely on locality sensitive hashing
+(LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to address this issue. Specifically,
+we hash each signature and group together those that collide.  These are more
+likely to be similar; we only need to perform comparisons among the nodes in
+each cluster, ignoring cross cluster comparisons.  This approach avoids $n^2$
+operations and appears to perform well in practice.
 
-\end{enumerate}
-
-The graph resulting from this process can be used to answer discovery queries.
-Discovery queries vary from simple keyword search, useful to quickly glance over
-data, to more involved queries such as table augmentation, to add attributes of
-interest to known tables. We discuss the queries at the end of the section. 
+%\subsection{Data Discovery Components}
+%
+%The data discovery module consists of two conceptually different components, a
+%data profiler and a graph builder, that collaborate to build the linkage graph
+%indicated in Figure~\ref{fig:arch}. 
+%
+%\begin{enumerate}
+%\item {\bf Data profiler.} This component summarizes each column of each table
+%into a profile. Each profile contains a signature, which is a domain-dependent,
+%compact representation of the original content.  For numerical data, we use the
+%data distribution, and for textual data,  a vector of the most significant words
+%in the column.  Our profiles also contain information about data cardinality,
+%data type, and numerical ranges if applicable~\cite{profiling_survey}.
+%
+%\item {\bf Graph builder.} Using the profiles, the graph builder finds
+%relationships among nodes and represents them as edges. Examples of
+%relationships are \emph{content similarity} based on measuring the similarity
+%distance between signatures and \emph{schema similarity} that captures the
+%similarity of the labels of the different nodes. Another kind of relationship
+%captures the hierarchical relationship between a table and its columns.
+%\nan{Each node is a column, or a table? The graph is not formally defined.}
+%\sibo{The definition of node appears in Section \ref{introduction}, but it will
+%be better to recap the definition again.}
+%
+%\end{enumerate}
+%
+%The graph resulting from this process can be used to answer discovery queries.
+%Discovery queries vary from simple keyword search, useful to quickly glance over
+%data, to more involved queries such as table augmentation, to add attributes of
+%interest to known tables. We discuss the queries at the end of the section. 
 
 \subsection{Data Profiling at Scale}
 
@@ -82,29 +96,8 @@ The profiler works in a distributed environment using a lightweight coordinator
 that splits the work among multiple processors, helping to scale the
 computation.
 
-\subsection{Graph Builder}
+%The discovery module benefits from our distributed architecture that allows us to parallelize profiling as well as graph building, further speeding up execution times. Other kinds of relationships such as finding FK-PKs are too expensive to compute at scale for the whole graph.  These are left to the stitching module, which is described next.
 
-The input to the graph builder is a set of profiles that are attached to its
-nodes. The graph builder computes the edges among pairs of nodes. In particular,
-it finds content and schema similarity relationships. Each edge is scored with a
-weight that represents the strength of the relationship: the particular meaning
-depends on the edge semantics.\mourad{Give examples.}  Also, edges with a
-similarity less than a user-defined threshold are discarded.  This avoids having
-many edges that are not significant.
-
-Finding edges in the graph is an $O(n^2)$ computation, which will not scale.  We
-thus rely on locality sensitive hashing
-(LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to address this issue. Specifically,
-we hash each signature and group together those that collide.  These are more
-likely to be similar; we only need to perform comparisons among the nodes in
-each cluster, ignoring cross cluster comparisons.  This approach avoids $n^2$
-operations and appears to perform well in practice.
-
-The discovery module benefits from our distributed architecture that allows us
-to parallelize profiling as well as graph building, further speeding up
-execution times. Other kinds of relationships such as finding FK-PKs are too
-expensive to compute at scale for the whole graph.  These are left to the
-stitching module, which is described next.
 
 \subsection{Discovery Queries}
 \label{subsec:api}
@@ -123,7 +116,7 @@ retrieves and shows tables or groups of (probably joinable) tables that contain
 the desired attributes. The core of the operation consists of finding tables
 with similar attribute names to the provided ones.
 \item \textbf{Extend attribute.} Similar to the extend operator of Octopus
-\cite{octopus}, or the ABA operation of Infogather \cite{infogather}, discovery
+\cite{octopus}, or the ABA operation of Infogather \cite{DBLP:conf/sigmod/YakoutGCC12}, discovery
 can extend tables of interest with additional attributes requested by users. The
 core of the operation consists of finding matches to the current table, and then
 retrieving the attributes that do not appear in the original table.

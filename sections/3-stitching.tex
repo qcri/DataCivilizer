@@ -1,6 +1,26 @@
 % !TEX root = ../main.tex
-\section{Data Stitcher}
+\section{Join Path Computation}
 \label{sec:stitching}
+
+In this section, we discuss how to build the linkage graph, as shown in Figure~\ref{fig:arch}, for the discovered data sets.
+
+\subsection{Graph Builder}
+
+\nan{Raul and Dong, please formally define the graph model.}
+
+Using the profiles of attributes, the graph builder finds relationships among nodes and represents them as edges. Examples of relationships are \emph{content similarity} based on measuring the similarity
+distance between signatures and \emph{schema similarity} that captures the
+similarity of the labels of the different nodes. Another kind of relationship
+captures the hierarchical relationship between a table and its columns.
+
+%\nan{Each node is a column, or a table? The graph is not formally defined.}
+%\sibo{The definition of node appears in Section \ref{introduction}, but it will be better to recap the definition again.}
+
+%The input to the graph builder is a set of profiles that are attached to its nodes. The graph builder computes the edges among pairs of nodes. In particular, it finds content and schema similarity relationships. 
+Each edge is scored with a weight that represents the strength of the relationship: the particular meaning
+depends on the edge semantics.\mourad{Give examples.}  Also, edges with a
+similarity less than a user-defined threshold are discarded.  This avoids having
+many edges that are not significant.
 
 
 
@@ -20,7 +40,8 @@ Foreign key/primary key relationships are usually identified by inclusion depend
 
 Consider two columns (or compound columns) from two tables \R and \S denoted by \RX and \SY. If there is a foreign key constraint on \RX with reference \SY, all the values in \RX must appear in \SY, which yields an inclusion dependency from \RX to \SY. However, in the real world, values in foreign key fields may not exist in the primary key field due to errors.  In this case an inclusion dependency from foreign key to primary key does no hold. 
 
-To address this issue, for each distinct value in \RX, we calculate the text similarity to values in \SY and use the maximum value as the strength of a value matching. We then compute the total strength of the maximum matching value divided by the number of values in \RX. This is the overall strength of the inclusion dependency.  If this number exceeds a predefined threshold $\delta$, we specify an inclusion dependency from \RX to \SY in our linkage graph. \nan{This is very weak. We can also tolerate errors by saying if $> x\%$ \RX appears in \SY, then there is a related inclusion dependency.}
+To address this issue, for each distinct value in \RX, we calculate the text similarity to values in \SY and use the maximum value as the strength of a value matching. We then compute the total strength of the maximum matching value divided by the number of values in \RX. This is the overall strength of the inclusion dependency.  If this number exceeds a predefined threshold $\delta$, we specify an inclusion dependency from \RX to \SY in our linkage graph. 
+%\nan{This is very weak. We can also tolerate errors by saying if $> x\%$ \RX appears in \SY, then there is a related inclusion dependency.}
 
 When dealing with compound columns, we can utilize different text similarity functions on different fields. Also, we must multiply the individual column scores to achieve an overall strength.
 
@@ -34,6 +55,6 @@ Using these features, we have implemented the four machine learning classificati
 
 The result of data stitching is a collection of PK-FK relationships that can be used to link the tables from the discovery module. However, there may exist multiple subgraphs in the linkage graph that can connect all the interesting tables, which we call \emph{join paths}. In the next section we discuss the choice of which one(s) to use to materialize a view for the user.
 
-\nan{So far, this section only talks about FK-PK relationships. In my opinion, these should be merged with graph builder.}
+%\nan{So far, this section only talks about FK-PK relationships. In my opinion, these should be merged with graph builder.}
 
-\nan{Data Stitcher should talk about how to join the discovered tables, i.e., materialize a view, which should not be left to the next section.}
+%\nan{Data Stitcher should talk about how to join the discovered tables, i.e., materialize a view, which should not be left to the next section.}
