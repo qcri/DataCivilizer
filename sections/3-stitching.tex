@@ -1,37 +1,29 @@
 % !TEX root = ../main.tex
-\section{Join Path Computation}
+\section{Linkage Graph Computation}
 \label{sec:stitching}
 
 In this section, we discuss how to build the linkage graph, as shown in Figure~\ref{fig:arch}, for the discovered data sets.
 
+
+
 \subsection{Graph Builder}
 
-\nan{Raul and Dong, please formally define the graph model.}
 
-Using the profiles of attributes, the graph builder finds relationships among nodes and represents them as edges. Examples of relationships are \emph{content similarity} based on measuring the similarity
-distance between signatures and \emph{schema similarity} that captures the
-similarity of the labels of the different nodes. Another kind of relationship
-captures the hierarchical relationship between a table and its columns.
 
-%\nan{Each node is a column, or a table? The graph is not formally defined.}
-%\sibo{The definition of node appears in Section \ref{introduction}, but it will be better to recap the definition again.}
+The linkage graph is a multi-graph where each node represents a table and each edge represents a relationship between the two tables or two columns in the two tables. Examples of relationships are \emph{column similarity}, \emph{schema similarity}, \emph{structure similarity} based on SimRank~\ref{simrank}, \emph{foreign-key and primary-key}, \emph{inclusion dependency}, \emph{table subsuming}, and \emph{equivalence}. The node label contains table meta-data, such as table name and schema information. The edge label includes its endpoints information (such as column names) and relationship information (such as the type and the score). We divide the relationships to two kinds, the light relationship which can be found in sub-quadratic time and the heavy relationship which needs at least quadratic time. The light relationships contains column similarity and schema similarity. The heavy relationships includes the PK-FK, inclusion dependency, and the structure similarity. Next we discuss how to build the light relationships.
 
-%The input to the graph builder is a set of profiles that are attached to its nodes. The graph builder computes the edges among pairs of nodes. In particular, it finds content and schema similarity relationships. 
-Each edge is scored with a weight that represents the strength of the relationship: the particular meaning
-depends on the edge semantics.\mourad{Give examples.}  Also, edges with a
-similarity less than a user-defined threshold are discarded.  This avoids having
-many edges that are not significant.
+
+The input to the graph builder is a set of profiles that are the attached to nodes of the graph. The graph builder then computes the arcs among pairs of nodes. In particular, the graph builder first finds column similarity and schema similarity relationships. Each edge is scored with a weight that represents the strength of the relationship: the particular meaning depends on the edge semantics.  Also, edges with a similarity less than a user-defined threshold are discarded, to avoid having a graph with many edges that are not significant. Finding these relationships in the graph is an $O(n^2)$ computation, which will not scale.  Hence, we rely on locality sensitive hashing (LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} who runs in sub-quadratic time. This approach avoids $n^2$ operations and appears to perform well in practice.
 
 
 
+For the heavy relationships we take the foreign-key and primary-key relationship as an example. The graph builder utilizes an implementation of inclusion dependency to find candidate PK-FK relationships and then refines the candidates using existing machine learning methods. However, as is well known, data in the wild is quite dirty, which makes discovering inclusion dependencies difficult. Specifically, foreign keys may not match a primary key, because of errors in either the PK or the FK. To tolerate errors, we extend traditional inclusion dependency by both key coverage and text similarity and propose an \emph{\eind} which will be described presently.
 
-Data stitching links together all the tables that are 
-returned by the discovery module
-%discovered by a user \nan{These tables should not be discovered by a user?} 
-and adds these linkages to the graph for future use. 
-Data stitching utilizes an implementation of inclusion dependency to find candidate PK-FK relationships and then refines the candidates using advanced techniques\mourad{A bit hand-waving}. However, as is well known, data in the wild is quite dirty, which makes discovering inclusion dependencies difficult.  Specifically, foreign keys may not match a primary key, because of errors in either the PK or the FK\mourad{We could consider other interesting cases; something like http://www.vldb.org/pvldb/vol8/p1358-he.pdf}. To tolerate errors, we extend traditional inclusion dependency by both key coverage and text similarity and propose an \emph{\eind} as discussed in Section~\ref{subsec:eind}.
 
-In Section~\ref{subsec:refine}, we consider techniques to improve the accuracy of candidate PK/FK relationships using machine learning techniques.
+It is expensive to compute the heavy relationships. To address this issue, in the graph builder, 1) the heavy relationships are keeping building in background, 2) efficient algorithms are proposed to find the heavy relationships, 3) and the data profiles and light relationships are used to prune the search space. Note the data discovery can use the heavy relationships to identify interesting data when they are available. After the user identified their interesting data, the graph builder can construct the heavy relationships among the interesting data on-line.
+
+
+Next we propose the error-robust inclusion dependency in Section~\ref{subsec:eind} and consider machine learning techniques to refine the candidate PK/FK relationships in Section~\ref{subsec:refine}.
 
 
 \subsection{Error-Robust Inclusion Dependency}\label{subsec:eind}
