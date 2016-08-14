@@ -34,9 +34,10 @@ data type, and numerical ranges if applicable~\cite{profiling_survey}.
 Note that finding pairwise relationships between each attribute profile is an $O(n^2)$ computation, which will not scale.  
 We thus rely on locality sensitive hashing
 (LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to address this issue. Specifically,
-we hash each signature and group together those that collide.  These are more
-likely to be similar; we only need to perform comparisons among the nodes in
-each cluster, ignoring cross cluster comparisons.  This approach avoids $n^2$
+we hash each signature and group together the colliding ones. %those that
+% collide.
+These are more likely to be similar; we only need to perform comparisons among the nodes in
+each cluster, ignoring cross cluster comparisons.  This approach avoids $O(n^2)$
 operations and appears to perform well in practice.
 
 %\subsection{Data Discovery Components}
@@ -73,7 +74,7 @@ operations and appears to perform well in practice.
 \subsection{Data Profiling at Scale}
 
 To run at scale, discovery relies on sampling to estimate the cardinality of
-columns and the quantiles for numerical data. This avoids having to sort each
+columns and the quantiles for numerical data. This avoids having to explore each
 column, which is not a linear computation.  More generally, this avoids a
 requirement to copy or update the data, reducing memory consumption.
 
@@ -90,7 +91,8 @@ The profiler has connectors to read data from different data sources, such as
 HDFS files, RDBMS or CSV files. The data is then streamed through the profiler
 pipeline which outputs the results
 %and  at the end the resulting attribute profile is sent
-to a store from where it is later consumed by the graph builder.
+to a store from where it is later consumed by the graph builder, which will be
+explained in Section \ref{subsec:graphbuild}.
 %At the same time,
 The profiler works in a distributed environment using a lightweight coordinator
 that splits the work among multiple processors, helping to scale the
@@ -105,8 +107,8 @@ computation.
 The discovery system permits users to submit \emph{schema retrieval queries},
 that are used to find schemas, i.e., datasets, relevant to the task at hand. For
 example, a user may use discovery to find all datasets that contain names of
-employees in a company with a schema retrieval query that search for all
-attributes referring to employee or name, and then write a SQL query (data
+employees in a company with a schema retrieval query that searches for all
+attributes referring to the employee or name, and then write a SQL query (data
 retrieval query) to filter from a list. Next we give some examples of some functions
 currently available to users:
 
@@ -120,7 +122,7 @@ with similar attribute names to the provided ones.
 can extend tables of interest with additional attributes requested by users. The
 core of the operation consists of finding matches to the current table, and then
 retrieving the attributes that do not appear in the original table.
-\item \textbf{Subsumption relationships.} Given some table of reference,
+\item \textbf{Subsumption relationships.} Given some tables of reference,
 discovery can provide a list of tables or groups of tables that have some form
 of subsumption relationship with respect to the reference one. 
 \item \textbf{Similarity and lookup.} Discovery can also be used to find schemas
@@ -129,7 +131,7 @@ as to find schemas that contain certain values, i.e., kewyord search for
 textual data and range search for numerical data.
 \end{itemize}
 
-Discovery works as an information retrieval system: a schema retrieval query
+In summary, discovery works as an information retrieval system: a schema retrieval query
 does not have a specific answer, instead it returns a ranked set of results.
 Hence, ranking appropiately the results from the hundreds of underlying data
 sources falls in the domain of discovery, and it is of great importance to reduce
