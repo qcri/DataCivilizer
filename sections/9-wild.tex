@@ -2,7 +2,7 @@
 \section{Data Civilizer in the Wild}
 \label{sec:wild}
 
-We have built a prototype of discovery and we are working on one on stitching at the moment. The ultimate goal is to integrate \dcv with \texttt{BigDawg}, our implementation of a Polystore to realize the end to end system depicted in this paper. Before that, we have been working closely with customers to adapt our prototypes to relevant real problems. In particular, we have deployed a preliminary prototype of discovery in two different organizations. The MIT Datawarehouse is a group inside MIT responsible for building and maintaining a data warehouse that integrates data from multiple source systems. Merck, a big pharmaceutical company, manages large volumes of data, which are managed by different storage systems. Next we provide detail on each organizations’ requirements, and how we are using \dcv to help them.
+We have built a prototype of discovery and we are working on one on stitching at the moment. The ultimate goal is to integrate \dcv with \texttt{BigDawg}, our implementation of a Polystore to realize the end to end system depicted in this paper. Before that, we have been working closely with customers to adapt our prototypes to relevant real problems. In particular, we have deployed a preliminary prototype of discovery in two different organizations. The MIT Datawarehouse is a group inside MIT responsible for building and maintaining a data warehouse that integrates data from multiple source systems. Merck, a big pharmaceutical company, manages large volumes of data, which are managed by different storage systems. Next we provide details on each organizations' requirements, and how we are using \dcv to help them.
 
 
 \begin{table}
@@ -35,7 +35,7 @@ In the future, we aim to deploy the entire \dcv system to enable running queries
 \subsection{Merck}
 
 
-Merck is a big pharmaceutical company that manages large vol- umes of data spread across around 4K databases, plus several data lakes. The use cases are varied, however there is a common case. One of the data assets of any pharmaceutical company are internal databases of chemical compounds and structures. Usually, these are more valuable when integrated with external, well-known and curated databases, such as PubChem~\cite{pubchem}, ChEMBL~\cite{ChEMBL}, or DrugBank~\cite{DrugBank}. We describe two common use cases that occur in this context:
+Merck is a big pharmaceutical company that manages large volumes of data spread across around 4K databases, plus several data lakes. The use cases are varied, however there is a common case. One of the data assets of any pharmaceutical company are internal databases of chemical compounds and structures. Usually, these are more valuable when integrated with external, well-known and curated databases, such as PubChem~\cite{pubchem}, ChEMBL~\cite{ChEMBL}, or DrugBank~\cite{DrugBank}. We describe two common use cases that occur in this context:
 
 
 \mypar{Identify entities}. One single chemical entity may be referred to with different identifier format in different databases. Chemical identifiers have been a subject of research in the bioinformatics community: multiple different formats have been proposed with different properties desirable according to the scenario. \dcv helps by mapping the multiple representations of the identifiers, therefore facilitating the identification of entities across multiple databases, public and internal.
