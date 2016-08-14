@@ -2,20 +2,27 @@
 \section{Polystore Query Processing}
 \label{sec:curating}
 
-Our local polystore system is called BigDAWG~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15}. It consists of a middleware query optimizer and executor, and shims to various local storage systems, as noted in~\cite{DBLP:journals/sigmod/DugganESBHKMMMZ15,DBLP:journals/pvldb/ElmoreDSBCGHHKK15}. Assume that a user has run discovery and stitching to identify a collection of join paths that can materialize a composite table of interest to the user.  Also, assume that the user has identified the subset of each source table in which he is interested. For any join path, it is now straightforward to construct the BigDAWG query that materializes the view specified by each join path. 
+\dcv uses the BigDAWG polystore~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15}. 
+BigDAWG  consists of a middleware query optimizer and executor, and shims to various local storage systems.
+%, as noted in~\cite{DBLP:journals/sigmod/DugganESBHKMMMZ15,DBLP:journals/pvldb/ElmoreDSBCGHHKK15}. 
+We assume that a user has run discovery and that the corresponding linkage graph has been computed. 
+We can thus identify a collection of join paths that can materialize a composite table of interest to the user.  
+Also, assume that the user has identified the subset of each source table in which he is interested. 
+For any join path, it is now straightforward to construct the BigDAWG query that materializes the view specified by each join path. 
 
 \subsection{Selecting a View to Materialize}
 
 \nan{Our solution for selecting a view to materialize is not well justified.}
 
-The conventional data federation wisdom is to choose the join path that minimizes the query processing cost. However, that ignores data cleaning issues, to which we now turn.
-
-To achieve high quality results, one has to clean the data prior to querying the table. For example, if one has a data value, \code{New Yark}, and wants to transform it to one of its airport codes \code{(JFK, LGA)}, then one must correct the data to \code{New York}, prior to the airport code lookup. Obviously, cleaning usually entails a human specification of the corrected value or a review of the value produced by an automatic algorithm. Hence, it is expensive in human resources, which we believe is generally ``the high pole in the tent''. 
+The conventional data federation wisdom is to choose the join path that minimizes the query processing cost. However, this ignores data cleaning issues, to which we now turn.
+To achieve high quality results, one has to clean the data prior to querying the table. 
+For example, if one has a data value, \code{New Yark}, and wants to transform it to one of its airport codes \code{(JFK, LGA)}, then one must correct the data to \code{New York}, prior to the airport code lookup. Obviously, cleaning usually entails a human specification of the corrected value or a review of the value produced by an automatic algorithm. Hence, it is expensive in human resources, which we believe is generally ``the high pole in the tent''. 
 %\sibo{I made a trial to change to the view selection strategy following the suggestions in the email:}
 %However, it is not always preferable to return only the highest quality answer. For example, a user may be willing to sacrifice the answer accuracy to trade more returned (discovered) data.  As such, we provide a multi-faceted algorithm which returns multiple join paths and let the user choose which one to explore. 
-As such, the goal of \dcv is to choose the join path that produces the highest quality answer and not the ones that is easiest to compute. 
+As such, the goal of \dcv is to choose the join path that produces the highest quality answer and not the one that is easiest to compute. 
 
-In \dcv, a user has to decide how (s)he wants to trade off the data quality and cleaning cost. \dcv defines two parameters under her / his control.
+In \dcv, a user has to decide how to trade off data quality and cleaning cost. 
+\dcv defines two parameters under the user control.
 
 \begin{enumerate}
 \item Minimize cost for a specific cleanliness metric. In this case, the user requires the data to be a certain percentage, \emph{P}, correct and will spend whatever it takes to get to that point.
@@ -25,52 +32,52 @@ In \dcv, a user has to decide how (s)he wants to trade off the data quality and 
 
 %\sibo{More facets probably come here.}
 
-Sometimes the user is the one actually cleaning the data. In this case, (s)he can use \emph{P} and \emph{M} to quantify the value of her / his time. In other cases, cleaning is done by other domain experts, who generally needs to be paid. In this case, \emph{P} and \emph{M} are statements about budget priorities.
+Sometimes the user is the one actually cleaning the data. In this case, (s)he can use \emph{P} and \emph{M} to quantify the value of her/his time. 
+In other cases, cleaning is performed by other domain experts, who generally need to be paid. In this case, \emph{P} and \emph{M} are statements about budget priorities.
 
 
 
 As a result, \dcv must make the following decisions.  First, it must make an assessment of the cleanliness of the result of any given join path.  We treat this issue in Section~\ref{subsec:model}. The obvious conclusion is to choose the join path that produces the highest quality result.
-Then, we need to choose where in the resulting query plan to place data cleaning operations so as to be the most efficient.  This is the topic of Section~\ref{subsec:gain}.
+Then, we need to choose where to place,  in the resulting query plan, data cleaning operations to be the most efficient.  This is the topic of Section~\ref{subsec:gain}.
 
 
 \subsection{The Cleanliness Model}
 \label{subsec:model}
 
+In \dcv, we collect information about the errors in each data set.\mourad{Do these assumptions makes sense!? I doubt anyone at Merck will volunteer to do it or even knows how to do it!} 
+First, we assume that each data set owner gives us accuracy metrics for each column, namely an estimation for the percentage of the column which is erroneous. 
+Second, the data owner also specifies a ``disorder metric" that indicates the average and variance of the ``lexical distance'' between an incorrect value and its ground truth. 
+For example, if salary errors average 5\% with variance 2\%, then $\frac{2}{3}$\sibo{Do not get how the 2/3 comes. The distribution is not given in the context}  of the errors are less than 7\%. 
+If an address field routinely confuses ``\textit{road}'' and ``\textit{street}'', but very rarely gets the name of the street wrong, then the lexical distance is again very small.
+
+To answer a query, \dcv generates a sub-graph for the query from the available join graph (which is the sub-graph of the linkage graph that only contains FK-PK edges) that covers all the nodes in the query. 
+For a given query, there may be multiple sub-graphs. 
+\dcv chooses the one with the maximum cleanliness, according to the following cleanliness model.
 
 
-In \dcv we collect more information about the errors in each data set. First, we assume that each data set owner gives us accuracy metrics for each column, namely an estimation for the percentage of the column which is erroneous. Second, the same data set owner is required to specify a ``disorder metric", which indicates the average and variance of the lexical distance between an incorrect value and its ground truth. \sibo{Do not get how the 2/3 comes. The distribution is not given in the context} For example, if salary errors average 5\% with variance 2\%, then $\frac{2}{3}$ of the errors are less than 7\%. If an address field routinely confuses ``\textit{road}'' and ``\textit{street}'', but very rarely gets the name of the street wrong, then the lexical distance is again very small.
+We first define the cleanliness of an edge in the join graph. 
+Given two linked nodes \RX and \SY in the graph, when we align the values in \RX and \SY using the maximum matching  defined in Section~\ref{subsec:eind}, we can tolerate some errors. Suppose that the lexical distances of the two nodes are \Dis(\RX) and \Dis(\SY), respectively. The distance between two values in \RX and \SY that represent the same object is highly likely to be within $\Dis(\RX) + \Dis(\SY)$. Thus we limit the weight (i.e., the text similarity) of each alignment in the maximal matching to be no smaller than $1-(\Dis(\RX)+\Dis(\SY))$. 
+Then the ratio of the values in the foreign key that appear in the maximal matching is the cleanliness of the edge. We define the cleanliness of a node \RX simply as its accuracy \Acc(\RX), which means the percentage of values in \RX that are not erroneous.
+
+Given a join path, its cleanliness is obtained by multiplying the cleanliness values of all the edges and nodes in the join path. Considering the join path is necessary since errors can propagate along this path and is dominated by the dirtiest one.
 
 
 
-To answer a query, \dcv generates a sub-graph for the query from the available join graph (which is the sub-graph of the linkage graph that only contains FK-PK edges) that covers all the nodes in the query. For a given query, there may be multiple this kind of sub-graphs. \dcv chooses the one with maximum cleanliness, according to the following cleanliness model.
+\subsection{Query Plan with Data Cleaning Operation}
+\label{subsec:gain}
 
-
-
-We first define the cleanliness of an edge in the join graph. Given two linked nodes \RX and \SY in the graph, when we align the values in \RX and \SY using the maximal matching as defined in Section~\ref{subsec:eind}, we can tolerate some errors. Suppose that the lexical distances of the two nodes are \Dis(\RX) and \Dis(\SY) respectively. The distance between two values in \RX and \SY that represent the same object is highly likely to be within $\Dis(\RX) + \Dis(\SY)$. Thus we limit the weight (i.e., the text similarity) of each alignment in the maximal matching to be no smaller than $1-(\Dis(\RX)+\Dis(\SY))$. Then the ratio of the values in the foreign key that appear in the maximal matching is the cleanliness of the edge. We define the cleanliness of a node \RX simply as its accuracy \Acc(\RX), which means the percentage of values in \RX that are not erroneous.
-
-Given a join path, we assess its cleanliness as the multiplication of the cleanliness of all the edges and nodes in the join path as the errors can propagate along the join path and is dominated by the dirtiest one.
-
-
-
-\subsection{Query Plan with Data Cleaning Operation}\label{subsec:gain}
-
-Obviously one wants to perform expensive cleaning on as few records as possible. Hence, one would like to insert cleaning operations as late in the query plan as possible. Unfortunately, if one runs a query that has the predicate:
-
+Obviously expensive cleaning should be performed on as few records as possible. Hence, we would like to insert cleaning operations as late in the query plan as possible. 
+Unfortunately, if we run a query with the following predicate:
 \vspace{.5em}
 \dots \textsf{where} $name = $ ``\code{New York}''
 \vspace{.5em}
-
-\noindent Then the misspelled city name will not be found, and accuracy will suffer. One solution is to clean the entire source data sets to avoid such errors, an expensive proposition indeed. If the penalty is small, then we can insert cleaning ``late'' in the query plan. On the other hand, if the penalty is large, then we must insert cleaning earlier, even though at much higher cost. We formalize our idea as follows.
-
+\noindent Then the misspelled city name,  \ie \code{New Yark}, will not be found, and accuracy will suffer. One solution is to clean the entire source data sets to avoid such errors, an expensive proposition indeed. If the penalty is small, then we can insert cleaning ``late'' in the query plan. On the other hand, if the penalty is large, then we must insert cleaning earlier, even though at much higher cost. We formalize our idea as follows.
 
 
-
-For each edge in the join path, if we put the cleaning operation ahead of the join operation, i.e., we only clean the tuple pairs in our maximal matching, we spend cleaning cost linear to the number of foreign keys and can only expect to achieve the accuracy same as the cleanliness of the edge. In contrast, if we first clean all the possible tuple pairs of the foreign key and primary key and then generate the real join results, we can achieve 100\% accuracy with a cleaning cost quadratic to the number of foreign keys. Similarly, if we put the cleaning operation behind the where clause, we can only expect to achieve the same accuracy of the column with the cost proportional to the number of tuples satisfy the where clause. Otherwise, we can achieve 100\% accuracy with the cost proportional to the number tuples in the whole column.
-
+For each edge in the join path, if we put the cleaning operation ahead of the join operation, i.e., we only clean the tuple pairs in our maximal matching, we spend cleaning cost linear to the number of foreign keys and can only expect to achieve the same accuracy  as the cleanliness of the edge. In contrast, if we first clean all the possible tuple pairs of the foreign key and primary key and then generate the real join results, we can achieve 100\% accuracy with a cleaning cost quadratic to the number of foreign keys. Similarly, if we put the cleaning operation behind the where clause, we can only expect to achieve the same accuracy of the column with the cost proportional to the number of tuples satisfying the where clause. Otherwise, we can achieve 100\% accuracy with the cost proportional to the number tuples in the whole column.
 
 
-
-In this setting, we can develop a dynamic programming algorithm to get a query plan with cleaning operations that achieve the maximum accuracy gain with limited cleaning cost budget or achieve the desired accuracy with smallest cleaning cost budget. In the algorithm, there are three kinds of states for each edge and each node in the join graph: 
+In this setting, we can develop a dynamic programming algorithm to obtain a query plan with cleaning operations that achieve the maximum accuracy gain with limited cleaning cost budget or achieve the desired accuracy with the smallest cleaning cost budget. In the algorithm, there are three kinds of states for each edge and each node in the join graph: 
 no cleaning, cleaning before query operation, and cleaning after query operation, each with different cleaning costs.
 %do not apply cleaning operation on it, apply cleaning operation before the query operation, and apply cleaning operation after the query operation, each with different cleaning costs.
 
