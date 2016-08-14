@@ -2,7 +2,13 @@
 \section{Data Civilizer in the Wild}
 \label{sec:wild}
 
-We have built a prototype of discovery and we are working on one on stitching at the moment. The ultimate goal is to integrate \dcv with \texttt{BigDawg}, our implementation of a Polystore to realize the end to end system depicted in this paper. Before that, we have been working closely with customers to adapt our prototypes to relevant real problems. In particular, we have deployed a preliminary prototype of discovery in two different organizations. The MIT Datawarehouse is a group inside MIT responsible for building and maintaining a data warehouse that integrates data from multiple source systems. Merck, a big pharmaceutical company, manages large volumes of data, which are managed by different storage systems. Next we provide details on each organizations' requirements, and how we are using \dcv to help them.
+We have built a prototype for the data discovery module and the linkage graph builder.
+%we are working on one on stitching at the moment. 
+Ultimately, we will integrate \dcv with \texttt{BigDawg}, our implementation of a Polystore to realize the end to end system described in this paper. 
+We have been working closely with customers to adapt our prototype to relevant real problems. 
+In particular, we have deployed a preliminary prototype of discovery in two different organizations. 
+The MIT Data warehouse (MIT DWH) is a group at MIT responsible for building and maintaining a data warehouse that integrates data from multiple source systems. Merck, a big pharmaceutical company, manages large volumes of data, which are managed by different storage systems. 
+We provide details below on each organizations' requirements, and how we are using \dcv to help them.
 
 
 \begin{table}
@@ -22,23 +28,25 @@ Merck & & & \\
 \subsection{MIT Data warehouse}
 
 
-One of the key tasks of the MIT DWH team is to assist its customers—any personnel from within MIT—in answering questions they have, for example, staff usually wants to create reports, for which they need access to various kinds of data. The warehouse contains around 1TB of data spread across 3K tables approximately.
+One of the key tasks of the MIT DWH team is to assist its customers—any personnel from within MIT—in answering questions they have, for example, staff usually wants to create reports, for which they need access to various kinds of data. The warehouse contains around 1TB of data spread across approximately 3K tables.
 
-A typical customer of the warehouse will present a question, for which the members will need to find relevant tables manually. Once they have determined the tables of interest, they create a view that is accessed by the customer to solve the question at hand. We describe next some of the common use cases we have found:
+A typical customer of the warehouse will present a question, for which the team members will need to find relevant tables manually. Once they have determined the tables of interest, they create a view that is accessed by the customer to solve the question at hand. We describe next some of the common use cases we have encountered:
 
-\mypar{Fill in virtual schema}. When a customer arrives with a question such as: \emph{I need to create a report with the \textbf{gender distribution of the faculty per department and year}}, the data warehouse personnel can use \dcv to find all the tables that contain schema names similar to the attributes exposed by the query, \eg gender, faculty name, department, year.
+\mypar{Fill in virtual schema}. When a customer arrives with a question such as: \emph{I need to create a report with the \textbf{gender distribution of the faculty per department and year}}, the data warehouse personnel can use \dcv to find all the tables that contain schema names similar to the attributes exposed by the query, \eg gender, faculty name, department, and year.
 
-\mypar{Table redundancy}. Multiple views are created for different customers. Many of them contain typically very similar data, as multiple customers are interested in similar items. To reduce the redundancy of data, \dcv helps to detect complementary as well as repeated sources. This sheds light on the status of the warehouse and helps to maintain it tidy and minimal.
+\mypar{Table redundancy}. Multiple views are created for different customers. Many of them contain typically very similar data, as multiple customers are interested in similar items. To reduce the redundancy of data, \dcv helps  detect complementary as well as repeated sources. This sheds light on the status of the warehouse and helps to maintain it tidy and minimal.
 
-In the future, we aim to deploy the entire \dcv system to enable running queries directly over the hundreds of data sources, by using the curating polystore and stitching to create the necessary views on demand. 
+In the future, we aim to deploy the entire \dcv system to enable running queries directly over the hundreds of data sources, by using the curating polystore and linkage graph builder to create the necessary views on demand. 
 
 \subsection{Merck}
 
 
-Merck is a big pharmaceutical company that manages large volumes of data spread across around 4K databases, plus several data lakes. The use cases are varied, however there is a common case. One of the data assets of any pharmaceutical company are internal databases of chemical compounds and structures. Usually, these are more valuable when integrated with external, well-known and curated databases, such as PubChem~\cite{pubchem}, ChEMBL~\cite{ChEMBL}, or DrugBank~\cite{DrugBank}. We describe two common use cases that occur in this context:
+Merck is a big pharmaceutical company that manages large volumes of data spread across around 4K databases in addition to several data lakes. 
+%The use cases are varied, however there is a common case. 
+One of the data assets of any pharmaceutical company are internal databases of chemical compounds and structures. Usually, these are more valuable when integrated with external, well-known and curated databases, such as PubChem~\cite{pubchem}, ChEMBL~\cite{ChEMBL}, or DrugBank~\cite{DrugBank}. We describe two common use cases that occur in this context:
 
 
-\mypar{Identify entities}. One single chemical entity may be referred to with different identifier format in different databases. Chemical identifiers have been a subject of research in the bioinformatics community: multiple different formats have been proposed with different properties desirable according to the scenario. \dcv helps by mapping the multiple representations of the identifiers, therefore facilitating the identification of entities across multiple databases, public and internal.
+\mypar{Identify entities}. One single chemical entity may be referred to with different identifiers and formats in different databases. Chemical identifiers have been a subject of research in the bioinformatics community: multiple different formats have been proposed with different properties according to the scenario. \dcv helps by mapping the multiple representations of the identifiers, therefore facilitating the identification of entities across multiple databases, public and internal.
 
 
 
