@@ -19,7 +19,8 @@ To achieve high quality results, one has to clean the data prior to querying the
 For example, if one has a data value, \code{New Yark}, and wants to transform it to one of its airport codes \code{(JFK, LGA)}, then one must correct the data to \code{New York}, prior to the airport code lookup. Obviously, cleaning usually entails a human specification of the corrected value or a review of the value produced by an automatic algorithm. Hence, it is expensive in human resources, which we believe is generally ``the high pole in the tent''. 
 %\sibo{I made a trial to change to the view selection strategy following the suggestions in the email:}
 %However, it is not always preferable to return only the highest quality answer. For example, a user may be willing to sacrifice the answer accuracy to trade more returned (discovered) data.  As such, we provide a multi-faceted algorithm which returns multiple join paths and let the user choose which one to explore. 
-As such, the goal of \dcv is to choose the join path that produces the highest quality answer and not the one that is easiest to compute. 
+As such, the goal of \dcv is to choose the join path that produces the highest quality answer and not the one that is easiest to compute. \srm{Don’t I care about completenetss of match as well?}
+
 
 In \dcv, a user has to decide how to trade off data quality and cleaning cost. 
 \dcv defines two parameters under the user control.
@@ -47,17 +48,17 @@ Then, we need to choose where to place,  in the resulting query plan, data clean
 In \dcv, we collect information about the errors in each data set.\mourad{Do these assumptions makes sense!? I doubt anyone at Merck will volunteer to do it or even knows how to do it!} 
 First, we assume that each data set owner gives us accuracy metrics for each column, namely an estimation for the percentage of the column which is erroneous. 
 Second, the data owner also specifies a ``disorder metric" that indicates the average and variance of the ``lexical distance'' between an incorrect value and its ground truth. 
-For example, if salary errors average 5\% with variance 2\%, then $\frac{2}{3}$\sibo{Do not get how the 2/3 comes. The distribution is not given in the context}  of the errors are less than 7\%. 
-If an address field routinely confuses ``\textit{road}'' and ``\textit{street}'', but very rarely gets the name of the street wrong, then the lexical distance is again very small.
+For example, if salary errors average 5\% with standard deviation 2\%, then $\frac{2}{3}$\sibo{Do not get how the 2/3 comes. The distribution is not given in the context}  of the errors are less than 7\%. 
+If an address field routinely confuses ``\textit{road}'' and ``\textit{street}'', but very rarely gets the name of the street wrong, then the lexical distance is again very small. \srm{We should explicitly define different metrics for lexical and numeric.  Mean +/- std dev doesn’t make sense for lexical, I think.}
 
-To answer a query, \dcv generates a sub-graph for the query from the available join graph (which is the sub-graph of the linkage graph that only contains FK-PK edges) that covers all the nodes in the query. 
+To answer a query, \dcv generates a sub-graph for the query from the available join graph (which is the sub-graph of the linkage graph that only contains FK-PK edges) that covers all the joins in the query. 
 For a given query, there may be multiple sub-graphs. 
 \dcv chooses the one with the maximum cleanliness, according to the following cleanliness model.
 
 
 We first define the cleanliness of an edge in the join graph. 
-Given two linked nodes \RX and \SY in the graph, when we align the values in \RX and \SY using the maximum matching  defined in Section~\ref{subsec:eind}, we can tolerate some errors. Suppose that the lexical distances of the two nodes are \Dis(\RX) and \Dis(\SY), respectively. The distance between two values in \RX and \SY that represent the same object is highly likely to be within $\Dis(\RX) + \Dis(\SY)$. Thus we limit the weight (i.e., the text similarity) of each alignment in the maximal matching to be no smaller than $1-(\Dis(\RX)+\Dis(\SY))$. 
-Then the ratio of the values in the foreign key that appear in the maximal matching is the cleanliness of the edge. We define the cleanliness of a node \RX simply as its accuracy \Acc(\RX), which means the percentage of values in \RX that are not erroneous.
+Given two linked nodes \RX and \SY in the graph, when we align the values in \RX and \SY using the maximum matching  defined in Section~\ref{subsec:eind}, we can tolerate some errors. Suppose that the lexical distances of the two nodes are \Dis(\RX) and \Dis(\SY), respectively\srm{is this an average over all values?}. The distance between two values in \RX and \SY that represent the same object is highly likely\srm{Not really...} to be within $\Dis(\RX) + \Dis(\SY)$. Thus we limit the weight (i.e., the text similarity) of each alignment in the maximal matching to be no smaller than $1-(\Dis(\RX)+\Dis(\SY))$\srm{This could be < 0.  This is for lexical similarity;  what about for numeric quantities.}. 
+Then the fraction of the values in the foreign key that appear in the maximal matching is the cleanliness of the edge. We define the cleanliness of a node \RX simply as its accuracy \Acc(\RX), which means the percentage of values in \RX that are not erroneous.\srm{No, DIS(R[X]) is the average dissimilaritity of the edge;  it doesn’t say anything about whetehr a given value is erroneous.}
 
 Given a join path, its cleanliness is obtained by multiplying the cleanliness values of all the edges and nodes in the join path. Considering the join path is necessary since errors can propagate along this path and is dominated by the dirtiest one.
 
@@ -71,13 +72,13 @@ Unfortunately, if we run a query with the following predicate:
 \vspace{.5em}
 \dots \textsf{where} $name = $ ``\code{New York}''
 \vspace{.5em}
-\noindent Then the misspelled city name,  \ie \code{New Yark}, will not be found, and accuracy will suffer. One solution is to clean the entire source data sets to avoid such errors, an expensive proposition indeed. If the penalty is small, then we can insert cleaning ``late'' in the query plan. On the other hand, if the penalty is large, then we must insert cleaning earlier, even though at much higher cost. We formalize our idea as follows.
+\noindent Then the misspelled city name,  \ie \code{New Yark}, will not be found, and accuracy will suffer. One solution is to clean the entire source data sets to avoid such errors, an expensive proposition indeed. If the penalty is small, then we can insert cleaning ``late'' in the query plan\srm{Why not use a relaxed similarity threshold and then clean those nodes.}. On the other hand, if the penalty is large, then we must insert cleaning earlier, even though at much higher cost. We formalize our idea as follows.
 
 
 For each edge in the join path, if we put the cleaning operation ahead of the join operation, i.e., we only clean the tuple pairs in our maximal matching, we spend cleaning cost linear to the number of foreign keys and can only expect to achieve the same accuracy  as the cleanliness of the edge. In contrast, if we first clean all the possible tuple pairs of the foreign key and primary key and then generate the real join results, we can achieve 100\% accuracy with a cleaning cost quadratic to the number of foreign keys. Similarly, if we put the cleaning operation behind the where clause, we can only expect to achieve the same accuracy of the column with the cost proportional to the number of tuples satisfying the where clause. Otherwise, we can achieve 100\% accuracy with the cost proportional to the number tuples in the whole column.
 
 
-In this setting, we can develop a dynamic programming algorithm to obtain a query plan with cleaning operations that achieve the maximum accuracy gain with limited cleaning cost budget or achieve the desired accuracy with the smallest cleaning cost budget. In the algorithm, there are three kinds of states for each edge and each node in the join graph: 
+In this setting, we can develop a dynamic programming algorithm to obtain a query plan with cleaning operations that achieve the maximum accuracy gain with limited cleaning cost budget or achieve the desired accuracy with the smallest cleaning cost budget\srm{What is algorithm?  Really dynamic programming?}. In the algorithm, there are three kinds of states for each edge and each node in the join graph: 
 no cleaning, cleaning before query operation, and cleaning after query operation, each with different cleaning costs.
 %do not apply cleaning operation on it, apply cleaning operation before the query operation, and apply cleaning operation after the query operation, each with different cleaning costs.
 
