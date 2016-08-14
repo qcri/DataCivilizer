@@ -44,7 +44,6 @@ In this paper, we present \dcv, a system we are building at MIT, QCRI, Waterloo,
 
 \dcv consists of a collection of modules with a workflow scheduling system, as noted in the architecture diagram of Figure \ref{fig:arch}. We elaborate on each module in the remainder of this section, using Merck as an example.
 We should note that \dcv focuses on structured data, which is represented as a collection of (sparse or dense) tables.
-%We assume that the text has been parsed in advance into a structured representation, and that the file data can be “tableized” by an adaptor.\mourad{This sentence is not really needed.}
 
 
 \begin{figure}[!t]
@@ -58,7 +57,8 @@ We should note that \dcv focuses on structured data, which is represented as a c
 A data scientist at Merck has usually a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 300 grams}.
 His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv, , will assist the scientist in finding $m$ tables of interest from all $n$ tables such that $m \ll n$, where $n$ is the number of all tables thus $n$ is much bigger than 4000.  
 %
-The process of discovering relevant tables is typically in the granularity of columns. Assuming that each table has up to $c$ columns, only linear algorithms, i.e., those run in $O(c\cdot n)$ time, are computationally feasible. If we also assume w.l.o.g. that $c$ is a constant, the discovery has to run in $O(n)$ time.
+The process of discovering relevant tables is typically in the granularity of columns. Assume that each table has a constant number of columns in average, which is usually true in practice. Only linear algorithms, i.e., those run in $O(n)$ time, are computationally feasible.
+%Assuming that each table has up to $c$ columns, only linear algorithms, i.e., those run in $O(c\cdot n)$ time, are computationally feasible. If we also assume w.l.o.g. that $c$ is a constant, the discovery has to run in $O(n)$ time.
 %
 This module, together with its needed data structures, will be discussed in Section~\ref{sec:discovery}.
 
@@ -68,7 +68,8 @@ This module, together with its needed data structures, will be discussed in Sect
 The semantic linkage between attributes of discovered tables is extremely helpful in constructing a composite \textsf{SQL} query to access the discovered data sets. 
 %
 Our current prototype leverages primary key-foreign key relationships (inclusion dependencies).
-It may has up to $O(c^2 \cdot m^2)$ linkage among different attributes, or simply $O(m^2)$ if we consider $c$ as a constant.
+Assuming a constant number of attributes each table contains, there may exist up to $O(m^2)$ linkage among different attributes.
+%It may have up to $O(m^2)$ linkage among different attributes, assuming a constant number of columns each table holds in average.
 %
 %Given $n$ data sets and each has up to $c$ attributes, in the worst case there are $O(n^2)$ linkages among different attributes, by treating $c$ as a constant.
 Fortunately, $m$ is typically small, as a consequence of data discovery.
