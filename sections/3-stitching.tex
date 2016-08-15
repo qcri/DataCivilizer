@@ -16,7 +16,7 @@ Examples of relationships are
 \emph{schema similarity}, 
 \emph{structure similarity}, % based on SimRank~\cite{DBLP:conf/kdd/JehW02}\mourad{No need to mention how since we don't for the others.}, 
 \emph{inclusion dependency}, 
-\emph{foreign-key and primary-key (PK-FK)} , 
+\emph{foreign-key and primary-key} , 
 \emph{table subsuming}, and 
 \emph{table equivalence}\mourad{What does it mean?}. 
 The node label contains table meta-data, such as table name and schema information. 
@@ -26,7 +26,7 @@ Computing the different relationships requires different time complexities.
 We thus divide them into, {\textit light relationships}, which can be computed in sub-quadratic time,
 and {\textit heavy relationships}, which needs at least quadratic time. 
 The light relationships contain column similarity and schema similarity. 
-The heavy relationships include the PK-FK, inclusion dependency, and the structure similarity. 
+The heavy relationships include the primary key-foreign key (PK-FK), inclusion dependency, and the structure similarity. 
 %Next we discuss how to build the light relationships.
 
 
