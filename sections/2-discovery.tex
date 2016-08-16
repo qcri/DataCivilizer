@@ -25,11 +25,11 @@ variety of techniques such as searches for tables with specific substrings in th
 
 \subsection{Data Profiling at Scale}
 
-We summarize each column of each table into a {\em profile}
-where a profile contains a signature, which is a domain-dependent,
-compact representation of the original content.  For numerical data, we use the
-data distribution, and for textual data,  a vector of the most significant words
-in the column.  Our profiles also contain information about data cardinality,
+The key idea in the discovery module is to summarize each column of each table into a {\em profile}.
+A profile consists of one or more {\it signatures};  each signature summarizes the original content of the column into a domain-dependent,
+compact representation of the original data.  By default signatures consist of a histogram representing the
+data distribution of numerical values and  a vector of the most significant words
+in the column for textual data.  Our profiles also contain information about data cardinality,
 data type, and numerical ranges if applicable~\cite{profiling_survey}.
 
 %Note that finding pairwise relationships between each attribute profile is an $O(n^2)$ computation, which will not scale.  
@@ -76,10 +76,10 @@ data type, and numerical ranges if applicable~\cite{profiling_survey}.
 
 To run at scale, discovery relies on sampling to estimate the cardinality of
 columns and the quantiles for numerical data. This avoids having to sort each
-column, which is not a linear computation.  More specifically, this avoids a
-requirement to copy or update the data, reducing memory consumption.
+column, which is not a linear computation.  This also allows us to avoid making a copy of
+the data,  reducing memory pressure.
 
-The data profiler architecture is a pipeline of stages, with each stage
+The profiler itself consists a pipeline of stages, where each stage is
 responsible for performing a different computation. For example, the first stage
 performs basic denoising of the data, such as removing empty values and dealing
 with potential formatting issues of the underlying files, e.g. figuring out the
