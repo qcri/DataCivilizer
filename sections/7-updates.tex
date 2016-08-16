@@ -23,7 +23,7 @@ In response to the above three types of updates, \dcv uses three corresponding s
 
 \stitle{(ii) Provenance management.}  In case (2) above, the human effort to update and clean MVs may be daunting. In this case, MVs should be discarded rather than updated. Naturally, there is a need for a workflow component that supports data versioning and branching operations. \dcv will leverage Decibel~\cite{DBLP:journals/pvldb/MaddoxGEMPD16}, a system developed at MIT for this purpose.
 
-\stitle{(iii) Descriptive and prescriptive data cleaning.} When a scientist updates an MV (case 3) above), this will trigger the update propagation to descendant MVs, as well as back upstream to data sources, if possible. To perform this propagation, we plan to leverage the techniques in~\cite{DBLP:conf/sigmod/ChalamallaIOP14}, a system developed by QCRI and Waterloo.
+\stitle{(iii) Descriptive and prescriptive data cleaning.} When a scientist updates an MV (case 3) above), this will trigger the update propagation to descendant MVs, as well as back upstream to data sources, if possible. To perform this propagation, we plan to leverage the techniques in PDC~\cite{DBLP:conf/sigmod/ChalamallaIOP14}, a system developed by QCRI and Waterloo.
 
 
 %As data appears incrementally, we need an incremental inclusion dependency algorithm. Extending our algorithms in Section~\ref{subsec:eind} is a project we are currently working on.

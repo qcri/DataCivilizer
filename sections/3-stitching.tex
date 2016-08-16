@@ -28,7 +28,7 @@ The node label contains table metadata, such as table name, cardinality and
 other information computed by the profiler. The edge label includes metadata
 about the relationship it represents, \eg type and score, if any. Computing
 the different relationships requires different time complexities. We 
-divide them into, {\textit light relationships}, which can be computed in
+categorize them into, {\textit light relationships}, which can be computed in
 sub-quadratic time, and {\textit heavy relationships}, which needs at least
 quadratic time. The light relationships contain column similarity and schema
 similarity. The heavy relationships include the primary key-foreign key
@@ -72,7 +72,7 @@ Section~\ref{subsec:refine}.
 
 \subsection{Error-Robust Inclusion Dependency}\label{subsec:eind}
 
-Foreign key/primary key relationships are usually identified by inclusion
+Foreign key-primary key relationships are usually identified by inclusion
 dependency techniques.  To address dirty data, we propose an error-robust
 inclusion dependency scheme.
 %, which enhances traditional inclusion dependency techniques.
@@ -100,7 +100,7 @@ Also, we must compose the individual column scores to achieve an overall strengt
 
 
 The error-robust inclusion dependency algorithm returns a collection of candidate PK-FK relationships.
-We apply the algorithms in~\cite{DBLP:conf/webdb/RostinABNL09} to refine our candidate selection. The authors proposed 10~different features to distinguish foreign key constraints from spurious inclusion dependencies. Consider two columns \RX and \SY with an inclusion dependency from the first one to the second one. In~\cite{DBLP:conf/webdb/RostinABNL09}, the specified features include 
+We apply the algorithms in~\cite{DBLP:conf/webdb/RostinABNL09} \nan{Ahmed's comment: Which is this system? Can it be named?} to refine our candidate selection. The authors proposed 10~different features to distinguish foreign key constraints from spurious inclusion dependencies. Consider two columns \RX and \SY with an inclusion dependency from the first one to the second one. In~\cite{DBLP:conf/webdb/RostinABNL09}, the specified features include 
 \emph{coverage}, which is the ratio of distinct values in \RX that are contained in \SY, 
 \emph{column name similarity}, which is the similarity between the attribute names of X and Y, 
 and \emph{out-of-domain range}, which is the percentage of values in \SY not within $[\min(\RX), \max(\RX)]$ where $\min(\RX)$ and $\max(\RX)$ are respectively the minimum and maximum values in \RX.
