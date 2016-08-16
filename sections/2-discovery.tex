@@ -32,14 +32,14 @@ data distribution, and for textual data,  a vector of the most significant words
 in the column.  Our profiles also contain information about data cardinality,
 data type, and numerical ranges if applicable~\cite{profiling_survey}.
 
-Note that finding pairwise relationships between each attribute profile is an $O(n^2)$ computation, which will not scale.  
-We thus rely on locality sensitive hashing
-(LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to address this issue. Specifically,
-we hash each signature and group together the colliding ones. %those that
-% collide.
-These are more likely to be similar; we only need to perform comparisons among the nodes in
-each cluster, ignoring cross cluster comparisons.  This approach avoids $O(n^2)$
-operations and appears to perform well in practice.
+%Note that finding pairwise relationships between each attribute profile is an $O(n^2)$ computation, which will not scale.  
+%We thus rely on locality sensitive hashing
+%(LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to address this issue. Specifically,
+%we hash each signature and group together the colliding ones. %those that
+%% collide.
+%These are more likely to be similar; we only need to perform comparisons among the nodes in
+%each cluster, ignoring cross cluster comparisons.  This approach avoids $O(n^2)$
+%operations and appears to perform well in practice.
 
 %\subsection{Data Discovery Components}
 %
