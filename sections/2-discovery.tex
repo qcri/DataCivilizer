@@ -6,7 +6,7 @@ The goal of the data discovery module is to find relevant data among multiple,
 perhaps millions of, data sets that are spread across the different storage systems of an
 enterprise, and sometimes beyond.
 
-A naive solution is to ask an expert (if one is available), or to perform
+A typical solution is to ask an expert (if one is available), or to perform
 manual exploration by inspecting datasets one by one, which are obviously
 time-consuming and prone to missing relevant data sources.  
 Recently, there have been efforts to automate this process, such as
@@ -18,7 +18,7 @@ of \dcv allowing the orchestration of complex query workflows that integrate cur
 %execution, which is the ultimate goal.  
 
 The data discovery module narrows down the search for relevant data from
-$n$ data sources to a handful number of $m$ data sources, upon which we can afford to compute finer-grained relationships.
+$n$ data sources to a handful of $m$ data sources, on which finer-grained relationships can be computed more efficiently and
 \dcv discovery supports a user-level API to search for relevant data using a
 variety of techniques such as schema search and similar content. 
 %Discovery is extensible; an engineer can extend the supported relationships to cover other relevant use cases.
