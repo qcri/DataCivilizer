@@ -5,11 +5,11 @@
 An oft-cited statistic is that data scientists spend 80\% of their time finding, preparing, integrating and cleaning data sets. The remaining 20\% time is spent doing the desired analytic tasks such as data mining and machine learning. In practice, 80\% may be a lower bound; for example one data officer, Mark Schreiber of Merck, a large pharmaceutical company, estimates that data scientists in Merck spend 98\% of their time on the ``grunt work'' and only one hour per week on ``useful work''.
 
 In this paper, we present \dcv, a system we are building at MIT, QCRI, Waterloo, and TU Berlin, whose main purpose is to decrease the ``grunt work factor'' by helping data scientists to 
-(i)~perform {\it data discovery}, i.e., quickly find data of interest from large numbers of tables;
-(ii)~built  a {\it linkage graph}, i.e., find ways to connect data sets of interest;
-(iii)~find desired data from disparate data stores;
-(iv)~clean the desired data; and %as it is often cited that 20\% of a typical data source is incorrect or missing; and
-(v)~perform these tasks iteratively using a workflow system since data scientists often iterate through these steps in different orders.
+(i)~quickly {\it discover} data sets of interest from large numbers of tables;
+(ii)~{\it connect and link} relevant data sets;
+(iii)~{\it compute} answers from the disparate data stores that host the discovered data sets;
+(iv)~{\it clean} the desired data; and %as it is often cited that 20\% of a typical data source is incorrect or missing; and
+(v)~{\it iterate} through these tasks using a workflow system, since data scientists often iterate through these steps in different orders.
 
 %\vspace{.5em} %Mourad: It's ugly with this space thing!
 %\begin{itemize} \\
@@ -42,9 +42,11 @@ In this paper, we present \dcv, a system we are building at MIT, QCRI, Waterloo,
 %%\vspace{.5em}
 %\end{enumerate}
 
+
 \dcv consists of two major components, as shown in 
-Figure~\ref{fig:arch}.  The {\it offline component} indexes and profiles datasets;  these profiles are stored 
-in a linkage graph, which is used to process workflow queries online. 
+Figure~\ref{fig:arch}.  
+%ihab: added double arrows, online activities can change the graph as well
+The {\it offline component} indexes and profiles datasets;  these profiles are stored  in a linkage graph, which is used to process workflow queries online. 
 Datasets in \dcv consist of structured data, which may be stored in relational databases, spreadsheets, or other structured formats; we use the term {\it tables} or {\it datasets} to refer to these.
  The {\it online component} involves executing a user-supplied workflow that consists of a mix of discovery, join path selection, and cleaning operations on datasets, all supported via interactions with the linkage graph. We elaborate on each module in the remainder of this section, using Merck as an example.
 
@@ -74,14 +76,16 @@ This module, together with the corresponding data structures, is discussed in Se
 The semantic linkage between attributes of discovered tables is needed so that the user can assemble relational schemas and run 
  \textsf{SQL} queries on the discovered data sets. 
 %
-Our current prototype leverages \srm{Leverages sounds like it is taking advantage of known PK-FK relationships;  do we mean "searches for" or "Involves finding"} primary key-foreign key relationships (inclusion dependencies) for this purpose.
+Our current prototype identifies
+%\srm{Leverages sounds like it is taking advantage of known PK-FK relationships;  do we mean "searches for" or "Involves finding"} 
+primary key-foreign key relationships (inclusion dependencies) among relevant tables (sata sets) for this purpose.
 Assuming a constant number of attributes in each table, there may exist up to $O(m^2)$ linkages among different attributes in the $m$ tables produced by discovery.
 %It may have up to $O(m^2)$ linkage among different attributes, assuming a constant number of columns each table holds in average.
 %
 %Given $n$ data sets and each has up to $c$ attributes, in the worst case there are $O(n^2)$ linkages among different attributes, by treating $c$ as a constant.
 Since $m$ is the result of data discovery, we expect it to be small.
 %\mourad{Should we mention here that we may need more tables beyond the discovery module's output to build join paths? It might be confusing as this stage.}
-As such, the process of building the linkage graph can be run dynamically; we discuss its details in Section~\ref{sec:stitching}.
+As such, the process of building the linkage graph can be run dynamically and on-demand; we discuss its details in Section~\ref{sec:stitching}.
 
 %The discovery and stitching modules share a common graph structure. Such structure has a node for each column in each table with various kinds of links such as data similarity, schema similarity, and inclusion dependency.  These links are maintained in a data fabric similar in spirit to a knowledge graph~\cite{DBLP:conf/semweb/AuerBKLCI07,DBLP:conf/sigmod/BollackerEPST08,DBLP:conf/www/SuchanekKW07}. Building and maintaining this graph is the responsibility of the graph builder component.
 
@@ -133,10 +137,8 @@ In addition, if a scientist updates a view, we need to propagate changes to othe
 We describe the current implementation of \dcv in Section~\ref{sec:wild}. We also report on initial user experience for two use cases: the MIT data warehouse and Merck. We conclude with final remarks and an outline of our future research plans in Section~\ref{sec:conclusion}.
 
 
-\stitle{Our contributions.}
-The main contribution of \dcv is that it is an ``end-to-end'' system. In contrast, there has been much work on ``point solutions'' that solve small pieces of the overall problem. For example, Data Wrangler~\cite{2011-wrangler} and DataXFormer~\cite{DBLP:conf/icde/AbedjanMIOPS16} automate some aspects of cleaning and transforming data.
-In addition, we studied several representative data cleaning systems on a collection of real world data sources ``from the wild''~\cite{DBLP:journals/pvldb/AbedjanCDFIOPST16} and we found out that there was no cleaning Esperanto and multiple tools are required to achieve reasonable accuracy.  
+%\stitle{Our contributions.}
+The main contribution of \dcv is that it is an ``end-to-end'' system. In contrast, there has been much work on ``point solutions'' that solve small pieces of the overall problem. For example, Data Wrangler~\cite{2011-wrangler} and DataXFormer~\cite{DBLP:conf/icde/AbedjanMIOPS16} automate some aspects of cleaning and transforming data;  Data Tamer~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} mainly performs schema mappings and record linkage; and  DeepDive~\cite{DBLP:journals/pvldb/ShinWWSZR15} extracts facts and structured information from large corpora of text, images and other unstructured sources. However, neither solution performs  discovery, linkage graph computation, and polystore operations in concert.
+In fact, we have recently studied several representative data cleaning systems on a collection of real world data sources ``from the wild''~\cite{DBLP:journals/pvldb/AbedjanCDFIOPST16} and we found out that there was no cleaning Esperanto and multiple tools are required to achieve reasonable accuracy.  
 Hence, point solutions do not achieve acceptable performance, and an ensemble approach is required.
-%
-Data Tamer~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} performs schema mappings and record linkage. DeepDive~\cite{DBLP:journals/pvldb/ShinWWSZR15} extracts facts and structured information from large corpora of text, images and other unstructured sources. However, neither solution performs  discovery, linkage graph computation, and polystore operations in concert.
 
