@@ -2,25 +2,25 @@
 \section{Discovery}
 \label{sec:discovery}
 
-The data discovery module's goal is to find relevant data among multiple,
-perhaps millions of, data sets that are spread across the different storage systems of an
-enterprise, and sometimes beyond.
+The data discovery module's goal is to find relevant data from hundreds, thousands or
+ millions of data sets  spread across the different storage systems of an
+enterprise.
 
-A typical solution is to ask an expert (if one is available), or to perform
-manual exploration by inspecting datasets one by one, which are obviously
+Typical solutions to finding relevant data include asking an expert (if one is available), or  performing
+manual exploration by inspecting datasets one by one.  Obviously, both approaches are
 time-consuming and prone to missing relevant data sources.  
-Recently, there have been efforts to automate this process, such as
+Recently, there have been efforts to automate this process, through efforts such as
 Goods~\cite{DBLP:conf/sigmod/HalevyKNOPRW16} and 
-InfoGather~\cite{DBLP:conf/sigmod/YakoutGCC12}. Unlike these systems
-that are designed to answer a particular use case, our discovery module aims to
+InfoGather~\cite{DBLP:conf/sigmod/YakoutGCC12}. \srm{I don't understand the following sentence, vis-a-vis the Goods paper, which seems to be about supporting data discovery for a bunch of use cases, without one specific use-case in mind.}  Unlike these systems
+that are designed with a specific use-case in mind, our discovery module aims to
 collect enough information about the data sets and to expose them to upper layers
-of \dcv allowing the orchestration of complex query workflows that integrate curation operations.
+of \dcv, allowing the orchestration of complex query workflows that integrate a variety of cleaning, linking, and querying operations.
 %execution, which is the ultimate goal.  
 
 The data discovery module narrows down the search for relevant data from
-$n$ data sources to a handful of $m$ data sources, on which finer-grained relationships can be computed more efficiently and
+$n$ data sources to a handful of $m$ data sources, on which finer-grained relationships can be computed more efficiently.
 \dcv discovery supports a user-level API to search for relevant data using a
-variety of techniques such as schema search and similar content. 
+variety of techniques such as searches for tables with specific substrings in the schemas ({\it schema search}) or table values ({\it content search}). 
 %Discovery is extensible; an engineer can extend the supported relationships to cover other relevant use cases.
 
 \subsection{Data Profiling at Scale}
