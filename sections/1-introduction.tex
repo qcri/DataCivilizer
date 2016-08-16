@@ -116,20 +116,21 @@ The above aspects will be discussed in Section~\ref{sec:curating}.
 \stitle{[Updates.]}  
 If a source data set is updated, these updates must be incrementally propagated through the data curation pipeline to update downstream materialized views. 
 In some cases, the human effort involved may be daunting and the materialized view should be discarded rather than updated. 
-In addition, if a scientist updates a view, we may need to propagate changes to other derived views, as well as back upstream to data sources, if this is possible. Section~\ref{sec:updates} discusses these  issues.
+In addition, if a scientist updates a view, we need to propagate changes to other derived views, as well as back upstream to data sources, if this is possible. Section~\ref{sec:updates} discusses these  issues.
 
 
 
 \stitle{[Workflow.]} 
 \dcv offers a workflow engine whereby data scientists can iterate over its components in whatever order they wish,  Moreover, they need to be able to undo previous workflow steps and perform alternate branching from the result of a workflow step.  Section~\ref{sec:workflow} discusses our workflow management.
 
+\smallskip
 
 We describe the current implementation of \dcv in Section~\ref{sec:wild}. We also report on initial user experience for two use cases: the MIT data warehouse and Merck. We conclude with final remarks and an outline of our future research plans in Section~\ref{sec:conclusion}.
 
 
 \stitle{Our contributions.}
 The main contribution of \dcv is that it is an ``end-to-end'' system. In contrast, there has been much work on ``point solutions'' that solve small pieces of the overall problem. For example, Data Wrangler~\cite{2011-wrangler} and DataXFormer~\cite{DBLP:conf/icde/AbedjanMIOPS16} automate some aspects of cleaning and transforming data.
-In addition, we recently studied several representative data cleaning tools on a collection of real world data sources ``from the wild''~\cite{DBLP:journals/pvldb/AbedjanCDFIOPST16} and we found out that there was no cleaning Esperanto and multiple tools are required to achieve reasonable accuracy.  
+In addition, we studied several representative data cleaning systems on a collection of real world data sources ``from the wild''~\cite{DBLP:journals/pvldb/AbedjanCDFIOPST16} and we found out that there was no cleaning Esperanto and multiple tools are required to achieve reasonable accuracy.  
 Hence, point solutions do not achieve acceptable performance, and an ensemble approach is required.
 %
 Data Tamer~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} performs schema mappings and record linkage. DeepDive~\cite{DBLP:journals/pvldb/ShinWWSZR15} extracts facts and structured information from large corpora of text, images and other unstructured sources. However, neither solution performs  discovery, linkage graph computation, and polystore operations in concert.
