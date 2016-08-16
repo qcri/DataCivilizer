@@ -8,7 +8,7 @@ In this paper, we present \dcv, a system we are building at MIT, QCRI, Waterloo,
 (i)~performing data discovery, i.e., quickly find data of interest from large numbers of tables;
 (ii)~computing a linkage graph, i.e., find ways to connect data sets of interest;
 (iii)~executing queries to fetch desired data from disparate data stores;
-(iv)~cleaning the required data, as it is often cited that 20\% of a typical data source is incorrect or missing; and
+(iv)~cleaning the required data; and %as it is often cited that 20\% of a typical data source is incorrect or missing; and
 (v)~performing these tasks iteratively using a workflow system since data scientists often iterate through these steps in different orders.
 
 %\vspace{.5em} %Mourad: It's ugly with this space thing!
@@ -44,7 +44,7 @@ In this paper, we present \dcv, a system we are building at MIT, QCRI, Waterloo,
 
 \dcv consists of a collection of modules with a workflow scheduling system, as noted in the architecture diagram of 
 Figure~\ref{fig:arch}. We elaborate on each module in the remainder of this section, using Merck as an example.
-We should note that \dcv focuses on structured data, which is represented as a collection of (sparse or dense) tables.
+We should note that \dcv focuses on structured data, which are represented as a collection of (sparse or dense) tables.
 
 
 \begin{figure}[!t]
@@ -55,8 +55,8 @@ We should note that \dcv focuses on structured data, which is represented as a c
 
 
 \stitle{[Discovery.]} 
-A data scientist at Merck has usually a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 300 grams}.
-His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv, , will assist the scientist in finding $m$ tables of interest from all $n$ tables such that $m \ll n$, where $n$ is the number of all tables making it much bigger than 4000.  
+A data scientist at Merck has a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 300 grams}.
+His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv, will assist the scientist in finding $m$ tables of interest from all $n$ tables such that $m \ll n$, where $n$ is the number of all tables making it much bigger than 4000.  
 %
 The process of discovering relevant tables is typically in the granularity of columns. 
 %Assume that each table has a constant number of columns in average, which is usually true in practice. 
