@@ -2,14 +2,14 @@
 \section{Introduction}
 \label{introduction}
 
-An often cited statistic is that data scientists spend 80\% of their time finding, preparing, integrating and cleaning data sets. The remaining 20\% time is spent doing the desired analytic tasks such as data mining and machine learning. In fact, 80\% may be a lower bound; for example one data officer, Mark Schreiber of Merck, a large pharmaceutical company, estimates that data scientists in Merck spend 98\% of their time on the ``grunt work'' and only one hour per week on ``useful work''.
+An oft-cited statistic is that data scientists spend 80\% of their time finding, preparing, integrating and cleaning data sets. The remaining 20\% time is spent doing the desired analytic tasks such as data mining and machine learning. In practice, 80\% may be a lower bound; for example one data officer, Mark Schreiber of Merck, a large pharmaceutical company, estimates that data scientists in Merck spend 98\% of their time on the ``grunt work'' and only one hour per week on ``useful work''.
 
-In this paper, we present \dcv, a system we are building at MIT, QCRI, Waterloo, and TU Berlin, whose main purpose is to decrease the ``grunt work factor'' by helping data scientists in 
-(i)~performing data discovery, i.e., quickly find data of interest from large numbers of tables;
-(ii)~computing a linkage graph, i.e., find ways to connect data sets of interest;
-(iii)~executing queries to fetch desired data from disparate data stores;
-(iv)~cleaning the required data; and %as it is often cited that 20\% of a typical data source is incorrect or missing; and
-(v)~performing these tasks iteratively using a workflow system since data scientists often iterate through these steps in different orders.
+In this paper, we present \dcv, a system we are building at MIT, QCRI, Waterloo, and TU Berlin, whose main purpose is to decrease the ``grunt work factor'' by helping data scientists to 
+(i)~perform {\it data discovery}, i.e., quickly find data of interest from large numbers of tables;
+(ii)~built  a {\it linkage graph}, i.e., find ways to connect data sets of interest;
+(iii)~find desired data from disparate data stores;
+(iv)~clean the desired data; and %as it is often cited that 20\% of a typical data source is incorrect or missing; and
+(v)~perform these tasks iteratively using a workflow system since data scientists often iterate through these steps in different orders.
 
 %\vspace{.5em} %Mourad: It's ugly with this space thing!
 %\begin{itemize} \\
@@ -42,9 +42,11 @@ In this paper, we present \dcv, a system we are building at MIT, QCRI, Waterloo,
 %%\vspace{.5em}
 %\end{enumerate}
 
-\dcv consists of a collection of modules with a workflow scheduling system, as noted in the architecture diagram of 
-Figure~\ref{fig:arch}. We elaborate on each module in the remainder of this section, using Merck as an example.
-We should note that \dcv focuses on structured data, which are represented as a collection of (sparse or dense) tables.
+\dcv consists of two major components, as shown in 
+Figure~\ref{fig:arch}.  The {\it offline component} indexes and profiles datasets;  these profiles are stored 
+in a linkage graph, which is used to process workflow queries online. 
+Datasets in \dcv consist of structured data, which may be stored in relational databases, spreadsheets, or other structured formats; we use the term {\it tables} or {\it datasets} to refer to these.
+ The {\it online component} involves executing a user-supplied workflow that consists of a mix of discovery, join path selection, and cleaning operations on datasets, all supported via interactions with the linkage graph. We elaborate on each module in the remainder of this section, using Merck as an example.
 
 
 \begin{figure}[!t]
@@ -56,28 +58,30 @@ We should note that \dcv focuses on structured data, which are represented as a 
 
 \stitle{[Discovery.]} 
 A data scientist at Merck has a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 300 grams}.
-His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv, will assist the scientist in finding $m$ tables of interest from all $n$ tables such that $m \ll n$, where $n$ is the number of all tables making it much bigger than 4000.  
+His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv will assist the scientist in finding $m$ tables of interest from all $n$ tables such that $m \ll n$, where $n$ is the number of all tables making it much bigger than 4000.  
 %
-The process of discovering relevant tables is typically in the granularity of columns. 
+Although discovery queries are run as a part of the online workflow, they are supported by profiles and indexes that are built during offline processing.  Building these profiles requires looking at both the schemas a values of every table; 
+%The process of discovering relevant tables is typically in the granularity of columns. 
 %Assume that each table has a constant number of columns in average, which is usually true in practice. 
-Thus, only linear algorithms, i.e., those that can run in $O(n)$ time, are computationally feasible.
+as such, we employ linear algorithms to make this pre-computation tractable.
 %Assuming that each table has up to $c$ columns, only linear algorithms, i.e., those run in $O(c\cdot n)$ time, are computationally feasible. If we also assume w.l.o.g. that $c$ is a constant, the discovery has to run in $O(n)$ time.
 %
-This module, together with the corresponding data structures, will be discussed in Section~\ref{sec:discovery}.
+This module, together with the corresponding data structures, is discussed in Section~\ref{sec:discovery}.
 
 %Since discovery must be run on millions of columns, we assume that only linear algorithms are computationally feasible, and any needed data structures must be built in advance.
 
 \stitle{[Linkage Graph Computation.]} 
-The semantic linkage between attributes of discovered tables is extremely helpful in constructing a composite \textsf{SQL} query to access the discovered data sets. 
+The semantic linkage between attributes of discovered tables is needed so that the user can assemble relational schemas and run 
+ \textsf{SQL} queries on the discovered data sets. 
 %
-Our current prototype leverages primary key-foreign key relationships (inclusion dependencies) for this purpose.
-Assuming a constant number of attributes in each table, there may exist up to $O(m^2)$ linkages among different attributes.
+Our current prototype leverages \srm{Leverages sounds like it is taking advantage of known PK-FK relationships;  do we mean "searches for" or "Involves finding"} primary key-foreign key relationships (inclusion dependencies) for this purpose.
+Assuming a constant number of attributes in each table, there may exist up to $O(m^2)$ linkages among different attributes in the $m$ tables produced by discovery.
 %It may have up to $O(m^2)$ linkage among different attributes, assuming a constant number of columns each table holds in average.
 %
 %Given $n$ data sets and each has up to $c$ attributes, in the worst case there are $O(n^2)$ linkages among different attributes, by treating $c$ as a constant.
-Since $m$ is typically small, being the result of data discovery,
+Since $m$ is the result of data discovery, we expect it to be small.
 %\mourad{Should we mention here that we may need more tables beyond the discovery module's output to build join paths? It might be confusing as this stage.}
-the process of building the linkage graph can be run dynamically; we discuss its details in Section~\ref{sec:stitching}.
+As such, the process of building the linkage graph can be run dynamically; we discuss its details in Section~\ref{sec:stitching}.
 
 %The discovery and stitching modules share a common graph structure. Such structure has a node for each column in each table with various kinds of links such as data similarity, schema similarity, and inclusion dependency.  These links are maintained in a data fabric similar in spirit to a knowledge graph~\cite{DBLP:conf/semweb/AuerBKLCI07,DBLP:conf/sigmod/BollackerEPST08,DBLP:conf/www/SuchanekKW07}. Building and maintaining this graph is the responsibility of the graph builder component.
 
