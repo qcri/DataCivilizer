@@ -75,7 +75,8 @@ Assuming a constant number of attributes in each table, there may exist up to $O
 %It may have up to $O(m^2)$ linkage among different attributes, assuming a constant number of columns each table holds in average.
 %
 %Given $n$ data sets and each has up to $c$ attributes, in the worst case there are $O(n^2)$ linkages among different attributes, by treating $c$ as a constant.
-Since $m$ is typically small, being the result of data discovery,\mourad{Should we mention here that we may need more tables beyond the discovery module's output to build join paths? It might be confusing as this stage.}
+Since $m$ is typically small, being the result of data discovery,
+%\mourad{Should we mention here that we may need more tables beyond the discovery module's output to build join paths? It might be confusing as this stage.}
 the process of building the linkage graph can be run dynamically; we discuss its details in Section~\ref{sec:stitching}.
 
 %The discovery and stitching modules share a common graph structure. Such structure has a node for each column in each table with various kinds of links such as data similarity, schema similarity, and inclusion dependency.  These links are maintained in a data fabric similar in spirit to a knowledge graph~\cite{DBLP:conf/semweb/AuerBKLCI07,DBLP:conf/sigmod/BollackerEPST08,DBLP:conf/www/SuchanekKW07}. Building and maintaining this graph is the responsibility of the graph builder component.

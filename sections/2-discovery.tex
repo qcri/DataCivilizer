@@ -2,7 +2,7 @@
 \section{Discovery}
 \label{sec:discovery}
 
-The goal of the data discovery module is to find relevant data among multiple,
+The data discovery module's goal is to find relevant data among multiple,
 perhaps millions of, data sets that are spread across the different storage systems of an
 enterprise, and sometimes beyond.
 
@@ -23,7 +23,7 @@ $n$ data sources to a handful of $m$ data sources, on which finer-grained relati
 variety of techniques such as schema search and similar content. 
 %Discovery is extensible; an engineer can extend the supported relationships to cover other relevant use cases.
 
-\subsection{Data Profiler}
+\subsection{Data Profiling at Scale}
 
 We summarize each column of each table into a {\em profile}
 where a profile contains a signature, which is a domain-dependent,
@@ -72,7 +72,7 @@ data type, and numerical ranges if applicable~\cite{profiling_survey}.
 %data, to more involved queries such as table augmentation, to add attributes of
 %interest to known tables. We discuss the queries at the end of the section. 
 
-\subsection{Data Profiling at Scale}
+%\subsection{Data Profiling at Scale}
 
 To run at scale, discovery relies on sampling to estimate the cardinality of
 columns and the quantiles for numerical data. This avoids having to sort each

@@ -88,7 +88,7 @@ text similarity to values in \SY and use the maximum value as the strength of a
 value matching. We then compute the total strength of the maximum matching value
 divided by the number of values in \RX. This is the overall strength of the
 inclusion dependency.  If this number exceeds a predefined threshold $\delta$,
-we specify an inclusion dependency from \RX to \SY in our linkage graph.
+we set an inclusion dependency from \RX to \SY in our linkage graph.
 %\nan{This is very weak. We can also tolerate errors by saying if $> x\%$ \RX
 %appears in \SY, then there is a related inclusion dependency.}
 
@@ -96,16 +96,21 @@ When dealing with compound columns, we can utilize different text similarity fun
 Also, we must compose the individual column scores to achieve an overall strength.
 
 
-\subsection{Refine Candidate FK-PK Relationships}\label{subsec:refine}
+\subsection{Candidate FK-PK Relationships Refinement}
+\label{subsec:refine}
 
 
 The error-robust inclusion dependency algorithm returns a collection of candidate PK-FK relationships.
-We apply the algorithms in~\cite{DBLP:conf/webdb/RostinABNL09} \nan{Ahmed's comment: Which is this system? Can it be named?} to refine our candidate selection. The authors proposed 10~different features to distinguish foreign key constraints from spurious inclusion dependencies. Consider two columns \RX and \SY with an inclusion dependency from the first one to the second one. In~\cite{DBLP:conf/webdb/RostinABNL09}, the specified features include 
-\emph{coverage}, which is the ratio of distinct values in \RX that are contained in \SY, 
-\emph{column name similarity}, which is the similarity between the attribute names of X and Y, 
-and \emph{out-of-domain range}, which is the percentage of values in \SY not within $[\min(\RX), \max(\RX)]$ where $\min(\RX)$ and $\max(\RX)$ are respectively the minimum and maximum values in \RX.
-Using these features, we have implemented the four machine learning classification algorithms in~\cite{DBLP:conf/webdb/RostinABNL09}. These allow us to distinguish spurious inclusion dependencies from real ones  with high accuracy.
+We use the algorithms in~\cite{DBLP:conf/webdb/RostinABNL09} 
+%\nan{Ahmed's comment: Which is this system? Can it be named?}\mourad{It doesn't have a name!} 
+to refine our candidate selection. The authors proposed 10~different features to distinguish foreign key constraints from spurious inclusion dependencies. Consider two columns \RX and \SY with an inclusion dependency from the first one to the second one. 
+%In~\cite{DBLP:conf/webdb/RostinABNL09}, 
+The specified features include 
+\emph{coverage}, the ratio of distinct values in \RX that are contained in \SY, 
+\emph{column name similarity}, the similarity between the attribute names of X and Y, 
+and \emph{out-of-domain range}, the percentage of values in \SY not within $[\min(\RX), \max(\RX)]$ where $\min(\RX)$ and $\max(\RX)$ are respectively the minimum and maximum values in \RX.
 
+Using the above features, we have implemented the four machine learning classification algorithms in~\cite{DBLP:conf/webdb/RostinABNL09}. These allow us to distinguish spurious inclusion dependencies from real ones  with high accuracy.
 The result is a collection of PK-FK relationships that can be used to link the tables from the discovery module. However, there may exist multiple subgraphs in the linkage graph that can connect all the interesting tables, which we call \emph{join paths}. In the next section we discuss the choice of which one(s) to use to materialize a view for the user.
 
 %\nan{So far, this section only talks about FK-PK relationships. In my opinion, these should be merged with graph builder.}
