@@ -2,7 +2,65 @@
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
-In this paper, we propose an end-to-end big data management system named \dcv with the goal of discovering relevant data to the user specific tasks, link the relevant data for better usage, cleaning the data with limit budget, handle data updates, and enable iteratively processing the data. We build a module for each of the requirement above. As data in large companies are usually across multiple data storage platforms, we build our system in a polystore architecture. Moreover, we propose to place the data cleaning operation in the query plan, and trade-off the query result quality with the cleaning costs. We deployed our preliminary system on two different institutions, MIT and Merck and got positive feedbacks from the users.
+%In this paper, we propose an end-to-end big data management system named \dcv
+%with the goal of discovering relevant data to the user specific tasks, link the
+%relevant data for better usage, cleaning the data with limit budget, handle data
+%updates, and enable iteratively processing the data. We build a module for each
+%of the requirement above. As data in large companies are usually across multiple
+%data storage platforms, we build our system in a polystore architecture.
+%Moreover, we propose to place the data cleaning operation in the query plan, and
+%trade-off the query result quality with the cleaning costs. We deployed our
+%preliminary system on two different institutions, MIT and Merck and got positive
+%feedbacks from the users.
 
+Data Civilizer is a new end-to-end system that integrates the tasks of
+discovering relevant data, stitching it together in meaningful views for the
+users and integrating cleaning and curation along the process. We observe
+several challenges such as taming the scale on discovering data, finding
+efficient methods to stitch potentially dirty data and clean data under a budget
+with the goal of maximizing value for the user. We have built and deployed an
+initial prototype in two large organizations and will demo the system at the
+conference. Many opportunities for future work lie ahead:
 
-\dong{Future work goes here.}
+\begin{myitemize}
+\item\textbf{Workflow management.} Operation e2e in Civilizer entails multiple
+iterations of discovery, view creation and data curation, all intertwined with
+manual human intervention. Currently we have a rudimentary workflow orchestrator
+that we plan to extend with further options such as: i) a recommendation mechanism
+to propose operations based on a workflow-aware log of past sequences of them;
+and ii) inspect past operations, delete and highlight the promising ones through a
+lineage mechanism, facilitating other users operation. 
+\item\textbf{Error model.} We plan to include a better error model into
+Civilizer after some findings we have done recently \cite{datacleaning} and some
+ongoing discussions. The general idea is in capturing the \emph{importance} of
+errors, in particular, as referred to their impact ont the final result quality.
+\item\textbf{Steering cleaning engine.} Cleaning happens across many layers of
+Civilizer. We are currently testing different algorithms that we plan to
+integrate in the platform with the aim of help as much as possible users to
+clean the data that yields the higher quality returns.
+\end{myitemize}
+
+%The process of data curation may entail multiple iterations of data discovery,
+%data stitching, querying and data curation. For sure, cleaning and
+%transformation procedures must be guided by the user. \dcv will have a fairly
+%conventional workflow system that will allow a human to construct sequences of
+%operations, undo ones that are unproductive and utilize branching to try
+%multiple processing operations.
+%
+%In addition, we plan to build a workflow orchestrator which will retain previous
+%operation sequences and propose ones that best fit the current situation. We
+%expect this tactic to be successful because the types of data curation and
+%preparation steps in an enterprise often follow repetitive patterns.
+%Specifically, our workflow orchestrator will store the user query, the sequence
+%of operations in a central workflow registry together with the meta-data and
+%signatures provided by the data discovery component. 
+%
+%The orchestrator will evaluate the current user query and the initial results of
+%the data discovery component against the workflow registry. Similar queries and
+%similar data profiles are likely to demand similar cleaning procedures. Previous
+%workflows will be ranked based on the similarity of the user query and retrieved
+%discovery results. Accordingly, the related curation and preparation procedures
+%will be shown in ranked order to the user.
+%
+
+%\dong{Future work goes here.}
