@@ -2,44 +2,63 @@
 \section{Discovery}
 \label{sec:discovery}
 
-The data discovery module's goal is to find relevant data from hundreds, thousands or
- millions of data sets  spread across the different storage systems of an
-enterprise.
+The data discovery module's goal is to find relevant data from hundreds,
+thousands or millions of data sets  spread across the different storage systems
+of an enterprise.
 
-Typical solutions to finding relevant data include asking an expert (if one is available), or  performing
-manual exploration by inspecting data sets one by one.  Obviously, both approaches are
-time-consuming and prone to missing relevant data sources.  
-Recently, there have been efforts to automate this process, through efforts such as
-Goods~\cite{DBLP:conf/sigmod/HalevyKNOPRW16} and 
-InfoGather~\cite{DBLP:conf/sigmod/YakoutGCC12}. \srm{I don't understand the following sentence, vis-a-vis the Goods paper, which seems to be about supporting data discovery for a bunch of use cases, without one specific use-case in mind.}\mourad{I agree with Sam; after skimming through the paper, I see Goods as a serious competitor to DC, at least on the discovery side.}  Unlike these systems
-that are designed with a specific use-case in mind, our discovery module aims to
-collect enough information about the data sets and to expose them to upper layers
-of \dcv, allowing the orchestration of complex query workflows that integrate a variety of cleaning, linking, and querying operations.
+Typical solutions to finding relevant data include asking an expert (if one is
+available), or  performing manual exploration by inspecting data sets one by
+one. Obviously, both approaches are time-consuming and prone to missing
+relevant data sources. Recently, there have been efforts to automate this
+process, some examples are Goods~\cite{DBLP:conf/sigmod/HalevyKNOPRW16}
+and InfoGather~\cite{DBLP:conf/sigmod/YakoutGCC12}. These systems, however, are
+designed to solve a limited number of use cases of relevance for the companies
+where they are deployed. Unlike them, our discovery module aims to support
+general discovery queries that can then be used for unanticipated discovery
+needs users may have.
+
+%\srm{I don't understand the
+%following sentence, vis-a-vis the Goods paper, which seems to be about
+%supporting data discovery for a bunch of use cases, without one specific
+%use-case in mind.}\mourad{I agree with Sam; after skimming through the paper, I
+%see Goods as a serious competitor to DC, at least on the discovery side.}
+%
+%Unlike these systems that are designed with a specific use-case in mind, our
+%discovery module aims to collect enough information about the data sets and to
+%expose them to upper layers of \dcv, allowing the orchestration of complex query
+%workflows that integrate a variety of cleaning, linking, and querying
+%operations.
+
 %execution, which is the ultimate goal.  
 
-The data discovery module narrows down the search for relevant data from
-$n$ data sources to a handful of $m$ data sources, on which finer-grained relationships can be computed more efficiently.
-\dcv discovery supports a user-level API to search for relevant data using a
-variety of techniques such as searching for tables with specific substrings in the schemas ({\it schema search}) or table values ({\it content search}). 
-%Discovery is extensible; an engineer can extend the supported relationships to cover other relevant use cases.
+The data discovery module narrows down the search for relevant data from $n$
+data sources to a handful of $m$ data sources, on which finer-grained
+relationships can be computed more efficiently. \dcv discovery supports a
+user-level API to search for relevant data using a variety of techniques such as
+searching for tables with specific substrings in the schemas ({\it schema
+search}) or table values ({\it content search}). 
+%Discovery is extensible; an engineer can extend the supported relationships to
+%cover other relevant use cases.
 
 \subsection{Data Profiling at Scale}
 
 The key idea   is to summarize each column of each table into a {\em profile}.
-A profile consists of one or more {\it signatures};  each signature summarizes the original content of the column into a domain-dependent,
-compact representation of the original data.  By default, signatures consist of a histogram representing the
-data distribution of numerical values and  a vector of the most significant words
-in the column for textual data.  Our profiles also contain information about data cardinality,
-data type, and numerical ranges if applicable~\cite{profiling_survey}.
+A profile consists of one or more {\it signatures};  each signature summarizes
+the original content of the column into a domain-dependent, compact
+representation of the original data.  By default, signatures consist of a
+histogram representing the data distribution of numerical values and  a vector
+of the most significant words in the column for textual data.  Our profiles also
+contain information about data cardinality, data type, and numerical ranges if
+applicable~\cite{profiling_survey}.
 
-%Note that finding pairwise relationships between each attribute profile is an $O(n^2)$ computation, which will not scale.  
-%We thus rely on locality sensitive hashing
-%(LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to address this issue. Specifically,
-%we hash each signature and group together the colliding ones. %those that
-%% collide.
-%These are more likely to be similar; we only need to perform comparisons among the nodes in
-%each cluster, ignoring cross cluster comparisons.  This approach avoids $O(n^2)$
-%operations and appears to perform well in practice.
+%Note that finding pairwise relationships between each attribute profile is an
+%$O(n^2)$ computation, which will not scale.  We thus rely on locality sensitive
+%hashing (LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to address this issue.
+%Specifically, we hash each signature and group together the colliding ones.
+%%those that % collide.  These are more likely to be similar; we only need to
+%perform comparisons among the nodes in each cluster, ignoring cross cluster
+%comparisons.  This approach avoids $O(n^2)$ operations and appears to perform
+%well in practice.
 
 %\subsection{Data Discovery Components}
 %
@@ -76,68 +95,86 @@ data type, and numerical ranges if applicable~\cite{profiling_survey}.
 
 To run at scale, discovery relies on sampling to estimate the cardinality of
 columns and the quantiles for numerical data. This avoids having to sort each
-column, which is not a linear computation.  This also allows us to avoid making a copy of
-the data,  reducing memory pressure.
+column, which is not a linear computation.  This also allows us to avoid making
+a copy of the data,  reducing memory pressure.
 
 The profiler itself consists a pipeline of stages, where each stage is
 responsible for performing a different computation. For example, the first stage
 performs basic de-noising of the data, such as removing empty values and dealing
 with potential formatting issues of the underlying files, \eg figuring out the
-separator for a CSV file.  The second stage determines the data type of each column,
-information that is propagated along with the data to the next stages. The rest
-of the stages are responsible for computing cardinalities, performing quantile
-estimation, \eg to determine numerical ranges.
+separator for a CSV file.  The second stage determines the data type of each
+column, information that is propagated along with the data to the next stages.
+The rest of the stages are responsible for computing cardinalities, performing
+quantile estimation, \eg to determine numerical ranges.
 
 The profiler has connectors to read data from different data sources, such as
 HDFS files, RDBMS or CSV files. Data sets are streamed through the profiler
 pipeline;  the pipeline outputs the results
 %and  at the end the resulting attribute profile is sent
-to a {\it profile store} where it is later consumed by the graph builder, which will be
-explained in Section \ref{subsec:graphbuild}.
+to a {\it profile store} where it is later consumed by the graph builder, which
+will be explained in Section \ref{subsec:graphbuild}.
 %At the same time,
 The profiler works in a distributed environment using a lightweight coordinator
 that splits the work among multiple processors, helping to scale the
 computation.
 
-%The discovery module benefits from our distributed architecture that allows us to parallelize profiling as well as graph building, further speeding up execution times. Other kinds of relationships such as finding FK-PKs are too expensive to compute at scale for the whole graph.  These are left to the stitching module, which is described next.
-
+%The discovery module benefits from our distributed architecture that allows us
+%to parallelize profiling as well as graph building, further speeding up
+%execution times. Other kinds of relationships such as finding FK-PKs are too
+%expensive to compute at scale for the whole graph.  These are left to the
+%stitching module, which is described next.
 
 \subsection{Discovery Queries}
 \label{subsec:api}
 
-Using the discovery system, users can submit \emph{schema retrieval queries}
-to find  data sets whose schemas are relevant to the task at hand. 
-For example, to find all data sets that contain names of
-employees in a company, the user issues a schema retrieval query that searches for all
-attributes referring to the employee or name.
-The user can then write a SQL query, \ie a \emph{data retrieval query}, to filter from a list. 
-\srm{I think a little more detail is needed here describing how the profiles built above are used to answer these queries.  As it is the two subsections don't seem well connected -- why are profiles needed?}
-Here are some examples of functions that the discovery module provides to users:
+The profiles, then, are the building blocks used by the graph builder (Section
+\ref{subsec:graphbuild}) to produce a linkage graph, that in turn serves as the
+main data structure to answer discovery queries. Users can submit
+\emph{discovery queries} to find data sets whose schemas are relevant to the
+task at hand. For example, to find all data sets that contain names of employees
+in a company, the user issues a discovery query that searches for all attributes
+referring to the employee or name. The user can then write a SQL query to filter
+from a list. Here are some examples of functions that the discovery module
+provides to users:
+%\srm{I think a little more detail is
+%needed here describing how the profiles built above are used to answer these
+%queries.  As it is the two subsections don't seem well connected -- why are
+%profiles needed?} 
 
 \begin{itemize}
-\item \textbf{Fill-in schema}. Given a set of names, this function
-retrieves and shows tables or groups of (probably joinable\mourad{How do you know?}) tables that contain
-the desired attributes. The core of the operation consists of finding tables
-with similar attribute names to the provided ones.
+\item \textbf{Fill-in schema}. Given a set of names, this function retrieves and
+shows tables or groups of tables that contain the desired attributes. The core
+of the operation consists of finding tables with similar attribute names to the
+provided ones.
+%\mourad{How do you know?}
 
-\item \textbf{Extend attribute.} Similar to the extend operator of Octopus~\cite{octopus}, or the ABA operation of Infogather~\cite{DBLP:conf/sigmod/YakoutGCC12}, using this function users
-can extend tables of interest with additional attributes. The
-core of the operation consists of finding matches to the current table, and then
-retrieving the attributes that do not appear in the original table.
+\item \textbf{Extend attribute.} Similar to the extend operator of
+Octopus~\cite{octopus}, or the ABA operation of
+Infogather~\cite{DBLP:conf/sigmod/YakoutGCC12}, using this function users can
+extend tables of interest with additional attributes. The core of the operation
+consists of finding matches to the current table, and then retrieving the
+attributes that do not appear in the original table.
 
-\item \textbf{Subsumption relationships.} Given some reference table,
-this function provides a list of tables or groups of tables that have some form
-of subsumption relationship (i.e., are contained in or contain) with respect to the reference table. 
+\item \textbf{Subsumption relationships.} Given some reference table, this
+function provides a list of tables or groups of tables that have some form of
+subsumption relationship (i.e., are contained in or contain) with respect to the
+reference table. 
 
 \item \textbf{Similarity and lookup.} Discovery can also be used to find schemas
 that contain data similar to some provided schema (attribute or table), as well
-as to find schemas that contain certain values, \ie keyword search for
-textual data and range search for numerical data.
+as to find schemas that contain certain values, \ie keyword search for textual
+data and range search for numerical data.  
+
 \end{itemize}
 
-Finally, discovery works like an information retrieval system: schema retrieval queries
-do not return a specific answer, but instead return a ranked set of results.
-Hence,  appropriately ranking the results from the hundreds of underlying data
-sources falls in the domain of discovery, and it is of great importance to reduce
-the amount of work that downstream components  within \dcv must perform. \srm{Any suggestions about how to do this?}
+Finally, discovery works like an information retrieval system: schema retrieval
+queries do not return a specific answer, but instead return a ranked set of
+results. Hence, appropriately ranking the results from the hundreds of
+underlying data sources falls in the domain of discovery, and it is of great
+importance to reduce the amount of work that downstream components within \dcv
+must perform. We are currently exploring several options, of which a model that
+decouples discovery query processing from ranking evaluation seems the most
+promising.
+
+%\srm{Any suggestions about how to do this?}
 
