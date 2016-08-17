@@ -5,7 +5,7 @@
 \dcv uses the \texttt{BigDAWG} polystore~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15}. \texttt{BigDAWG} consists of a middleware query optimizer and executor, and shims to various local storage systems. 
 We assume that a user has run discovery and that the corresponding linkage graph has been computed. 
 We can thus identify a collection of join paths that can materialize a composite table of interest to the user. 
-We also assume that the user has identified the subset of each source table in which he is interested\mourad{Is this assumption needed, it's just specifying a predicate!?}. 
+The user can now identify the subsets of each table in which he is interested. 
 For any join path, it is now straightforward to construct the \texttt{BigDAWG} query that materializes the view specified by each join path. 
 Next we discuss how to choose a join path from all the possible ones to materialize.
 	

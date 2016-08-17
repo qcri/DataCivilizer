@@ -11,11 +11,7 @@ available), or  performing manual exploration by inspecting data sets one by
 one. Obviously, both approaches are time-consuming and prone to missing
 relevant data sources. Recently, there have been efforts to automate this
 process, some examples are Goods~\cite{DBLP:conf/sigmod/HalevyKNOPRW16}
-and InfoGather~\cite{DBLP:conf/sigmod/YakoutGCC12}. These systems, however, are
-designed to solve a limited number of use cases of relevance for the companies
-where they are deployed. Unlike them, our discovery module aims to support
-general discovery queries that can then be used for unanticipated discovery
-needs users may have.
+and InfoGather~\cite{DBLP:conf/sigmod/YakoutGCC12}. These systems, however, have been designed with specific use cases in mind. Infogather augments tables with attributes it finds in other sources. Goods, through specific metadata captured by the company, permits finding similar datasets and inspect them. Unlike them, our discovery module aims to support general discovery queries that can then be used for unanticipated discovery needs. For this purpose \dcv generates more sophisticated meta-data and profiles from the data, for which we present the appropriate techniques.
 
 %\srm{I don't understand the
 %following sentence, vis-a-vis the Goods paper, which seems to be about
