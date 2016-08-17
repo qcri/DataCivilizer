@@ -6,7 +6,7 @@ An oft-cited statistic is that data scientists spend 80\% of their time finding,
 
 In this paper, we present \dcv, a system we are building at MIT, QCRI, Waterloo, and TU Berlin, whose main purpose is to decrease the ``grunt work factor'' by helping data scientists to 
 (i)~quickly {\it discover} data sets of interest from large numbers of tables;
-(ii)~{\it connect and link} relevant data sets;
+(ii)~{\it link} relevant data sets; %Mourad:Well link and connect mean the same thing!?
 (iii)~{\it compute} answers from the disparate data stores that host the discovered data sets;
 (iv)~{\it clean} the desired data; and %as it is often cited that 20\% of a typical data source is incorrect or missing; and
 (v)~{\it iterate} through these tasks using a workflow system, since data scientists often iterate through these steps in different orders.
@@ -46,9 +46,9 @@ In this paper, we present \dcv, a system we are building at MIT, QCRI, Waterloo,
 \dcv consists of two major components, as shown in 
 Figure~\ref{fig:arch}.  
 %ihab: added double arrows, online activities can change the graph as well
-The {\it offline component} indexes and profiles datasets;  these profiles are stored  in a linkage graph, which is used to process workflow queries online. 
-Datasets in \dcv consist of structured data, which may be stored in relational databases, spreadsheets, or other structured formats; we use the term {\it tables} or {\it datasets} to refer to these.
- The {\it online component} involves executing a user-supplied workflow that consists of a mix of discovery, join path selection, and cleaning operations on datasets, all supported via interactions with the linkage graph. We elaborate on each module in the remainder of this section, using Merck as an example.
+The {\it offline component} indexes and profiles data sets;  these profiles are stored  in a linkage graph, which is used to process workflow queries online. 
+Data sets in \dcv consist of structured data, which may be stored in relational databases, spreadsheets, or other structured formats; we use the term {\it tables} or {\it data sets} to refer to these.
+ The {\it online component} involves executing a user-supplied workflow that consists of a mix of discovery, join path selection, and cleaning operations on data sets, all supported via interactions with the linkage graph. We elaborate on each module in the remainder of this section, using Merck as an example.
 
 
 \begin{figure}[!t]
@@ -60,9 +60,9 @@ Datasets in \dcv consist of structured data, which may be stored in relational d
 
 \stitle{[Discovery.]} 
 A data scientist at Merck has a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 300 grams}.
-His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv will assist the scientist in finding $m$ tables of interest from all $n$ tables such that $m \ll n$, where $n$ is the number of all tables making it much bigger than 4000.  
+His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv will assist the scientist in finding $m$ tables of interest from all $n$ tables such that $m \ll n$, where $n$ is the number of all tables making it much bigger than 4,000.  
 %
-Although discovery queries are run as a part of the online workflow, they are supported by profiles and indexes that are built during offline processing.  Building these profiles requires looking at both the schemas a values of every table; 
+Although discovery queries are run as a part of the online workflow, they are supported by profiles and indexes that are built during offline processing.  Building these profiles requires looking at both the schema and values of every table; 
 %The process of discovering relevant tables is typically in the granularity of columns. 
 %Assume that each table has a constant number of columns in average, which is usually true in practice. 
 as such, we employ linear algorithms to make this pre-computation tractable.
@@ -78,7 +78,7 @@ The semantic linkage between attributes of discovered tables is needed so that t
 %
 Our current prototype identifies
 %\srm{Leverages sounds like it is taking advantage of known PK-FK relationships;  do we mean "searches for" or "Involves finding"} 
-primary key-foreign key relationships (inclusion dependencies) among relevant tables (sata sets) for this purpose.
+primary key-foreign key relationships, using inclusion dependencies, among relevant tables for this purpose.
 Assuming a constant number of attributes in each table, there may exist up to $O(m^2)$ linkages among different attributes in the $m$ tables produced by discovery.
 %It may have up to $O(m^2)$ linkage among different attributes, assuming a constant number of columns each table holds in average.
 %
@@ -93,7 +93,7 @@ As such, the process of building the linkage graph can be run dynamically and on
 \stitle{[Polystore Query Processing and Curation.]}
 Since organizations such as  Merck have a variety of massive-scale data storage systems, it is not feasible to move all data to a central data warehouse. Also, it is neither economically nor technically practical to perform data processing on all of the thousands of databases in advance. 
 \dcv is built using a polystore architecture~\cite{DBLP:journals/sigmod/DugganESBHKMMMZ15} that federates query processing across disparate systems inside of an enterprise.  All modules of \dcv assume a polystore computing environment.
-Our plan is to leverage the \texttt{BigDAWG} polystore system~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15} we are building to  pull data from multiple underlying storage engines to compute the final result (or a {\em view}) that satisfies the user's specifications.
+Our plan is to leverage the \texttt{BigDAWG} polystore system~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15} we are building to  pull data from multiple underlying storage engines to compute the final result (or the {\em view}) that satisfies the user's specifications.
 
 %\stitle{[Curation Polystore]} 
 
@@ -104,6 +104,7 @@ This is an expensive process with the human effort required to validate cleaning
 Since there may be multiple views that ``solve'' a data scientist's query, each with different accuracy and human validation cost, \dcv must estimate the cost of curating the possible views,
 %to reason about the feasibility of using each one,
 given a scientist's time budget. 
+The above aspects will be discussed in Section~\ref{sec:curating}.
 
 
 %Obviously, we want to run stitching in the background in advance to deliver the best possible response time. As noted in Section~\ref{sec:stitching}, our current prototype leverages PK-FK relationships (inclusion dependencies).
@@ -116,7 +117,6 @@ given a scientist's time budget.
 %%to reason about the feasibility of using each one,
 %given a scientist's time budget. 
 
-The above aspects will be discussed in Section~\ref{sec:curating}.
 %Estimating the cleanliness of a view entails constructing a model for the dirtiness of the data in each source data set, which we discuss in Section~\ref{sec:curating}. Also discussed in Section~\ref{sec:curating} is where in a query plan we should allocate a cleaning budget.
 
 
@@ -138,7 +138,9 @@ We describe the current implementation of \dcv in Section~\ref{sec:wild}. We als
 
 
 %\stitle{Our contributions.}
-The main contribution of \dcv is that it is an ``end-to-end'' system. In contrast, there has been much work on ``point solutions'' that solve small pieces of the overall problem. For example, Data Wrangler~\cite{2011-wrangler} and DataXFormer~\cite{DBLP:conf/icde/AbedjanMIOPS16} automate some aspects of cleaning and transforming data;  Data Tamer~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} mainly performs schema mappings and record linkage; and  DeepDive~\cite{DBLP:journals/pvldb/ShinWWSZR15} extracts facts and structured information from large corpora of text, images and other unstructured sources. However, neither solution performs  discovery, linkage graph computation, and polystore operations in concert.
-In fact, we have recently studied several representative data cleaning systems on a collection of real world data sources ``from the wild''~\cite{DBLP:journals/pvldb/AbedjanCDFIOPST16} and we found out that there was no cleaning Esperanto and multiple tools are required to achieve reasonable accuracy.  
-Hence, point solutions do not achieve acceptable performance, and an ensemble approach is required.
+The main contribution of \dcv is that it is an ``end-to-end'' system. In contrast, there has been much work on ``point solutions'' that solve small pieces of the overall problem. For example, Data Wrangler~\cite{2011-wrangler} and DataXFormer~\cite{DBLP:conf/icde/AbedjanMIOPS16} automate some aspects of cleaning and transforming data;  Data Tamer~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} mainly performs schema mappings and record linkage; and  DeepDive~\cite{DBLP:journals/pvldb/ShinWWSZR15} extracts facts and structured information from large corpora of text, images and other unstructured sources. 
+However, no solution performs  discovery, linkage graph computation, and polystore operations in concert.
+In fact, we have recently studied several representative data cleaning systems on a collection of real world data sets``from the wild''~\cite{DBLP:journals/pvldb/AbedjanCDFIOPST16} and we found out that there was no cleaning Esperanto and multiple tools are required to achieve reasonable accuracy.  
+Hence, point solutions do not offer enough functionalities and do not achieve acceptable performance, 
+and an ensemble approach is required.
 

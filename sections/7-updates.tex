@@ -13,7 +13,8 @@ Real-world data is rarely static, which is exactly the scenario that \dcv faces 
 \stitle{(3) Updating MVs.} MVs might be created based on other MVs.  Since cleaning effort can happen at any place in a query plan, MVs may need to be updated.
 
 
-In response to the above three types of updates, \dcv uses three corresponding strategies.
+%In response to the above three types of updates, 
+\dcv uses three corresponding strategies to cater for these updates.
 
 
 \stitle{(i) MV maintenance.} \dcv will leverage mature techniques for maintaining materialized views (see~\cite{DBLP:journals/debu/GuptaM95} for a survey).  In this way, \dcv incrementally propagates updates through the data curation pipeline to update downstream MVs.

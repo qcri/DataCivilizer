@@ -13,30 +13,30 @@
 %preliminary system on two different institutions, MIT and Merck and got positive
 %feedbacks from the users.
 
-Data Civilizer is a new end-to-end system that integrates the tasks of
+\dcv is a new end-to-end system that integrates the tasks of
 discovering relevant data, stitching it together in meaningful views for the
 users and integrating cleaning and curation along the process. We observe
 several challenges such as taming the scale on discovering data, finding
 efficient methods to stitch potentially dirty data and clean data under a budget
 with the goal of maximizing value for the user. We have built and deployed an
-initial prototype in two large organizations and will demo the system at the
+initial prototype in two large organizations and we will demo the system at the
 conference. Many opportunities for future work lie ahead:
 
 \begin{myitemize}
-\item\textbf{Workflow management.} Operation e2e in Civilizer entails multiple
+\item\textbf{Workflow management.} \dcv supports multiple
 iterations of discovery, view creation and data curation, all intertwined with
 manual human intervention. Currently we have a rudimentary workflow orchestrator
-that we plan to extend with further options such as: i) a recommendation mechanism
-to propose operations based on a workflow-aware log of past sequences of them;
-and ii) inspect past operations, delete and highlight the promising ones through a
-lineage mechanism, facilitating other users operation. 
-\item\textbf{Error model.} We plan to include a better error model into
-Civilizer after some findings we have done recently \cite{datacleaning} and some
-ongoing discussions. The general idea is in capturing the \emph{importance} of
-errors, in particular, as referred to their impact ont the final result quality.
-\item\textbf{Steering cleaning engine.} Cleaning happens across many layers of
-Civilizer. We are currently testing different algorithms that we plan to
-integrate in the platform with the aim of help as much as possible users to
+that we plan to extend with further options such as: 
+i)~a recommendation mechanism to propose operations based on a workflow-aware log of past sequences;
+and ii)~inspect past operations, delete and highlight the promising ones through a
+lineage mechanism, facilitating other users' operations. 
+\item\textbf{Error model.} We plan to include a better error model based 
+on some of our recent findings in~\cite{datacleaning}. 
+The general idea is in capturing the \emph{importance} of
+errors, in particular, as referred to their impact on the final result quality.
+\item\textbf{Steering cleaning engine.} Cleaning happens across many layer. 
+We are currently testing different algorithms that we plan to
+integrate in the platform with the aim of helping users to
 clean the data that yields the higher quality returns.
 \end{myitemize}
 

@@ -15,7 +15,7 @@ The linkage graph is a hyper-graph
 %\mourad{Raul and Dong need to agree on the
 %structure of the graph, especially if nodes are tables or columns.} 
 where each node represents a column and there exists hyperedges that connect
-several columns to express compound keys and tables. Edges in the hyper-graph
+several columns to express compound keys or tables. Edges in the hyper-graph
 represent a relationship between nodes of the graph. Examples of relationships are 
 \emph{column similarity}, 
 \emph{schema similarity}, 
@@ -43,37 +43,37 @@ semantics.  Also, edges with a similarity less than a user-defined threshold are
 discarded to avoid having a graph with too many edges that are not significant.
 A straightforward computation of such relationships requires a $O(n^2)$
 computation, which will not scale.  Hence, we rely on locality sensitive hashing
-(LSH)~\cite{DBLP:conf/compgeom/DatarIIM04}, which runs in sub-quadratic time.
-This approach avoids $n^2$ operations and appears to perform well in practice.
+(LSH)~\cite{DBLP:conf/compgeom/DatarIIM04}, which runs in sub-quadratic time
+%This approach avoids $n^2$ operations 
+and appears to perform well in practice.
 
 It is usually expensive to compute the heavy relationships. To address this
-issue, the graph builder adopts the following general approach: (i)~the
-computation of heavy relationships is performed in the background, (ii)~we need
-to come up with efficient algorithms to find these relationships, and iii)~the
-data profiles and light relationships should be used as much as possible to
-prune the search space. Note that the data discovery can use the heavy
+issue, the graph builder adopts the following general approach: 
+(i)~the computation of heavy relationships is performed in the background, 
+(ii)~efficient algorithms to find these relationships are needed, 
+and (iii)~the data profiles and light relationships should be used as much as possible to prune the search space. 
+Note that the data discovery can use the heavy
 relationships, whenever available, to identify interesting data. After the
 users identify their interesting data, the graph builder can construct the heavy
 relationships among the interesting data online.
 
 %For efficiently computing the heavy relationships, 
-We take the foreign-key and primary-key relationship as an example to show how
+We take the foreign-key and primary-key relationships as an example to show how
 we efficiently compute a heavy relationship. The graph builder utilizes an
 implementation of inclusion dependency to find candidate PK-FK relationships and
-then refines the candidates using existing machine learning methods. However,
+then refines the candidates using machine learning methods. However,
 as it is well known, data in the wild is quite dirty, which makes discovering
 inclusion dependencies difficult. Specifically, foreign keys may not match a
 primary key, because of errors in either the PK or the FK. To tolerate errors,
 we extend traditional inclusion dependency discovery by both key coverage and
-text similarity and propose an \emph{\eind}. We describe the error-robust
-inclusion dependency in Section~\ref{subsec:eind} and machine learning
-techniques to refine the candidate PK/FK relationships in
-Section~\ref{subsec:refine}.
+text similarity and propose an \emph{\eind} approach. 
+We describe this approach in Section~\ref{subsec:eind} and machine learning
+techniques to refine the candidate PK/FK relationships in Section~\ref{subsec:refine}.
 
 \subsection{Error-Robust Inclusion Dependency}\label{subsec:eind}
 
 Foreign key-primary key relationships are usually identified by inclusion
-dependency techniques.  To address dirty data, we propose an error-robust
+dependency techniques.  To overcome the presence  dirty data, we propose an error-robust
 inclusion dependency scheme.
 %, which enhances traditional inclusion dependency techniques.
 Consider two columns (or compound columns) from two tables \R and \S denoted by
