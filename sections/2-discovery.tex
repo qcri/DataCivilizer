@@ -81,18 +81,18 @@ the data,  reducing memory pressure.
 
 The profiler itself consists a pipeline of stages, where each stage is
 responsible for performing a different computation. For example, the first stage
-performs basic denoising of the data, such as removing empty values and dealing
+performs basic de-noising of the data, such as removing empty values and dealing
 with potential formatting issues of the underlying files, e.g. figuring out the
-separator for a CSV file.  The second stage determines the data type,
+separator for a CSV file.  The second stage determines the data type of each column,
 information that is propagated along with the data to the next stages. The rest
 of the stages are responsible for computing cardinalities, performing quantile
-estimation, e.g., to determine numerical ranges.
+estimation, e.g., to determine numerical ranges, and so on.
 
 The profiler has connectors to read data from different data sources, such as
-HDFS files, RDBMS or CSV files. The data is then streamed through the profiler
-pipeline which outputs the results
+HDFS files, RDBMS or CSV files. Data sets are streamed through the profiler
+pipeline;  the pipeline outputs the results
 %and  at the end the resulting attribute profile is sent
-to a store from where it is later consumed by the graph builder, which will be
+to a {\it profile store} where it is later consumed by the graph builder, which will be
 explained in Section \ref{subsec:graphbuild}.
 %At the same time,
 The profiler works in a distributed environment using a lightweight coordinator
@@ -111,6 +111,7 @@ For example, to find all data sets that contain names of
 employees in a company, the user issues a schema retrieval query that searches for all
 attributes referring to the employee or name.
 The user can then write a SQL query, i.e., a \emph{data retrieval query}, to filter from a list. 
+\srm{I think a little more detail is needed here describing how the profiles built above are used to answer these queries.  As it is the two subsections don't seem well connected -- why are profiles needed?}
 Here are some examples of functions that the discovery module provides to users:
 
 \begin{itemize}
@@ -124,9 +125,9 @@ can extend tables of interest with additional attributes. The
 core of the operation consists of finding matches to the current table, and then
 retrieving the attributes that do not appear in the original table.
 
-\item \textbf{Subsumption relationships.} Given some reference tables,
-this function can provide a list of tables or groups of tables that have some form
-of subsumption relationship with respect to the reference one. 
+\item \textbf{Subsumption relationships.} Given some reference table,
+this function provides a list of tables or groups of tables that have some form
+of subsumption relationship (i.e., are contained in or contain) with respect to the reference table. 
 
 \item \textbf{Similarity and lookup.} Discovery can also be used to find schemas
 that contain data similar to some provided schema (attribute or table), as well
@@ -134,9 +135,9 @@ as to find schemas that contain certain values, i.e., keyword search for
 textual data and range search for numerical data.
 \end{itemize}
 
-In summary, discovery works as an information retrieval system: a schema retrieval query
-does not have a specific answer, instead it returns a ranked set of results.
-Hence, ranking appropriately the results from the hundreds of underlying data
+Finally, discovery works like an information retrieval system: schema retrieval queries
+do not return a specific answer, but instead return a ranked set of results.
+Hence,  appropriately ranking the results from the hundreds of underlying data
 sources falls in the domain of discovery, and it is of great importance to reduce
-the amount of work that downstream components  within \dcv must perform.
+the amount of work that downstream components  within \dcv must perform. \srm{Any suggestions about how to do this?}
 
