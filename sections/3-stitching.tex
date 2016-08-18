@@ -14,8 +14,9 @@ builder is a set of profiles and the output is a linkage graph.
 The linkage graph is a hyper-graph
 %\mourad{Raul and Dong need to agree on the
 %structure of the graph, especially if nodes are tables or columns.} 
-where each node represents a column and there exists hyperedges that connect
-several columns to express compound keys or tables. Edges in the hyper-graph
+where each node represents a column and hyperedges connect
+several columns to express compound keys or tables.\mourad{Dong, this is not consistent, in a hypergraph there are only ``hyperedges'' and they connect two or more nodes; so belonging to the same table, compound keys, column similarity, etc. are all represented by hyperedges. So no need to say ``to express compound keys or tables'' except if you want to say ``to be able to express relationships involving more that two nodes such as compound keys ...''} 
+Edges in the hyper-graph
 represent a relationship between nodes of the graph. Examples of relationships are 
 \emph{column similarity}, 
 \emph{schema similarity}, 
@@ -23,7 +24,7 @@ represent a relationship between nodes of the graph. Examples of relationships a
 \emph{inclusion dependency}, 
 \emph{foreign-key and primary-key}, 
 \emph{table subsuming}, and 
-\emph{table equivalence}\mourad{What does it mean?}. 
+\emph{table equivalence}\mourad{Dong, what does it mean?}. 
 The node label contains table metadata, such as table name, cardinality and
 other information computed by the profiler. The edge label includes metadata
 about the relationship it represents, \eg type and score, if any. Computing

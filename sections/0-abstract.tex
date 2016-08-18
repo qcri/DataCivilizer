@@ -1,14 +1,14 @@
 % !TEX root = ../main.tex
 
 \begin{abstract}
-In large companies, it is often challenging for users to find relevant data for  specific tasks, from using simple keyword queries to more complex structured queries, since the data is often scattered, inconsistent, and frequently updated. In order to decrease the ``grunt work'' needed to facilitate the analysis of data in the wild, we present an end-to-end data management system, named \dcv. 
+In many organizations, large and even small, it is often challenging for users to find relevant data for  specific tasks, from using simple keyword queries or even more complex structured queries, since the data is often scattered, inconsistent, and frequently updated. In order to decrease the ``grunt work'' needed to facilitate the analysis of data in the wild, we present \dcv, an end-to-end data management system. 
 %
-It has a {\em data discovery} module to identify the data that is relevant to user tasks.
+\dcv has a {\em data discovery} module to identify the data that is relevant to user tasks.
 It also contains a {\em linkage graph computation} module that links all discovered relevant data on demand.
 In addition, its {\em query processing} module is built on top of a polystore architecture to compute a result for a given user task, which also integrates data cleaning operations.
 In practice, different tasks might invoke the above modules in different orders, and might be iterative.
-To cope with this, we implement a {\em workflow} engine to enable the arbitrary composition of different modules, as well as to handle data updates.
-We have deployed our preliminary \dcv system in two institutions, MIT and Merck. The users gave us positive feedback and indicated that the system indeed shortened their time and effort to find, prepare and analyze the data.
+To cope with this, the system has a {\em workflow} engine to enable the arbitrary composition of different modules, as well as to handle data updates.
+We have deployed our preliminary \dcv system in two institutions, MIT and Merck. The users gave us positive feedback and indicated that the system indeed shortened their time and effort to find, prepare, and analyze the data.
 %In this paper, we present an end-to-end data management system, named \dcv, whose main purpose is to decrease the  ``grunt work''\mourad{I prefer http://dictionary.cambridge.org/dictionary/english/grunt-work.} needed to facilitate the 
 %``mung work''  for  analyzing analysis of data in the wild. 
 % To solve these problems, \dcv has a data discovery module to help users identify their interesting data. 

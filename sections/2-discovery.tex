@@ -2,16 +2,16 @@
 \section{Discovery}
 \label{sec:discovery}
 
-The data discovery module's goal is to find relevant data from hundreds,
-thousands or millions of data sets  spread across the different storage systems
+The data discovery module's goal is to find relevant data from hundreds to 
+thousands of data sets  spread across the different storage systems
 of an enterprise.
 
 Typical solutions to finding relevant data include asking an expert (if one is
-available), or  performing manual exploration by inspecting data sets one by
+available) or  performing manual exploration by inspecting data sets one by
 one. Obviously, both approaches are time-consuming and prone to missing
 relevant data sources. Recently, there have been efforts to automate this
 process, some examples are Goods~\cite{DBLP:conf/sigmod/HalevyKNOPRW16}
-and InfoGather~\cite{DBLP:conf/sigmod/YakoutGCC12}. These systems, however, have been designed with specific use cases in mind. Infogather augments tables with attributes it finds in other sources. Goods, through specific metadata captured by the company, permits finding similar datasets and inspect them. Unlike them, our discovery module aims to support general discovery queries that can then be used for unanticipated discovery needs. For this purpose \dcv generates more sophisticated meta-data and profiles from the data, for which we present the appropriate techniques.
+and InfoGather~\cite{DBLP:conf/sigmod/YakoutGCC12}. These systems, however, have been designed with specific use cases in mind. Infogather augments tables with attributes it finds in other sources. Goods, through specific metadata captured by the company, permits finding similar datasets and inspecting them. In contrast, our discovery module aims to support general discovery queries that can then be used for unanticipated discovery needs. For this purpose, \dcv generates more sophisticated meta-data and profiles from the data, for which we develop appropriate techniques. %Mourad: A bit handwaving!
 
 %\srm{I don't understand the
 %following sentence, vis-a-vis the Goods paper, which seems to be about
@@ -42,7 +42,7 @@ The key idea   is to summarize each column of each table into a {\em profile}.
 A profile consists of one or more {\it signatures};  each signature summarizes
 the original content of the column into a domain-dependent, compact
 representation of the original data.  By default, signatures consist of a
-histogram representing the data distribution of numerical values and  a vector
+histogram representing the data distribution for numerical values and  a vector
 of the most significant words in the column for textual data.  Our profiles also
 contain information about data cardinality, data type, and numerical ranges if
 applicable~\cite{profiling_survey}.
@@ -123,7 +123,7 @@ computation.
 \subsection{Discovery Queries}
 \label{subsec:api}
 
-The profiles, then, are the building blocks used by the graph builder (Section
+The profiles are the building blocks used by the graph builder (Section
 \ref{subsec:graphbuild}) to produce a linkage graph, that in turn serves as the
 main data structure to answer discovery queries. Users can submit
 \emph{discovery queries} to find data sets whose schemas are relevant to the
@@ -153,7 +153,7 @@ attributes that do not appear in the original table.
 
 \item \textbf{Subsumption relationships.} Given some reference table, this
 function provides a list of tables or groups of tables that have some form of
-subsumption relationship (i.e., are contained in or contain) with respect to the
+subsumption relationship (\ie are contained in or contain) with respect to the
 reference table. 
 
 \item \textbf{Similarity and lookup.} Discovery can also be used to find schemas
@@ -163,7 +163,7 @@ data and range search for numerical data.
 
 \end{itemize}
 
-Finally, discovery works like an information retrieval system: schema retrieval
+Discovery works like an information retrieval system: schema retrieval
 queries do not return a specific answer, but instead return a ranked set of
 results. Hence, appropriately ranking the results from the hundreds of
 underlying data sources falls in the domain of discovery, and it is of great
