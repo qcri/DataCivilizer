@@ -25,9 +25,9 @@ One of the key tasks of the MIT DWH team is to assist its customers—any person
 
 A typical customer of the warehouse will present a question, for which the team members will need to find relevant tables manually. Once they have determined the tables of interest, they create a view that is accessed by the customer to solve the question at hand. Below are some of the common use cases we have encountered:
 
-\mypar{Fill in virtual schema}. When a customer arrives with a question such as: \emph{I need to create a report with the \textbf{gender distribution of the faculty per department and year}}, the data warehouse personnel can use \dcv to find all the tables that contain schema names similar to the attributes exposed by the query, \eg gender, faculty name, department, and year.
+\mypar{Fill in virtual schema} When a customer arrives with a question such as: \emph{I need to create a report with the \textbf{gender distribution of the faculty per department and year}}, the data warehouse personnel can use \dcv to find all the tables that contain schema names similar to the attributes exposed by the query, \eg gender, faculty name, department, and year.
 
-\mypar{Table redundancy}. Multiple views are created for different customers. Many of them contain typically very similar data, as multiple customers are interested in similar items. To reduce the redundancy of data, \dcv helps  detect complementary as well as repeated sources. This sheds light on the status of the warehouse and helps to maintain it tidy and minimal.
+\mypar{Table redundancy} Multiple views are created for different customers. Many of them contain typically very similar data, as multiple customers are interested in similar items. To reduce the redundancy of data, \dcv helps  detect complementary as well as repeated sources. This sheds light on the status of the warehouse and helps to maintain it tidy and minimal.
 
 In the future, we aim to deploy the entire \dcv system to enable running queries directly over the hundreds of data sources, by using the polystore query processing and curation module and linkage graph builder to create the necessary views on demand. 
 
@@ -39,9 +39,9 @@ Merck is a big pharmaceutical company that manages large volumes of data spread 
 One of the data assets of any pharmaceutical company are internal databases of chemical compounds and structures. Usually, these are more valuable when integrated with external, well-known and curated databases, such as PubChem~\cite{pubchem}, ChEMBL~\cite{ChEMBL}, or DrugBank~\cite{DrugBank}. We describe two common use cases that occur in this context:
 
 
-\mypar{Identify entities}. One single chemical entity may be referred to with different identifiers and formats in different databases. Chemical identifiers have been a subject of research in the bioinformatics community: multiple different formats have been proposed with different properties according to the scenario. \dcv helps by mapping the multiple representations of the identifiers, therefore facilitating the identification of entities across multiple databases, public and internal.
+\mypar{Identify entities} One single chemical entity may be referred to with different identifiers and formats in different databases. Chemical identifiers have been a subject of research in the bioinformatics community: multiple different formats have been proposed with different properties according to the scenario. \dcv helps by mapping the multiple representations of the identifiers, therefore facilitating the identification of entities across multiple databases, public and internal.
 
 
 
-\mypar{Enrich data}. One of the reasons for the existence of multiple chemical databases is that each puts an emphasis on different information. Analysts typically face situations in which they are interested in a set of attributes that are spread across different tables on different databases. \dcv helps to detect such attributes and bring them together \emph{on-demand}  to serve the users' purpose.
+\mypar{Enrich data} One of the reasons for the existence of multiple chemical databases is that each puts an emphasis on different information. Analysts typically face situations in which they are interested in a set of attributes that are spread across different tables on different databases. \dcv helps to detect such attributes and bring them together \emph{on-demand}  to serve the users' purpose.
 
