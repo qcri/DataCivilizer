@@ -11,18 +11,14 @@ builder is a set of profiles and the output is a linkage graph.
 \subsection{Graph Builder}
 \label{subsec:graphbuild}
 
-The linkage graph is a hyper-graph where each node represents a column and edges
-represent a relationship between nodes of the graph. Note the hyper-edges can
-express relationships involving more than two columns, such as compound keys and
-within the same table. This is useful to allow capturing relationships among
-tables, \eg subsumption, and compound keys \eg PKFK between compound keys. 
+The linkage graph is a hyper-graph where each simple node represents a column, each hyper-node consists of multiple simple nodes and can represents a table or a compound key, and each simple edge represents a relationship between two nodes in the graph. Note the hyper-graph can express relationships involving more than two columns. This is useful to capture relationships among tables, \eg \pkfk relationship between compound keys.
 
 Examples of relationships are 
 \emph{column similarity}, 
 \emph{schema similarity}, 
 \emph{structure similarity}, % based on SimRank~\cite{DBLP:conf/kdd/JehW02}\mourad{No need to mention how since we don't for the others.}, 
 \emph{inclusion dependency}, 
-\emph{foreign-key and primary-key}, and
+\emph{\pkfk relationship}, and
 \emph{table subsuming}. 
 The node label contains table metadata, such as table name, cardinality and
 other information computed by the profiler. The edge label includes metadata
@@ -31,8 +27,7 @@ the different relationships requires different time complexities. We
 categorize them into, {\textit light relationships}, which can be computed in
 sub-quadratic time, and {\textit heavy relationships}, which needs at least
 quadratic time. The light relationships contain column similarity and schema
-similarity. The heavy relationships include the primary key-foreign key
-(PK-FK), inclusion dependency, and structure similarity. 
+similarity. The heavy relationships include the \pkfk (PK-FK), inclusion dependency, and structure similarity. 
 
 The input to the graph builder is a set of profiles that are attached to nodes
 of the graph.  The graph builder then computes the relationships among pairs of
@@ -51,9 +46,9 @@ It is usually expensive to compute the heavy relationships. To address this
 issue, the graph builder adopts the following general approach: (i)~the
 computation of heavy relationships is performed in the background, and (ii)~data
 profiles and light relationships should be used as much as possible to prune the
-search space for the heavy relationships. After the user chooses the data of
+search space for the heavy relationships. Note that the data discovery can use the heavy relationships, whenever available, to identify interesting data. After the user chooses the data of
 interest, the graph builder can construct the heavy relationships among this
-data.
+data online.
 
 %For efficiently computing the heavy relationships, 
 We take the foreign-key and primary-key relationships as an example to show how
@@ -70,7 +65,7 @@ techniques to refine the candidate PK/FK relationships in Section~\ref{subsec:re
 
 \subsection{Error-Robust Inclusion Dependency}\label{subsec:eind}
 
-Foreign key-primary key relationships are usually identified by inclusion
+\Pkfk relationships are usually identified of by inclusion
 dependency techniques. To overcome the presence of dirty data, we propose an
 error-robust inclusion dependency scheme.
 %, which enhances traditional inclusion dependency techniques.
@@ -109,7 +104,7 @@ The specified features include
 and \emph{out-of-domain range}, the percentage of values in \SY not within $[\min(\RX), \max(\RX)]$ where $\min(\RX)$ and $\max(\RX)$ are respectively the minimum and maximum values in \RX.
 
 Using the above features, we have implemented the four machine learning classification algorithms in~\cite{DBLP:conf/webdb/RostinABNL09}. These allow us to distinguish spurious inclusion dependencies from real ones  with high accuracy.
-The result is a collection of PK-FK relationships that can be used to link the tables from the discovery module. However, there may exist multiple subgraphs in the linkage graph that can connect all the interesting tables, which we call \emph{join paths}. In the next section we discuss the choice of which one(s) to use to materialize a view for the user.
+The result is a collection of PK-FK relationships that can be used to link the tables of user interest from the discovery module. However, there may exist multiple subgraphs in the linkage graph that can connect all the interesting tables, which we call \emph{join paths}. In the next section we discuss the choice of which one(s) to use to materialize a view for the user.
 
 %\nan{So far, this section only talks about FK-PK relationships. In my opinion, these should be merged with graph builder.}
 

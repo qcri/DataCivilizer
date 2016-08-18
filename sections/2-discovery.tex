@@ -38,7 +38,7 @@ of queries.
 %execution, which is the ultimate goal.  
 
 The data discovery module narrows down the search for relevant data from
-the total number of data sources to a handful of them, on which finer-grained
+the total number of data sources to a handful, on which finer-grained
 relationships can be computed efficiently. \dcv discovery supports a
 user-level API to search for relevant data using a variety of techniques such as
 searching for tables with specific substrings in the schemas ({\it schema
@@ -154,7 +154,7 @@ provided ones.
 %\mourad{How do you know?}
 
 \item \textbf{Extend attribute.} This is similar to the extend operator of
-Octopus~\cite{octopus}, or the ABA operation of
+Octopus~\cite{DBLP:journals/pvldb/CafarellaHK09}, or the ABA operation of
 Infogather~\cite{DBLP:conf/sigmod/YakoutGCC12}. Using this function users can
 extend tables of interest with additional attributes. The core of the operation
 consists of finding matches to the current table, and then retrieving 
@@ -174,7 +174,7 @@ data and range search for numerical data.
 
 Discovery works like an information retrieval system: schema retrieval queries
 do not return a specific answer, but instead return a ranked set of results. We
-are currently exploring several options, of which a model that decouples
+are currently exploring several ranking options, and a model that decouples
 discovery query processing from ranking evaluation seems the most promising.
 
 %\srm{Any suggestions about how to do this?}
