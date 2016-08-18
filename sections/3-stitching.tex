@@ -11,7 +11,11 @@ builder is a set of profiles and the output is a linkage graph.
 \subsection{Graph Builder}
 \label{subsec:graphbuild}
 
-The linkage graph is a hyper-graph where each node represents a column and edges represent a relationship between nodes of the graph. Note the hyper-edges can express relationships involving more than two columns, such as compound keys and within the same table. 
+The linkage graph is a hyper-graph where each node represents a column and edges
+represent a relationship between nodes of the graph. Note the hyper-edges can
+express relationships involving more than two columns, such as compound keys and
+within the same table. This is useful to allow capturing relationships among
+tables, \eg subsumption, and compound keys \eg PKFK between compound keys. 
 
 Examples of relationships are 
 \emph{column similarity}, 
@@ -28,7 +32,7 @@ categorize them into, {\textit light relationships}, which can be computed in
 sub-quadratic time, and {\textit heavy relationships}, which needs at least
 quadratic time. The light relationships contain column similarity and schema
 similarity. The heavy relationships include the primary key-foreign key
-(PK-FK), inclusion dependency, and the structure similarity. 
+(PK-FK), inclusion dependency, and structure similarity. 
 
 The input to the graph builder is a set of profiles that are attached to nodes
 of the graph.  The graph builder then computes the relationships among pairs of
@@ -44,14 +48,12 @@ computation, which will not scale.  Hence, we rely on locality sensitive hashing
 and appears to perform well in practice.
 
 It is usually expensive to compute the heavy relationships. To address this
-issue, the graph builder adopts the following general approach: 
-(i)~the computation of heavy relationships is performed in the background, 
-(ii)~efficient algorithms to find these relationships are needed, 
-and (iii)~the data profiles and light relationships should be used as much as possible to prune the search space. 
-Note that the data discovery can use the heavy
-relationships, whenever available, to identify interesting data. After the
-users identify their interesting data, the graph builder can construct the heavy
-relationships among the interesting data online.
+issue, the graph builder adopts the following general approach: (i)~the
+computation of heavy relationships is performed in the background, and (ii)~data
+profiles and light relationships should be used as much as possible to prune the
+search space for the heavy relationships. After the user chooses the data of
+interest, the graph builder can construct the heavy relationships among this
+data.
 
 %For efficiently computing the heavy relationships, 
 We take the foreign-key and primary-key relationships as an example to show how
@@ -69,8 +71,8 @@ techniques to refine the candidate PK/FK relationships in Section~\ref{subsec:re
 \subsection{Error-Robust Inclusion Dependency}\label{subsec:eind}
 
 Foreign key-primary key relationships are usually identified by inclusion
-dependency techniques.  To overcome the presence  dirty data, we propose an error-robust
-inclusion dependency scheme.
+dependency techniques. To overcome the presence of dirty data, we propose an
+error-robust inclusion dependency scheme.
 %, which enhances traditional inclusion dependency techniques.
 Consider two columns (or compound columns) from two tables \R and \S denoted by
 \RX and \SY. If there is a foreign key constraint on \RX with reference \SY, all
