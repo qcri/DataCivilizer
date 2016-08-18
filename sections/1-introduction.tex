@@ -63,33 +63,11 @@ The {\it online component} involves executing a user-supplied workflow that cons
 \stitle{[Discovery.]} 
 A data scientist at Merck has a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 300 grams}.
 His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv will assist the scientist in finding $m$ tables of interest from all $n$ tables such that $m \ll n$, where $n$ is the number of all tables making it much bigger than 4,000.  
-%
-Although discovery queries are run as a part of the online workflow, they are supported by profiles and indexes that are built during the offline processing.  Building these profiles requires looking at both the schema and values of every table. 
-%The process of discovering relevant tables is typically in the granularity of columns. 
-%Assume that each table has a constant number of columns in average, which is usually true in practice. 
-Consequently, we employ linear algorithms to make this pre-computation tractable.
-%Assuming that each table has up to $c$ columns, only linear algorithms, i.e., those run in $O(c\cdot n)$ time, are computationally feasible. If we also assume w.l.o.g. that $c$ is a constant, the discovery has to run in $O(n)$ time.
-%
-This module, together with the corresponding data structures, is discussed in Section~\ref{sec:discovery}.
 
-%Since discovery must be run on millions of columns, we assume that only linear algorithms are computationally feasible, and any needed data structures must be built in advance.
+Although discovery queries are run as a part of the online workflow, they are supported by profiles and indexes that are built during the offline processing.  Building these profiles requires looking at both the schema and values of every table. Consequently, we employ linear algorithms to make this pre-computation tractable. This module, together with the corresponding data structures, is discussed in Section~\ref{sec:discovery}.
 
-\stitle{[Linkage Graph Computation.]} 
-The semantic linkage between attributes of discovered tables is needed so that the user can assemble relational schemas and run 
- \textsf{SQL} queries on the discovered data sets. 
-%
-Our current prototype identifies
-%\srm{Leverages sounds like it is taking advantage of known PK-FK relationships;  do we mean "searches for" or "Involves finding"} 
-primary key-foreign key relationships, using inclusion dependencies, among relevant tables for this purpose.
-Assuming a constant number of attributes in each table, there may exist up to $O(m^2)$ linkages among different attributes in the $m$ tables produced by discovery.
-%It may have up to $O(m^2)$ linkage among different attributes, assuming a constant number of columns each table holds in average.
-%
-%Given $n$ data sets and each has up to $c$ attributes, in the worst case there are $O(n^2)$ linkages among different attributes, by treating $c$ as a constant.
-Since $m$ is the result of data discovery, we expect it to be small.
-%\mourad{Should we mention here that we may need more tables beyond the discovery module's output to build join paths? It might be confusing as this stage.}
-As such, the process of building the linkage graph can be run dynamically and on-demand; we discuss its details in Section~\ref{sec:stitching}.
+\stitle{[Linkage Graph Computation.]} The semantic linkage between attributes of discovered tables is needed so that the user can assemble relational schemas and run \textsf{SQL} queries on the discovered data sets. All the linkages that can be found in linear time are built in advance during offline stage. All the other linkages, such as foreign-key and primary-key relationship, will keep building in the background or build in an on-demand way during the online stage. Our current prototype identifies primary key-foreign key relationships, using inclusion dependencies, among relevant tables for this purpose. As such, the process of building the linkage graph can be run dynamically and on-demand; we discuss its details in Section~\ref{sec:stitching}.
 
-%The discovery and stitching modules share a common graph structure. Such structure has a node for each column in each table with various kinds of links such as data similarity, schema similarity, and inclusion dependency.  These links are maintained in a data fabric similar in spirit to a knowledge graph~\cite{DBLP:conf/semweb/AuerBKLCI07,DBLP:conf/sigmod/BollackerEPST08,DBLP:conf/www/SuchanekKW07}. Building and maintaining this graph is the responsibility of the graph builder component.
 
 
 \stitle{[Polystore Query Processing and Curation.]}
