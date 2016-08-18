@@ -1,9 +1,8 @@
 % !TEX root = ../main.tex
-\section{Conclusion and Future Work}
+\section{Conclusions}
 \label{sec:conclusion}
 
-In this paper, we presented \dcv,  an end-to-end big data management system.
-\dcv aims to support 
+In this paper, we presented \dcv,  an end-to-end big data management system. \dcv aims to support 
 the discovery relevant data to the user specific tasks, 
 the linkage of the relevant data for better usage, 
 the cleaning of the data under limited budget, 
@@ -11,16 +10,16 @@ the handling of  data updates,
 and the iterative processing of the data. 
 %We built a module for each of the requirement above. 
 As data in large companies are usually scattered across multiple
-data storage platforms, we proposed the use of polystore architecture to deploy our system.
+data storage platforms, we proposed the use of a polystore architecture to deploy our system.
 Moreover, a key characteristic of \dcv it to place the data cleaning operations in the query plan
 while  trading-off the query result quality with the cleaning costs. 
-\dcv workflow orchestrator will leverage knowledge about previous workloads to propose relevant operations to the user.
-We deployed our preliminary system on two different institutions, MIT and Merck and obtained positive
+The \dcv workflow orchestrator will leverage knowledge about previous workloads to propose relevant operations to the user.
+We have deployed our preliminary system at two different institutions, MIT and Merck and obtained positive
 feedback from the users.
 
-\section{Acknowledgements}
+\section{Acknowledgments}
 
-We would like to thank Michael Stonebraker, for his many helpful comments, and his insightful perusal of this paper.\mourad{Mike, does it work for you? We can also put it in the beginning as a footnote.}
+Under normal circumstance, Michael Stonebraker would be a prominent author, but is pre from appear because of CIDR rule concerning PC chairs.
 
 % \dcv is a new end-to-end system that integrates the tasks of
 % discovering relevant data, stitching it together in meaningful views for the
