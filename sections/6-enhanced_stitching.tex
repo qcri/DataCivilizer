@@ -4,7 +4,16 @@
 \section{Querying the Join Graph}\label{sec:enhancedstitching}
 
 
-After we ran the data stitching and get the join graph, the user can query the join graph explicitly or implicitly. The user can specify several attributes he is interested in, which compose a \emph{query schema}, and several predicates on these attributes. The query result is a view that subsumes the query schema and obeys the predicates. To answer a query, data civilizer generates a steiner tree for the query schema from the join graph. As there are multiple steiner trees, to select the best one, we give a cleanliness model to estimate the quality of the corresponding query result in Section~\ref{subsec:model:recall}. Given a steiner tree, we discuss how to maximize the quality of the corresponding result with a given budget in Section~\ref{subsec:gain}.
+After we ran the data stitching and get the join graph, the user can query the
+join graph explicitly or implicitly. The user can specify several attributes he
+is interested in, which compose a \emph{query schema}, and several predicates on
+these attributes. The query result is a view that subsumes the query schema and
+obeys the predicates. To answer a query, data civilizer generates a steiner tree
+for the query schema from the join graph. As there are multiple steiner trees,
+to select the best one, we give a cleanliness model to estimate the quality of
+the corresponding query result in Section~\ref{subsec:model:recall}. Given a
+steiner tree, we discuss how to maximize the quality of the corresponding result
+with a given budget in Section~\ref{subsec:gain}.
 
 
 %Consider a \emph{path query} to be a predicate $P$ on an attribute in one of the tables along with a chain of PK/FK relationships, terminating with a retrieval of a non-key attribute in the final table. 
@@ -109,16 +118,32 @@ Where School.student_no > 4000
 \end{lstlisting}
 
 
-
-
-
 \subsection{A Cleanliness Model wrt Precision}\label{subsec:model:precision}
 
 
-We first give the intuition of our cleanliness model wrt precision. As the result of a \emph{path query} is a view, we estimate a cleanliness score for each record in the view and utilize an aggregation function to combine the cleanliness scores of all the records. The aggregated score is the cleanliness of the result. As each record in the view is a ``chain'' of tuples from different tables, we can estimate the cleanliness of each part in the tuple chain and use their product as the cleanliness score of this record. Next we formally define our cleanliness model.
+We first give the intuition of our cleanliness model wrt precision. As the
+result of a \emph{path query} is a view, we estimate a cleanliness score for
+each record in the view and utilize an aggregation function to combine the
+cleanliness scores of all the records. The aggregated score is the cleanliness
+of the result. As each record in the view is a ``chain'' of tuples from
+different tables, we can estimate the cleanliness of each part in the tuple
+chain and use their product as the cleanliness score of this record. Next we
+formally define our cleanliness model.
 
 
-Assume there are $K$ tables, $T_1$, $\cdots$, $T_K$ in the \emph{path query} where the predicate $P$ applies on $T_1$. Let $R_1, R_2, \cdots, R_n$ be the records in the view. For each record $R_i$, suppose that the tuple chain is $(t^i_1, t^i_2, \cdots, t^i_m)$. For the tuple $t^i_1$ where the predicate $P$ applies, we estimate the cleanliness score as $S_{pred}(t^i_1, P)$. For each tuple pair $t^i_j$ and $t^i_k$ in the chain, we can estimate the cleanliness score as $S_{join}(t^i_j,t^i_k)$. This score is achieved either by the error-robust inclusion dependency as described in Section 3 or the cleanliness estimation in Section 5. Then the cleanliness score for the record $R_i$ is $C_{R_i}=S_{pred}(t^i_1,P)\prod_{i=1}^{m-1}S_{join}(t^i_j,t^i_k)$. Suppose we use the aggregation function $\mathbf{A}$ to combine the cleanliness scores of all the records. The quality of the view is $\mathbf{A}(C_{R_1}, C_{R_2}, \cdots, C_{R_n})$.
+Assume there are $K$ tables, $T_1$, $\cdots$, $T_K$ in the \emph{path query}
+where the predicate $P$ applies on $T_1$. Let $R_1, R_2, \cdots, R_n$ be the
+records in the view. For each record $R_i$, suppose that the tuple chain is
+$(t^i_1, t^i_2, \cdots, t^i_m)$. For the tuple $t^i_1$ where the predicate $P$
+applies, we estimate the cleanliness score as $S_{pred}(t^i_1, P)$. For each
+tuple pair $t^i_j$ and $t^i_k$ in the chain, we can estimate the cleanliness
+score as $S_{join}(t^i_j,t^i_k)$. This score is achieved either by the
+error-robust inclusion dependency as described in Section 3 or the cleanliness
+estimation in Section 5. Then the cleanliness score for the record $R_i$ is
+$C_{R_i}=S_{pred}(t^i_1,P)\prod_{i=1}^{m-1}S_{join}(t^i_j,t^i_k)$. Suppose we
+use the aggregation function $\mathbf{A}$ to combine the cleanliness scores of
+all the records. The quality of the view is $\mathbf{A}(C_{R_1}, C_{R_2},
+\cdots, C_{R_n})$.
 
 
 \fi

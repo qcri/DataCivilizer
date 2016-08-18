@@ -2,15 +2,26 @@
 \section{Updates}
 \label{sec:updates}
 
-Real-world data is rarely static, which is exactly the scenario that \dcv faces at Merck and the MIT Data Warehouse.  We consider three types of updates.
+Real-world data is rarely static, which is exactly the scenario that \dcv faces
+at Merck and the MIT Data Warehouse. We consider three types of updates.
 
-\stitle{(1) Insertions/deletions on source tables.} This happens when there is a change to a table, \eg insertion of a new procurement record in the MIT Data Warehouse. This may also happen when data sources are cleaned (see Section~\ref{sec:curating}).
+\stitle{(1) Insertions/deletions on source tables.} This happens when there is a
+change to a table, \eg insertion of a new procurement record in the MIT Data
+Warehouse. This may also happen when data sources are cleaned (see
+Section~\ref{sec:curating}).
 
 
-\stitle{(2) Replacement of source tables.} Large companies typically rely on both internal and external information to build their knowledge bases. For instance, Merck collects published standard medical names from the World Health Organization (WHO) to help construct their own ontology. These data sources are updated periodically by WHO.  Sometimes, even the format may be changed, e.g., from a JSON file to a CSV file.
+\stitle{(2) Replacement of source tables.} Large companies typically rely on
+both internal and external information to build their knowledge bases. For
+instance, Merck collects published standard medical names from the World Health
+Organization (WHO) to help construct their own ontology. These data sources are
+updated periodically by WHO.  Sometimes, even the format may be changed, e.g.,
+from a JSON file to a CSV file.
 
 
-\stitle{(3) Updating MVs.} MVs might be created based on other MVs.  Since cleaning effort can happen at any place in a query plan, MVs may need to be updated.
+\stitle{(3) Updating MVs.} MVs might be created based on other MVs.  Since
+cleaning effort can happen at any place in a query plan, MVs may need to be
+updated.
 
 
 %In response to the above three types of updates, 
