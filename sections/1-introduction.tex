@@ -33,9 +33,9 @@ The {\it online component} involves executing a user-supplied workflow that cons
 
 
 \stitle{[Discovery.]} A data scientist at Merck has a hypothesis, for example, {\it the drug Ritalin causes brain cancer in rats weighing more than 300 grams}.
-His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv will assist the scientist in finding tables of interest from all the Merck tables.
+His first job is to identify relevant data sets, both inside and outside of Merck, that might contribute to testing this hypothesis. Inside the company alone, Merck has approximately 4,000 Oracle databases and countless other repositories. The discovery component in \dcv will assist the scientist in finding tables of interest from all the Merck tables. Discovery queries are run as a part of the online workflow which is discussed in Section~\ref{sec:discovery}.
 
-Although discovery queries are run as a part of the online workflow, they are supported by profiles and indexes that are built during the offline processing.  Building these profiles requires looking at both the schema and values of every table. Consequently, we employ linear algorithms to make this pre-computation tractable. This module, together with the corresponding data structures, is discussed in Section~\ref{sec:discovery}.
+% Although discovery queries are run as a part of the online workflow, they are supported by profiles and indexes that are built during the offline processing.  Building these profiles requires looking at both the schema and values of every table. Consequently, we employ linear algorithms to make this pre-computation tractable. This module, together with the corresponding data structures, is discussed in Section~\ref{sec:discovery}.
 
 
 

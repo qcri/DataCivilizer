@@ -68,7 +68,7 @@ We plan to examine this tactic in detail as future work.
 \label{subsec:gain}
 
 
-In a query plan, the cleaning cost and the result quality are different based on the position of the data cleaning operation. For example, cleaning a whole column before the selection on this column yields a higher cleaning cost and query accuracy than put the cleaning operation after the selection operation. Obviously expensive cleaning should be performed on as few records as possible and have as max impact as possible. We now give a way to obtain a query plan with cleaning operations that achieve high quality gain with a limited cleaning budget.
+In a query plan with cleaning operations, the cleaning cost and the result quality are different based on the position of the data cleaning operation. For example, cleaning a whole column before the selection on this column yields a higher cleaning cost and query accuracy than putting the cleaning operation after the selection operation. Obviously expensive cleaning should be performed on as few records as possible and have as max impact as possible. We now give a way to obtain a query plan with cleaning operations that achieve high quality gain with a limited cleaning budget.
 
 
 The intuition is that for each value in each node of the join path, we count how many times it appears in the query result. Then we clean the values in the decreasing order of the number of times they appear, until our budget is exhausted. This will only address false positives; a different approach is required for false negatives. We leave it as a future work.
