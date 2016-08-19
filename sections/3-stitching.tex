@@ -39,8 +39,7 @@ discarded to avoid having a graph with too many edges that are not significant.
 A straightforward computation of such relationships requires a $O(n^2)$
 computation, which will not scale.  However, for light-relationships, which depend on similarity metric
 such as edit distance and Jaccard similarlity, we can employ locality sensitive hashing
-(LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to yield sub-quadratic runtimes;
-\srm{please check the following} we have found LSH to run quite well in practice, even for data sets up to several Terabytes.
+(LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to yield sub-quadratic runtime; we have found LSH to run quite well in practice, even for data sets up to several Terabytes.
 
 It is usually expensive to compute the heavy relationships. To address this
 issue, the graph builder adopts the following general approach: (i)~the
