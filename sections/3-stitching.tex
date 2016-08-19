@@ -24,8 +24,8 @@ The node label contains table metadata, such as table name, cardinality and
 other information computed by the profiler. The edge label includes metadata
 about the relationship it represents, \eg type and score, if any. Computing
 the different relationships requires different time complexities. We 
-categorize them into, {\textit light relationships}, which can be computed in
-sub-quadratic time, and {\textit heavy relationships}, which needs at least
+categorize them into, \textit{light relationships}, which can be computed in
+sub-quadratic time, and \textit{heavy relationships}, which needs at least
 quadratic time. The light relationships contain column similarity and schema
 similarity. The heavy relationships include the \pkfk (PK-FK), inclusion dependency, and structure similarity. 
 
@@ -36,20 +36,18 @@ schema similarity relationships.  Each edge is assigned a weight that represents
 the strength of the relationship: the particular meaning depends on the edge
 semantics.  Also, edges with a similarity less than a user-defined threshold are
 discarded to avoid having a graph with too many edges that are not significant.
-\srm{please check the following} A straightforward computation of such relationships requires a $O(n^2)$
+A straightforward computation of such relationships requires a $O(n^2)$
 computation, which will not scale.  However, for light-relationships, which depend on similarity metric
 such as edit distance and Jaccard similarlity, we can employ locality sensitive hashing
 (LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to yield sub-quadratic runtimes;
-%This approach avoids $n^2$ operations 
-we have found LSH to run quite well in practice, even for data sets up to several Terabytes.
+\srm{please check the following} we have found LSH to run quite well in practice, even for data sets up to several Terabytes.
 
 It is usually expensive to compute the heavy relationships. To address this
 issue, the graph builder adopts the following general approach: (i)~the
-computation of heavy relationships is performed in the background, and (ii)~data
+computation of heavy relationships is performed in the background, (ii)~data
 profiles and light relationships are used as much as possible to prune the
-search space for the heavy relationships. Note that the data discovery can use the heavy \srm{do we mean light?} relationships, whenever available, to identify interesting data. After the user chooses the data of
-interest, the graph builder can construct the heavy relationships amongst this
-data online.
+search space for the heavy relationships, and (iii)~after the user chooses the data of
+interest, if the heavy relationships are not ready amongst this data, the graph builder can construct the heavy relationships online.
 
 %For efficiently computing the heavy relationships, 
 We use the foreign-key (FK) and primary-key (PK) relationships as an example of how

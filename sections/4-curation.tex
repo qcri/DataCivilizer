@@ -28,8 +28,8 @@ In other cases, cleaning is performed by other domain experts, who generally nee
 Sometimes the user may prefer the join path that yields largest view size, \ie the number of rows in the view. 
 For example, the user may want a view with 1,000 rows and 90\% cleanliness rather than a view with 10 rows and 98\% cleanliness. 
 We can combine all the facets as the criteria for join path selection. 
-\srm{Studied where?  What BigDAWG estimates?}
-Estimating the view size has been extensively studied in the literature and we just utilize the \texttt{BigDAWG} estimates.
+\srm{Studied where?  What BigDAWG estimates?}\dong{I think BigDAWG may have a query optimizer that estimates the query result size. And we can use that to estimate the view size.}
+Estimating the view size has been extensively studied in the literature~\cite{DBLP:conf/sigmod/IoannidisP95} and we just utilize the \texttt{BigDAWG} estimates.
 
 As a result, \dcv must make the following decisions. 
 First, it needs to assess the cleanliness of the result of any given join path. We treat this issue in Section~\ref{subsec:model}. 
