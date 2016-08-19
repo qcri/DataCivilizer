@@ -15,7 +15,7 @@ InfoGather~\cite{DBLP:conf/sigmod/YakoutGCC12}. Goods permits users to inspect
 datasets and find others similar to datasets of interest. Infogather permits to
 extend the attributes of a dataset of interest with attributes from other
 datasets. These systems are designed to solve these particular use cases, and so
-their indices are built for this specific purpose. In
+their indexes are built for this specific purpose. In
 contrast, our discovery module aims to support general \emph{discovery queries} that
 can then be used for unanticipated discovery needs. Hence, the discovery module
 uses a linkage graph (Section \ref{subsec:graphbuild}) to permit a broader range
@@ -51,9 +51,9 @@ search}) or table values ({\it content search}).
 The key idea is to summarize each column of each table into a {\em profile}.
 A profile consists of one or more {\it signatures};  each signature summarizes
 the original contents of the column into a domain-dependent, compact
-representation of the original data.  By default, signatures consist of a
-histogram representing the data distribution for numerical values and  a vector
-of the most significant words in the column for textual data.  Our profiles also
+representation of the original data.  By default, signatures for numerical values consist of a
+histogram representing the data distribution and; for textual values they consist of a vector
+of the most significant words in the column.  Our profiles also
 contain information about data cardinality, data type, and numerical ranges if
 applicable~\cite{profiling_survey}.
 
@@ -172,7 +172,7 @@ data and range search for numerical data.
 
 \end{itemize}
 
-Discovery works like an information retrieval system: schema retrieval queries
+Discovery works similarly to an information retrieval system: schema retrieval queries
 do not return a specific answer, but instead return a ranked set of results. We
 are currently exploring several ranking options, and a model that decouples
 discovery query processing from ranking evaluation seems the most promising.

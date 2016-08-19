@@ -2,7 +2,7 @@
 \section{Polystore Query Processing}
 \label{sec:curating}
 
-\dcv uses the \texttt{BigDAWG} polystore~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15}. \texttt{BigDAWG} consists of a middleware query optimizer and executor, and shims to various local storage systems. We assume that a user has run discovery and that the corresponding linkage graph has been computed. We can thus identify a collection of join paths that can be used to materialize a composite table of interest to the user. The user can now identify the subsets of each table in which he is interested. For any join path, it is now straightforward to construct the \texttt{BigDAWG} query that materializes the view specified by each join path. Next we discuss how to choose a join path from all the possible ones to materialize a desired view.
+\dcv uses the \texttt{BigDAWG} polystore~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15} to federate access to multiple storage systems inside an organization. \texttt{BigDAWG} consists of a middleware query optimizer and executor, and shims to various local storage systems. We assume that a user has run discovery and that the corresponding linkage graph has been computed.  If the user is interested in a composite table containing a particular set of columns that are not available in any single data source,  we can use the PK-FK mining techniques describe in the previous section to find a set of possible join paths that can be used to materialize the table of interest to the user. Furthermore, for any particular join path, it is straightforward to construct the \texttt{BigDAWG} query that materializes the view specified by each join path. However, the we still need to choose which of several possible join paths is the best to compute the table of interest to the user.
 	
 
 % in Section~\ref{subsec:selectview}. As one of the most important criteria to select the join path is its cleanliness, we then propose a model to estimate the cleanliness of the join path in Section~\ref{subsec:model}. When the join path is selected, we need to clean it with a given budget. We develop a method to integrate the cleaning operations in the query plan that materializes the view in Section~\ref{subsec:gain}.
@@ -10,11 +10,11 @@
 
 \subsection{Materialized View Selection}
 
-The conventional data federation wisdom is to choose the join path that minimizes the query processing cost. However, this ignores data cleaning issues, to which we now turn. To achieve high quality results, one has to clean the data in conjunction with querying the table. For example, if one has a data value, \code{New Yark}, and wants to transform it to one of its airport codes \code{(JFK, LGA)}, then one must correct the data to \code{New York}, prior to the airport code lookup. Obviously, cleaning usually entails a human specification of the corrected value or a review of the value produced by an automatic algorithm. Hence, it is expensive in human resources, which we believe is generally ``the high pole in the tent''. 
-As such, one goal of \dcv is to choose the join path that produces the highest quality answer and not the one that is easiest to compute. 
+The conventional data federation wisdom is to choose the join path that minimizes the query processing cost. However, this ignores data cleaning issues, to which we now turn. To achieve high quality results, one has to clean the data in conjunction with querying the table. For example, if one has a data value, \code{New Yark}, and wants to transform it to one of its airport codes \code{(JFK, LGA)}, then one must correct the data to \code{New York}, prior to the airport code lookup. Obviously, cleaning usually entails a human specification of the corrected value or a review of the value produced by an automatic algorithm. Such human costs can easily dominate the total query execution time and represent a significant financial cost in many data cleaning scenarios.
+As such, one goal of \dcv is to choose the join path that produces the highest quality answer, rather than the one that is easiest to compute. 
 
 In \dcv, a user has to decide how to trade off data quality and cleaning cost. 
-\dcv defines two parameters under the user control.
+\dcv defines two parameters, both under the user's control.
 
 \begin{enumerate}
 \item Minimize cost for a specific cleanliness metric. In this case, the user requires the data to be a certain percentage, \emph{P}, correct and will spend whatever it takes to get to that point.
@@ -28,10 +28,11 @@ In other cases, cleaning is performed by other domain experts, who generally nee
 Sometimes the user may prefer the join path that yields largest view size, \ie the number of rows in the view. 
 For example, the user may want a view with 1,000 rows and 90\% cleanliness rather than a view with 10 rows and 98\% cleanliness. 
 We can combine all the facets as the criteria for join path selection. 
+\srm{Studied where?  What BigDAWG estimates?}
 Estimating the view size has been extensively studied in the literature and we just utilize the \texttt{BigDAWG} estimates.
 
 As a result, \dcv must make the following decisions. 
-First, assess the cleanliness of the result of any given join path. We treat this issue in Section~\ref{subsec:model}. 
+First, it needs to assess the cleanliness of the result of any given join path. We treat this issue in Section~\ref{subsec:model}. 
 Then, we need to choose where to place, in the resulting query plan, data cleaning operations to be the most efficient. This is the topic of Section~\ref{subsec:gain}.
 
 
@@ -64,12 +65,12 @@ We plan to examine this tactic in detail as future work.
 
 
 
-\subsection{Query Plan with Data Cleaning Operations}
+\subsection{Query Planning with Data Cleaning}
 \label{subsec:gain}
 
 Obviously expensive cleaning should be performed on as few records as possible and have the maximum impact possible. We now discuss how to obtain a query plan with cleaning operations that achieve the maximum quality gain with a limited cleaning budget. 
 
-The intuition is that for each value in each node, we count how many times it appears in the query result. Then we clean the values in the decreasing order of the number of times they appear, until our budget is exhausted.  In this setting, we can use dynamic programming to obtain a query plan with cleaning operations that achieve the maximum accuracy gain with limited cleaning cost budget or achieve the desired accuracy with the smallest cleaning cost budget. Of course this will only address false positives; a different approach is required for false negatives. We leave it as a future work.
+The intuition is that for each value in each node, we count how many times it appears in the query result. Then we clean the values in the decreasing order of the number of times they appear, until our budget is exhausted.  \srm{I don't understand how this is a DP;  it sounds like a greedy algorithm?} In this setting, we can use dynamic programming to obtain a query plan with cleaning operations that achieve the maximum accuracy gain with limited cleaning cost budget or achieve the desired accuracy with the smallest cleaning cost budget. Of course this will only address false positives; a different approach is required for false negatives. We leave it as a future work.
 
 
 
