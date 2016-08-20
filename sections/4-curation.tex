@@ -67,25 +67,37 @@ We plan to examine this tactic in detail as future work.
 \subsection{Query Planning with Data Cleaning}
 \label{subsec:gain}
 
-Obviously expensive cleaning should be performed on as few records as possible and have the maximum impact possible. We now discuss how to obtain a query plan with cleaning operations that achieve the maximum quality gain with a limited cleaning budget. 
 
-The intuition is that for each value in each node, we count how many times it appears in the query result. Then we clean the values in the decreasing order of the number of times they appear, until our budget is exhausted.  \srm{I don't understand how this is a DP;  it sounds like a greedy algorithm?} In this setting, we can use dynamic programming to obtain a query plan with cleaning operations that achieve the maximum accuracy gain with limited cleaning cost budget or achieve the desired accuracy with the smallest cleaning cost budget. Of course this will only address false positives; a different approach is required for false negatives. We leave it as a future work.
-
+In a query plan, the cleaning cost and the result quality are different based on the position of the data cleaning operation. For example, cleaning a whole column before the selection on this column yields a higher cleaning cost and query accuracy than put the cleaning operation after the selection operation. Obviously expensive cleaning should be performed on as few records as possible and have as max impact as possible. We now give a way to obtain a query plan with cleaning operations that achieve high quality gain with a limited cleaning budget.
 
 
-\iffalse %Mourad: Dong, can we use some of this writeup!?
-Unfortunately, if we run a query with the following predicate:
+The intuition is that for each value in each node of the join path, we count how many times it appears in the query result. Then we clean the values in the decreasing order of the number of times they appear, until our budget is exhausted. This will only address false positives; a different approach is required for false negatives. We leave it as a future work.
+
+
+%Another better way is that we use dynamic programming to obtain a query plan with cleaning operations that achieve the maximum accuracy gain with limited cleaning cost budget or achieve the desired accuracy with the smallest cleaning cost budget. 
+
+
+
+
+
+
+\iffalse
+For example, if we run a query with the following predicate:
 
 \vspace{.5em}
 \dots \textsf{where} $name = $ ``\code{New York}''
 \vspace{.5em}
 
-\noindent Then the misspelled city name,  \ie \code{New Yark}, will not be found, and accuracy will suffer. One solution is to clean the entire source data sets to avoid such errors, an expensive proposition indeed. If the penalty is small, then we can insert cleaning ``late'' in the query plan. On the other hand, if the penalty is large, then we must insert cleaning earlier, even though at much higher cost. We formalize our idea as follows.
 
 
+\noindent Then the misspelled city name,  \ie \code{New Yark}, will not be found, and accuracy will suffer. One solution is to clean the entire source data sets to avoid such errors, an expensive proposition indeed. If the budget is small, then we can insert cleaning ``late'' in the query plan. On the other hand, if the penalty is large, then we must insert cleaning earlier, even though at much higher cost. 
+
+\fi
+
+
+\iffalse
 For each edge in the join path, if we put the cleaning operation ahead of the join operation, i.e., we only clean the tuple pairs in our maximal matching, we spend cleaning cost linear to the number of foreign keys and can only expect to achieve the same accuracy  as the cleanliness of the edge. In contrast, if we first clean all the possible tuple pairs of the foreign key and primary key and then generate the real join results, we can achieve 100\% accuracy with a cleaning cost quadratic to the number of foreign keys. Similarly, if we put the cleaning operation behind the where clause, we can only expect to achieve the same accuracy of the column with the cost proportional to the number of tuples satisfying the where clause. Otherwise, we can achieve 100\% accuracy with the cost proportional to the number tuples in the whole column.
 
 
 In this setting, we can use dynamic programming to obtain a query plan with cleaning operations that achieve the maximum accuracy gain with limited cleaning cost budget or achieve the desired accuracy with the smallest cleaning cost budget. More specifically, for each node and edge in the join graph, we can choose not to clean it, clean it before the query operation (i.e., join or selection), or clean after the query operation. Each with different cleaning cost. With dynamic programming, we can achieve an optimal strategy.
 \fi
-
