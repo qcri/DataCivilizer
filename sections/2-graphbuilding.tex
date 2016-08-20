@@ -150,7 +150,7 @@ have found LSH to run quite well in practice, even for data sets up to several
 Terabytes.
 
 It is usually expensive to compute the heavy relationships. To address this
-issue, the graph builder adopts the following general approach: (i)~the
+issue, the graph builder adopts the following general approaches: (i)~the
 computation of heavy relationships is performed in the background, (ii)~data
 profiles and light relationships are used as much as possible to prune the
 search space for the heavy relationships, and (iii)~after the user chooses the
@@ -163,7 +163,7 @@ heavy relationship and deal with the complexities that arise in real data where
 errors and noise make finding such relationships tricky. The graph builder
 utilizes an implementation 
 of inclusion dependency (i.e., column A {\it includes
-all the values of} column B) to find candidate PK-FK relationships, since a PK
+all the values of} column B) to find candidate PK-FK relationships, since a PK column
 should include all values in an FK column. We then refine the candidates using
 machine learning methods. However, as it is well known, data in the wild is
 quite dirty, which makes discovering inclusion dependencies difficult.
@@ -188,10 +188,10 @@ exist in the primary key fields due to errors.  In this case an inclusion
 dependency from foreign key to primary key does no hold.
 
 To address this, for each distinct value in \RX, we calculate the
-text similarity to values in \SY and use the maximum value as the strength of a
-value matching. We then compute the total strength of the maximum matching value
+text similarity to values in \SY and use the similarity as the strength of a
+value matching. We then compute the total strength of the maximum matching between the two columns
 divided by the number of values in \RX. This is the overall strength of the
-inclusion dependency.  If this number exceeds a predefined threshold $\delta$,
+inclusion dependency.  If this number exceeds a set threshold $\delta$,
 we add an inclusion dependency from \RX to \SY in our linkage graph.
 %\nan{This is very weak. We can also tolerate errors by saying if $> x\%$ \RX
 %appears in \SY, then there is a related inclusion dependency.}
