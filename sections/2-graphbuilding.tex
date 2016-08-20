@@ -104,8 +104,8 @@ computation.
 
 The linkage graph is a graph with both simple nodes, which represent columns,
 and hyper-nodes which are multiple simple nodes that represent tables or
-compound keys. Each edge represents a relationship between two nodes or
-hyper-nodes in the graph. Note that in this way the model can express
+compound keys. Each edge represents a relationship between two nodes (either simple nodes or
+hyper-nodes) in the graph. Note that in this way the model can express
 relationships involving individual columns as well as groups of them. This is
 necessary to capture relationships among tables, \eg \pkfk relationship between
 compound keys.
