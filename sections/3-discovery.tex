@@ -63,12 +63,15 @@ linkage graph:
 %queries.  As it is the two subsections don't seem well connected -- why are
 %profiles needed?} 
 
+\vspace{-.1em}
 \begin{itemize}
 \item \textbf{Fill-in schema}. Given a set of names, this function retrieves 
 tables or groups of tables that contain the desired attributes. The core
-of the operation consists of finding tables with similar attribute names to the
+of the operation consists of finding tables with similar attribute names to
 provided ones, using the keyword index.
 %\mourad{How do you know?}
+
+\vspace{-.25em}
 
 \item \textbf{Extend attribute.} This is similar to the extend operator of
 Octopus~\cite{DBLP:journals/pvldb/CafarellaHK09}, or the ABA operation of
@@ -77,15 +80,20 @@ extend tables of interest with additional attributes. The core of the operation
 consists of finding matches to the current table using the linkage graph, and then retrieving 
 attributes that do not appear.
 
+\vspace{-.25em}
 \item \textbf{Subsumption relationships.} Given some reference table, this
 function provides a list of tables or groups of tables that have some form of
 subsumption relationship (\ie are contained in or contain) with respect to the
 reference table;  this can be done directly from the linkage graph.
 
+\vspace{-.25em}
+
 \item \textbf{Similarity and lookup.} Discovery can also be used to find schemas
 that contain data similar to some provided schema (attribute or table), as well
 as to find schemas that contain certain values, \ie keyword search for textual
 data and range search for numerical data.  
+
+\vspace{-.25em}
 
 \end{itemize}
 

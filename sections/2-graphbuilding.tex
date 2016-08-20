@@ -198,7 +198,7 @@ to refine our candidate selection. The authors proposed 10~different features to
 %In~\cite{DBLP:conf/webdb/RostinABNL09}, 
 The specified features include 
 \emph{coverage}, the ratio of distinct values in \RX that are contained in \SY, 
-\emph{column name similarity}, the similarity between the attribute names of X and Y, 
+\emph{column name similarity}, the similarity between the attribute names, 
 and \emph{out-of-domain range}, the percentage of values in \SY not within $[\min(\RX), \max(\RX)]$ where $\min(\RX)$ and $\max(\RX)$ are respectively the minimum and maximum values in \RX.
 
 Using the above features, we implemented the four machine learning classification algorithms from Rostin et al.~\cite{DBLP:conf/webdb/RostinABNL09}. These allow us to distinguish spurious inclusion dependencies from real ones with high accuracy.   We add the highest confidence candidate PK-FK pairs as edges in the linkage graph.
