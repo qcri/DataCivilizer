@@ -26,15 +26,15 @@ updated.
 %In response to the above three types of updates, 
 \dcv uses three corresponding strategies to cater to the above updates.
 
-\stitle{(i) MV maintenance.} \dcv will need to incrementally propagates updates through the data curation pipeline to update downstream MVs, as well as from intermediate results that are cleaned back to data sources, if possible.
+\stitle{(i) MV maintenance.} \dcv will need to incrementally propagate updates through the data curation pipeline to update downstream MVs, as well as from intermediate results that are cleaned back to data sources, if possible.
 To perform this propagation, we plan to leverage the techniques in DBRx~\cite{DBLP:conf/sigmod/ChalamallaIOP14}, a system developed by QCRI and Waterloo.
 In some cases, the human effort to update and clean MVs may be daunting, and automatic methods may fail. In such cases, MVs should be discarded rather than updated. 
 
 \stitle{(ii) Provenance management.}  To perform update propagation, \dcv will need to keep track of the relationships between data sets (their provenance). \dcv will leverage Decibel~\cite{DBLP:journals/pvldb/MaddoxGEMPD16}, a system developed at MIT for this purpose.
 
 \stitle{(iii) Incremental graph updates.}  As data changes, the linkage graph and profiles will also need to be updated.  To support incremental updates  to profiles we  use a simple reference counting scheme, where each keyword has a count associated with it that is decremented when a word is removed.  A word
-is removed from the profile when its count reaches zero.  To support updates to the graph, rather than recompute relationships every time an table changes, we 
-maintain an estimate of the fraction of rows in a column that have changes since we last updates its node and edges in the graph, and re-index a column when
+is removed from the profile when its count reaches zero.  To support updates to the graph, rather than recomputing relationships every time an table changes, we 
+maintain an estimate of the fraction of rows in a column that have changed since we last updated its node and edges in the graph, and re-index a column when
 this estimate goes above a set threshold.
 
 %As data appears incrementally, we need an incremental inclusion dependency algorithm. Extending our algorithms in Section~\ref{subsec:eind} is a project we are currently working on.
