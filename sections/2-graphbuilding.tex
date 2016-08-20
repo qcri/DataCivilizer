@@ -2,8 +2,12 @@
 \section{Linkage Graph Computation}
 \label{sec:stitching}
 
-In this section, we discuss how to build the linkage graph of \dcv. We first show how to create the data profiles in linear time which can then be fed into the linkage graph and then formally define our graph model in Section~\ref{subsec:graphbuild}. Finally, 
-as an example of linkages, we focus on how we discover and refine \pkfk relationships in Sections~\ref{subsec:eind} and~\ref{subsec:refine}, respectively.
+In this section, we discuss how to build the linkage graph of \dcv. We first
+show how to create the data profiles in linear time---which can then be fed into
+the linkage graph---and then formally define our graph model in
+Section~\ref{subsec:graphbuild}. Finally, as an example of linkages, we focus on
+how we discover and refine \pkfk relationships in Sections~\ref{subsec:eind}
+and~\ref{subsec:refine}, respectively.
 
 
 
@@ -16,8 +20,11 @@ representation of the original data.  By default, signatures for numerical value
 histogram representing the data distribution and; for textual values they consist of a vector
 of the most significant words in the column, indexed using a hash table.  Our profiles also
 contain information about data cardinality, data type, and numerical ranges if
-applicable~\cite{profiling_survey}.  \srm{We also keep a global keyword index that maps to columns whose
-names or contents contain each word, to facilitate keyword queries.}
+applicable~\cite{profiling_survey}. \notera{In addition to the profiles, we maintain a
+global keyword index to facilitate keyword queries. The index maps keywords to
+columns containing the word in their name or content.}
+%\srm{We also keep a global keyword index that maps to columns whose
+%names or contents contain each word, to facilitate keyword queries.}
 
 %Note that finding pairwise relationships between each attribute profile is an
 %$O(n^2)$ computation, which will not scale.  We thus rely on locality sensitive
@@ -106,45 +113,54 @@ Examples of relationships are
 \emph{table subsumption}. 
 The node label contains table metadata, such as table name, cardinality and
 other information computed by the profiler. The edge label includes metadata
-about the relationship it represents, \eg type and score, if any. Computing
-the different relationships requires different time complexities. We 
-categorize them into, \textit{light relationships}, which can be computed in
-sub-quadratic time, and \textit{heavy relationships}, which needs at least
-quadratic time. The light relationships contain column similarity and schema
-similarity. The heavy relationships include the \pkfk (PK-FK), inclusion dependency, and structure similarity. 
+about the relationship it represents, \eg type and score, if any. Computing the
+different relationships requires different time complexities. We categorize them
+into \textit{light relationships}, which can be computed in sub-quadratic time,
+and \textit{heavy relationships}, which need at least quadratic time. The light
+relationships contain column similarity and schema similarity. The heavy
+relationships include \pkfk (PK-FK), inclusion dependency, and structure
+similarity. 
 
 
-The graph builder first computes the light relationships amongst pairs of
-nodes in advance during offline processing. In particular, the graph builder first finds column similarity and
-schema similarity relationships.  Each edge is assigned a weight that represents
-the strength of the relationship: the particular meaning depends on the edge
-semantics. Also, edges with a similarity less than a user-defined threshold are
-discarded to avoid having a graph with too many edges that are not significant.
-A straightforward computation of such relationships requires a $O(n^2)$
-computation, which will not scale. However, for light-relationships, which depend on similarity metrics
-such as edit distance and Jaccard similarlity, we can employ locality sensitive hashing
-(LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to yield sub-quadratic runtime; we have found LSH to run quite well in practice, even for data sets up to several Terabytes.
+The graph builder first computes the light relationships amongst pairs of nodes
+in advance during offline processing. In particular, the graph builder first
+finds \emph{column similarity} and \emph{schema similarity} relationships.  Each
+edge is assigned a weight that represents the strength of the relationship: the
+particular meaning depends on the edge semantics. Also, edges with a similarity
+less than a user-defined threshold are discarded to avoid having a graph with
+too many edges that are not significant.  A straightforward computation of such
+relationships requires a $O(n^2)$ computation, which will not scale. However,
+for light-relationships, which depend on similarity metrics such as edit
+distance and Jaccard similarlity, we can employ locality sensitive hashing
+(LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to yield sub-quadratic runtime; we
+have found LSH to run quite well in practice, even for data sets up to several
+Terabytes.
 
 It is usually expensive to compute the heavy relationships. To address this
 issue, the graph builder adopts the following general approach: (i)~the
 computation of heavy relationships is performed in the background, (ii)~data
 profiles and light relationships are used as much as possible to prune the
-search space for the heavy relationships, and (iii)~after the user chooses the data of
-interest, if the heavy relationships are not ready amongst this data, the graph builder can construct the heavy relationships online.
+search space for the heavy relationships, and (iii)~after the user chooses the
+data of interest, if the heavy relationships are not ready amongst this data,
+the graph builder can construct the heavy relationships online.
 
 %For efficiently computing the heavy relationships, 
-We use the PK-FK relationships as an example of how
-we efficiently compute a heavy relationship and deal with the complexities that arise in real data where errors and noise make finding
-such relationships tricky. The graph builder utilizes an
-implementation of inclusion dependency (i.e., column A {\it includes all the values of} column B) to find candidate PK-FK relationships, since a PK should include all values in an FK column.  We then 
- refine the candidates using machine learning methods. However,
-as it is well known, data in the wild is quite dirty, which makes discovering
-inclusion dependencies difficult. Specifically, foreign keys may not match a
-primary key, because of errors in either the PK or the FK. To tolerate errors,
-we extend traditional inclusion dependency discovery by both key coverage and
-text similarity and propose an \emph{\eind} approach. 
-We describe this approach in Section~\ref{subsec:eind} and the machine learning
-techniques to refine the candidate PK-FK relationships in Section~\ref{subsec:refine}.
+We use the PK-FK relationships as an example of how we efficiently compute a
+heavy relationship and deal with the complexities that arise in real data where
+errors and noise make finding such relationships tricky. The graph builder
+utilizes \notera{a variant}
+%an implementation 
+of inclusion dependency (i.e., column A {\it includes
+all the values of} column B) to find candidate PK-FK relationships, since a PK
+should include all values in an FK column. We then refine the candidates using
+machine learning methods. However, as it is well known, data in the wild is
+quite dirty, which makes discovering inclusion dependencies difficult.
+Specifically, foreign keys may not match a primary key, because of errors in
+either the PK or the FK. To tolerate errors, we extend traditional inclusion
+dependency discovery by both key coverage and text similarity and propose an
+\emph{\eind} approach.  We describe this approach in Section~\ref{subsec:eind}
+and the machine learning techniques to refine the candidate PK-FK relationships
+in Section~\ref{subsec:refine}.
 
 \subsection{Error-Robust Inclusion Dependency}\label{subsec:eind}
 
