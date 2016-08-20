@@ -102,7 +102,19 @@ computation.
 \subsection{Graph Builder}
 \label{subsec:graphbuild}
 
-The linkage graph is a hyper-graph where each simple node represents a column, each hyper-node consists of multiple simple nodes and can represent a table or a compound key, and each simple edge represents a relationship between two nodes in the graph. Note the hyper-graph can express relationships involving more than two columns. This is useful to capture relationships amongst tables, \eg \pkfk relationship between compound keys.
+The linkage graph is a hyper-graph where each simple node represents a column,
+and there exists hyper-edges that connect multiple simple nodes that are part of
+the same table or compound key. Each simple edge represents a relationship
+between two nodes in the graph. Note the hyper-graph can express relationships
+involving more than two columns. This is useful to capture relationships among
+tables, \eg \pkfk relationship between compound keys.
+
+%The linkage graph is a hyper-graph where each simple node represents a column,
+%each hyper-node consists of multiple simple nodes and can represent a table or a
+%compound key, and each simple edge represents a relationship between two nodes
+%in the graph. Note the hyper-graph can express relationships involving more than
+%two columns. This is useful to capture relationships amongst tables, \eg \pkfk
+%relationship between compound keys.
 
 Examples of relationships are 
 \emph{column similarity}, 
