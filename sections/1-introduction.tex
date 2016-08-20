@@ -17,7 +17,7 @@ and connect mean the same thing!?  (iii)~{\it compute} answers from the
 disparate data stores that host the discovered data sets; (iv)~{\it clean} the
 desired data; and %as it is often cited that 20\% of a typical data source is
 incorrect or missing; and (v)~{\it iterate} through these tasks using a workflow
-system, since data scientists often \notera{perform these tasks} %use these modules 
+system, since data scientists often perform these tasks %use these modules 
 in different orders.
 
 
@@ -52,10 +52,7 @@ schemas, and run \textsf{SQL} queries on the discovered data sets.
 %changes and new tables are added, they can be scanned and added to the graph
 %incrementally.} 
 %\mourad{We could say: 
-\notera{Initially, all linkages that can be found
-in linear time are built during the offline stage. As new data is added or
-existing data changes, the graph is incrementally updated to reflect the changes
-in these linkages.} All the other linkages, such as \pkfk relationships, will be
+Initially, all the linkages that can be found in linear time are built during the offline stage. As existing data changes and new tables are added, the graph is incrementally updated to reflect the changes. All the other linkages, such as primary key-foreign key (\pkfk) relationships, will be
 built in the background or on-demand during the online stage. Our current
 prototype identifies \pkfk relationships, using inclusion dependencies. As such,
 the process of building the linkage graph can be run dynamically and on-demand;
@@ -138,7 +135,7 @@ Section~\ref{sec:updates} discusses these  issues.
 
 
 \stitle{[Workflow.]} \dcv offers a workflow engine whereby data scientists can
-iterate over its components in whatever order they wish\notera{.} Moreover, they
+iterate over its components in whatever order they wish. Moreover, they
 need to be able to undo previous workflow steps and perform alternate branching
 from the result of a workflow step.  Section~\ref{sec:workflow} discusses our
 workflow management ideas.

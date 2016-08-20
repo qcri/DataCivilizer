@@ -20,9 +20,9 @@ representation of the original data.  By default, signatures for numerical value
 histogram representing the data distribution and; for textual values they consist of a vector
 of the most significant words in the column, indexed using a hash table.  Our profiles also
 contain information about data cardinality, data type, and numerical ranges if
-applicable~\cite{profiling_survey}. \notera{In addition to the profiles, we maintain a
+applicable~\cite{profiling_survey}. In addition to the profiles, we maintain a
 global keyword index to facilitate keyword queries. The index maps keywords to
-columns containing the word in their name or content.}
+columns containing the word in their names or content.
 %\srm{We also keep a global keyword index that maps to columns whose
 %names or contents contain each word, to facilitate keyword queries.}
 
@@ -118,7 +118,7 @@ different relationships requires different time complexities. We categorize them
 into \textit{light relationships}, which can be computed in sub-quadratic time,
 and \textit{heavy relationships}, which need at least quadratic time. The light
 relationships contain column similarity and schema similarity. The heavy
-relationships include \pkfk (PK-FK), inclusion dependency, and structure
+relationships include primary key-foreign key (PK-FK), inclusion dependency, and structure
 similarity. 
 
 
@@ -148,8 +148,7 @@ the graph builder can construct the heavy relationships online.
 We use the PK-FK relationships as an example of how we efficiently compute a
 heavy relationship and deal with the complexities that arise in real data where
 errors and noise make finding such relationships tricky. The graph builder
-utilizes \notera{a variant}
-%an implementation 
+utilizes an implementation 
 of inclusion dependency (i.e., column A {\it includes
 all the values of} column B) to find candidate PK-FK relationships, since a PK
 should include all values in an FK column. We then refine the candidates using
