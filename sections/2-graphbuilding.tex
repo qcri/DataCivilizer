@@ -82,7 +82,7 @@ The rest of the stages are responsible for computing cardinalities, and performi
 quantile estimation, \eg to determine numerical ranges.
 
 The profiler has connectors to read data from different data sources, such as
-HDFS files, RDBMS or CSV files. Data sets are streamed through the profiler
+HDFS files, RDBMS, and CSV files. Data sets are streamed through the profiler
 pipeline;  the pipeline outputs the results
 %and  at the end the resulting attribute profile is sent
 to a {\it profile store} where it is later consumed by the graph builder, which
@@ -142,7 +142,7 @@ edge is assigned a weight that represents the strength of the relationship: the
 particular meaning depends on the edge semantics. Also, edges with a similarity
 less than a user-defined threshold are discarded to avoid having a graph with
 too many edges that are not significant.  A straightforward computation of such
-relationships requires a $O(n^2)$ computation, which will not scale. However,
+relationships requires an $O(n^2)$ computation, which will not scale. However,
 for light-relationships, which depend on similarity metrics such as edit
 distance and Jaccard similarlity, we can employ locality sensitive hashing
 (LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to yield sub-quadratic runtime; we
