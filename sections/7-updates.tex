@@ -2,11 +2,10 @@
 \section{Updates}
 \label{sec:updates}
 
-Real-world data is rarely static, which is exactly the scenario that \dcv faces
-at Merck and the MIT Data Warehouse. We consider three types of updates.
+Real-world data is rarely static, and so some way to deal new datasets and updates is needed. We consider three types of updates.
 
 \stitle{(1) Insertions/deletions on source tables.} This happens when there is a
-change to a table, \eg insertion of a new procurement record in the MIT Data
+change to a table, \eg the insertion of a new procurement record in the MIT Data
 Warehouse. This may also happen when data sources are cleaned (see
 Section~\ref{sec:curating}).
 
@@ -20,23 +19,23 @@ from a JSON file to a CSV file.
 
 
 \stitle{(3) Updating MVs.} MVs might be created based on other MVs.  Since
-cleaning effort can happen at any place in a query plan, MVs may need to be
+new data can arrive at any time, and cleaning can be done at any time to any record, MVs may need to be
 updated.
 
 
 %In response to the above three types of updates, 
-\dcv uses three corresponding strategies to cater for the above updates.
+\dcv uses three corresponding strategies to cater to the above updates.
 
+\stitle{(i) MV maintenance.} \dcv will need to incrementally propagates updates through the data curation pipeline to update downstream MVs, as well as from intermediate results that are cleaned back to data sources, if possible.
+To perform this propagation, we plan to leverage the techniques in DBRx~\cite{DBLP:conf/sigmod/ChalamallaIOP14}, a system developed by QCRI and Waterloo.
+In some cases, the human effort to update and clean MVs may be daunting, and automatic methods may fail. In such cases, MVs should be discarded rather than updated. 
 
-\stitle{(i) MV maintenance.} \dcv will leverage mature techniques for maintaining materialized views (see~\cite{DBLP:journals/debu/GuptaM95} for a survey).  In this way, \dcv incrementally propagates updates through the data curation pipeline to update downstream MVs.
+\stitle{(ii) Provenance management.}  To perform update propagation, \dcv will need to keep track of the relationships between data sets (their provenance). \dcv will leverage Decibel~\cite{DBLP:journals/pvldb/MaddoxGEMPD16}, a system developed at MIT for this purpose.
 
-
-
-
-\stitle{(ii) Provenance management.}  In case (2) above, the human effort to update and clean MVs may be daunting. In this case, MVs should be discarded rather than updated. Naturally, there is a need for a workflow component that supports data versioning and branching operations. \dcv will leverage Decibel~\cite{DBLP:journals/pvldb/MaddoxGEMPD16}, a system developed at MIT for this purpose.
-
-\stitle{(iii) Descriptive and prescriptive data cleaning.} When a scientist updates an MV (case 3) above), this will trigger the update propagation to descendant MVs, as well as back upstream to data sources, if possible. To perform this propagation, we plan to leverage the techniques in DBRx~\cite{DBLP:conf/sigmod/ChalamallaIOP14}, a system developed by QCRI and Waterloo.
-
+\stitle{(iii) Incremental graph updates.}  As data changes, the linkage graph and profiles will also need to be updated.  To support incremental updates  to profiles we  use a simple reference counting scheme, where each keyword has a count associated with it that is decremented when a word is removed.  A word
+is removed from the profile when its count reaches zero.  To support updates to the graph, rather than recompute relationships every time an table changes, we 
+maintain an estimate of the fraction of rows in a column that have changes since we last updates its node and edges in the graph, and re-index a column when
+this estimate goes above a set threshold.
 
 %As data appears incrementally, we need an incremental inclusion dependency algorithm. Extending our algorithms in Section~\ref{subsec:eind} is a project we are currently working on.
 

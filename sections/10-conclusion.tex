@@ -11,15 +11,16 @@ and the iterative processing of the data.
 %We built a module for each of the requirement above. 
 As data in large companies are usually scattered across multiple
 data storage platforms, we proposed the use of a polystore architecture to deploy our system.
-Moreover, a key characteristic of \dcv it to place the data cleaning operations in the query plan
+A key characteristic of \dcv is that it places the data cleaning operations in the query plan
 while  trading-off the query result quality with the cleaning costs. 
-The \dcv workflow orchestrator will leverage knowledge about previous workloads to propose relevant operations to the user.
+%The \dcv workflow orchestrator leverages knowledge about previous workloads to propose relevant operations to the user.
 We have deployed our preliminary system at two different institutions, MIT and Merck and obtained positive
 feedback from the users.
 
 \section{Acknowledgments}
 
-Under normal circumstance, Michael Stonebraker would be a prominent author, but is precluded from appearing because of CIDR rules concerning PC chairs.
+ Michael Stonebraker contributed significantly to the work presented in this paper;
+ he precluded from being an author because of CIDR rules concerning PC chairs.
 
 % \dcv is a new end-to-end system that integrates the tasks of
 % discovering relevant data, stitching it together in meaningful views for the
