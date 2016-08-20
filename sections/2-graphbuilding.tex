@@ -2,7 +2,8 @@
 \section{Linkage Graph Computation}
 \label{sec:stitching}
 
-In this section, we discuss how to build the linkage graph, as shown in Figure~\ref{fig:arch}. We first show how to build the data profiles in linear time which can be fed into the linkage graph and then formally define our graph model in Section~\ref{subsec:graphbuild}. Finally we discuss a specific kind of linkage in the graph in Sections~\ref{subsec:eind} and~\ref{subsec:refine}.
+In this section, we discuss how to build the linkage graph of \dcv. We first show how to create the data profiles in linear time which can then be fed into the linkage graph and then formally define our graph model in Section~\ref{subsec:graphbuild}. Finally, 
+as an example of linkages, we focus on how we discover and refine \pkfk relationships in Sections~\ref{subsec:eind} and~\ref{subsec:refine}, respectively.
 
 
 
@@ -94,7 +95,7 @@ computation.
 \subsection{Graph Builder}
 \label{subsec:graphbuild}
 
-The linkage graph is a hyper-graph where each simple node represents a column, each hyper-node consists of multiple simple nodes and can represents a table or a compound key, and each simple edge represents a relationship between two nodes in the graph. Note the hyper-graph can express relationships involving more than two columns. This is useful to capture relationships amongst tables, \eg \pkfk relationship between compound keys.
+The linkage graph is a hyper-graph where each simple node represents a column, each hyper-node consists of multiple simple nodes and can represent a table or a compound key, and each simple edge represents a relationship between two nodes in the graph. Note the hyper-graph can express relationships involving more than two columns. This is useful to capture relationships amongst tables, \eg \pkfk relationship between compound keys.
 
 Examples of relationships are 
 \emph{column similarity}, 
@@ -132,7 +133,7 @@ search space for the heavy relationships, and (iii)~after the user chooses the d
 interest, if the heavy relationships are not ready amongst this data, the graph builder can construct the heavy relationships online.
 
 %For efficiently computing the heavy relationships, 
-We use the \pkfk relationships as an example of how
+We use the PK-FK relationships as an example of how
 we efficiently compute a heavy relationship and deal with the complexities that arise in real data where errors and noise make finding
 such relationships tricky. The graph builder utilizes an
 implementation of inclusion dependency (i.e., column A {\it includes all the values of} column B) to find candidate PK-FK relationships, since a PK should include all values in an FK column.  We then 
@@ -147,7 +148,7 @@ techniques to refine the candidate PK-FK relationships in Section~\ref{subsec:re
 
 \subsection{Error-Robust Inclusion Dependency}\label{subsec:eind}
 
-As noted above, \Pkfk relationships are usually identified using inclusion
+As noted above, \pkfk relationships are usually identified using inclusion
 dependency techniques. To overcome the presence of dirty data, we propose an
 error-robust inclusion dependency scheme.
 %, which enhances traditional inclusion dependency techniques.
