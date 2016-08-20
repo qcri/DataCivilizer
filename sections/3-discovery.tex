@@ -55,7 +55,9 @@ task at hand. For example, to find all data sets that contain names of employees
 in a company, the user issues a discovery query that searches for all attributes
 referring to an employee or a name. The user can then write a SQL query to filter
 from a list. Here are some examples of functions that the discovery module
-provides to users;  each of these queries can be answered using data collected as a part of profiling:
+provides to users;  each of these queries can be answered using data collected
+as a part of profiling \notera{as well as the information expressed in the
+linkage graph}:
 %\srm{I think a little more detail is
 %needed here describing how the profiles built above are used to answer these
 %queries.  As it is the two subsections don't seem well connected -- why are
@@ -65,7 +67,7 @@ provides to users;  each of these queries can be answered using data collected a
 \item \textbf{Fill-in schema}. Given a set of names, this function retrieves 
 tables or groups of tables that contain the desired attributes. The core
 of the operation consists of finding tables with similar attribute names to the
-provided ones, using they keyword index.
+provided ones, using the keyword index.
 %\mourad{How do you know?}
 
 \item \textbf{Extend attribute.} This is similar to the extend operator of
