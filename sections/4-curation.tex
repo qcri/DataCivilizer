@@ -2,7 +2,20 @@
 \section{Polystore Query Processing}
 \label{sec:curating}
 
-\dcv uses the \texttt{BigDAWG} polystore~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15} to federate access to multiple storage systems inside an organization. \texttt{BigDAWG} consists of a middleware query optimizer and executor, and shims to various local storage systems. We assume that a user has run discovery and that the corresponding linkage graph has been computed.  If the user is interested in a composite table containing a particular set of columns that are not available in any single data source,  we can use the PK-FK mining techniques describe in the previous section to find a set of possible join paths that can be used to materialize the table of interest to the user. Furthermore, for any particular join path, it is straightforward to construct the \texttt{BigDAWG} query that materializes the view specified by each join path. However, the we still need to choose which of several possible join paths is the best to compute the table of interest to the user.
+\dcv uses the \texttt{BigDAWG}
+polystore~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15} to federate access to
+multiple storage systems inside an organization. \texttt{BigDAWG} consists of a
+middleware query optimizer and executor, and shims to various local storage
+systems. We assume that a user has run discovery and that the corresponding
+linkage graph has been computed.  If the user is interested in a composite table
+containing a particular set of columns that are not available in any single data
+source,  we can use the PK-FK mining techniques described in the previous
+section to find a set of possible join paths that can be used to materialize the
+table of interest to the user. Furthermore, for any particular join path, it is
+straightforward to construct the \texttt{BigDAWG} query that materializes the
+view specified by each join path. However, we still need to choose which of
+several possible join paths is the best to compute the table of interest to the
+user.
 	
 
 % in Section~\ref{subsec:selectview}. As one of the most important criteria to select the join path is its cleanliness, we then propose a model to estimate the cleanliness of the join path in Section~\ref{subsec:model}. When the join path is selected, we need to clean it with a given budget. We develop a method to integrate the cleaning operations in the query plan that materializes the view in Section~\ref{subsec:gain}.
