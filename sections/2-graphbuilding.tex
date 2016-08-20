@@ -13,9 +13,10 @@ A profile consists of one or more {\it signatures};  each signature summarizes
 the original contents of the column into a domain-dependent, compact
 representation of the original data.  By default, signatures for numerical values consist of a
 histogram representing the data distribution and; for textual values they consist of a vector
-of the most significant words in the column.  Our profiles also
+of the most significant words in the column, indexed using a hash table.  Our profiles also
 contain information about data cardinality, data type, and numerical ranges if
-applicable~\cite{profiling_survey}.
+applicable~\cite{profiling_survey}.  \srm{We also keep a global keyword index that maps to columns whose
+names or contents contain each word, to facilitate keyword queries.}
 
 %Note that finding pairwise relationships between each attribute profile is an
 %$O(n^2)$ computation, which will not scale.  We thus rely on locality sensitive
@@ -113,13 +114,13 @@ similarity. The heavy relationships include the \pkfk (PK-FK), inclusion depende
 
 
 The graph builder first computes the light relationships amongst pairs of
-nodes in advance during offline stage. In particular, the graph builder first finds column similarity and
+nodes in advance during offline processing. In particular, the graph builder first finds column similarity and
 schema similarity relationships.  Each edge is assigned a weight that represents
 the strength of the relationship: the particular meaning depends on the edge
 semantics. Also, edges with a similarity less than a user-defined threshold are
 discarded to avoid having a graph with too many edges that are not significant.
 A straightforward computation of such relationships requires a $O(n^2)$
-computation, which will not scale. However, for light-relationships, which depend on similarity metric
+computation, which will not scale. However, for light-relationships, which depend on similarity metrics
 such as edit distance and Jaccard similarlity, we can employ locality sensitive hashing
 (LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to yield sub-quadratic runtime; we have found LSH to run quite well in practice, even for data sets up to several Terabytes.
 
@@ -184,6 +185,6 @@ The specified features include
 \emph{column name similarity}, the similarity between the attribute names of X and Y, 
 and \emph{out-of-domain range}, the percentage of values in \SY not within $[\min(\RX), \max(\RX)]$ where $\min(\RX)$ and $\max(\RX)$ are respectively the minimum and maximum values in \RX.
 
-Using the above features, we implemented the four machine learning classification algorithms from Rostin et al.~\cite{DBLP:conf/webdb/RostinABNL09}. These allow us to distinguish spurious inclusion dependencies from real ones with high accuracy. 
+Using the above features, we implemented the four machine learning classification algorithms from Rostin et al.~\cite{DBLP:conf/webdb/RostinABNL09}. These allow us to distinguish spurious inclusion dependencies from real ones with high accuracy.   We add the highest confidence candidate PK-FK pairs as edges in the linkage graph.
 
 Next we discuss how to utilize the linkage graph to help the user discover his interesting data in Section~\ref{sec:discovery}. The PK-FK relationships can be used to link the tables of user interest from the discovery module. However, there may exist multiple subgraphs in the linkage graph that can connect all the interesting tables, which we call \emph{join paths}. In Section~\ref{sec:curating}, we discuss the choice of which one(s) to use to materialize a view for the user.

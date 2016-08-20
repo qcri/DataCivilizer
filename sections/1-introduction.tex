@@ -27,7 +27,8 @@ The {\it online component} involves executing a user-supplied workflow that cons
 
 
 %For example, a data scientist at Merck wants to build an drug-indication ontology. 
-\stitle{[Linkage Graph Computation.]} The linkages amongst attributes and tables are needed so that the user can discover interesting data, assemble relational schemas, and run \textsf{SQL} queries on the discovered data sets. All the linkages that can be found in linear time are built in advance during offline stage. All the other linkages, such as \pkfk relationships, will be built in background or on-demand during the online stage. Our current prototype identifies \pkfk relationships, using inclusion dependencies. As such, the process of building the linkage graph can be run dynamically and on-demand; we discuss its details in Section~\ref{sec:stitching}.
+\stitle{[Linkage Graph Computation.]} The linkages amongst attributes and tables are needed so that the user can discover interesting data, assemble relational schemas, and run \textsf{SQL} queries on the discovered data sets. All the linkages that can be found in linear time are built in advance during offline stage. 
+\srm{Graph building does not need to be done all at once:  as data changes and new tables are added, they can be scanned and added to the graph incrementally.} All the other linkages, such as \pkfk relationships, will be built in background or on-demand during the online stage. Our current prototype identifies \pkfk relationships, using inclusion dependencies. As such, the process of building the linkage graph can be run dynamically and on-demand; we discuss its details in Section~\ref{sec:stitching}.
 
 
 

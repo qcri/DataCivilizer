@@ -4,7 +4,7 @@
 
 The data discovery module's goal is to find relevant data from perhaps hundreds
 to thousands of data sets  spread across the different storage systems of an
-enterprise.
+enterprise, using the linkage graph to provide answers efficiently.
 
 Current solutions to finding relevant data include asking an expert (if one is
 available) or  performing manual exploration by inspecting data sets one by one.
@@ -49,15 +49,13 @@ search}) or table values ({\it content search}).
 \subsection{Discovery Queries}
 \label{subsec:api}
 
-The profiles are the building blocks used by the graph builder (Section
-\ref{subsec:graphbuild}) to produce a linkage graph, that in turn serves as the
-main data structure to answer discovery queries. Users can submit
+Users can submit
 \emph{discovery queries} to find data sets whose schemas are relevant to the
 task at hand. For example, to find all data sets that contain names of employees
 in a company, the user issues a discovery query that searches for all attributes
 referring to an employee or a name. The user can then write a SQL query to filter
 from a list. Here are some examples of functions that the discovery module
-provides to users:
+provides to users;  each of these queries can be answered using data collected as a part of profiling:
 %\srm{I think a little more detail is
 %needed here describing how the profiles built above are used to answer these
 %queries.  As it is the two subsections don't seem well connected -- why are
@@ -67,20 +65,20 @@ provides to users:
 \item \textbf{Fill-in schema}. Given a set of names, this function retrieves 
 tables or groups of tables that contain the desired attributes. The core
 of the operation consists of finding tables with similar attribute names to the
-provided ones.
+provided ones, using they keyword index.
 %\mourad{How do you know?}
 
 \item \textbf{Extend attribute.} This is similar to the extend operator of
 Octopus~\cite{DBLP:journals/pvldb/CafarellaHK09}, or the ABA operation of
 Infogather~\cite{DBLP:conf/sigmod/YakoutGCC12}. Using this function users can
 extend tables of interest with additional attributes. The core of the operation
-consists of finding matches to the current table, and then retrieving 
-attributes that do not appear in the original table.
+consists of finding matches to the current table using the linkage graph, and then retrieving 
+attributes that do not appear.
 
 \item \textbf{Subsumption relationships.} Given some reference table, this
 function provides a list of tables or groups of tables that have some form of
 subsumption relationship (\ie are contained in or contain) with respect to the
-reference table. 
+reference table;  this can be done directly from the linkage graph.
 
 \item \textbf{Similarity and lookup.} Discovery can also be used to find schemas
 that contain data similar to some provided schema (attribute or table), as well
