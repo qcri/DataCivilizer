@@ -1,0 +1,190 @@
+% !TEX root = ../main.tex
+\section{Linkage Graph Computation}
+\label{sec:stitching}
+
+In this section, we discuss how to build the linkage graph, as shown in Figure~\ref{fig:arch}. We first show how to build the data profiles in linear time which can be fed into the linkage graph and then formally define our graph model in Section~\ref{subsec:graphbuild}. Finally we discuss a specific kind of linkage in the graph in Sections~\ref{subsec:eind} and~\ref{subsec:refine}.
+
+
+
+\subsection{Data Profiling at Scale}\label{subsec:profile}
+
+The key idea is to summarize each column of each table into a {\em profile}.
+A profile consists of one or more {\it signatures};  each signature summarizes
+the original contents of the column into a domain-dependent, compact
+representation of the original data.  By default, signatures for numerical values consist of a
+histogram representing the data distribution and; for textual values they consist of a vector
+of the most significant words in the column, indexed using a hash table.  Our profiles also
+contain information about data cardinality, data type, and numerical ranges if
+applicable~\cite{profiling_survey}.  \srm{We also keep a global keyword index that maps to columns whose
+names or contents contain each word, to facilitate keyword queries.}
+
+%Note that finding pairwise relationships between each attribute profile is an
+%$O(n^2)$ computation, which will not scale.  We thus rely on locality sensitive
+%hashing (LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to address this issue.
+%Specifically, we hash each signature and group together the colliding ones.
+%%those that % collide.  These are more likely to be similar; we only need to
+%perform comparisons among the nodes in each cluster, ignoring cross cluster
+%comparisons.  This approach avoids $O(n^2)$ operations and appears to perform
+%well in practice.
+
+%\subsection{Data Discovery Components}
+%
+%The data discovery module consists of two conceptually different components, a
+%data profiler and a graph builder, that collaborate to build the linkage graph
+%indicated in Figure~\ref{fig:arch}. 
+%
+%\begin{enumerate}
+%\item {\bf Data profiler.} This component summarizes each column of each table
+%into a profile. Each profile contains a signature, which is a domain-dependent,
+%compact representation of the original content.  For numerical data, we use the
+%data distribution, and for textual data,  a vector of the most significant words
+%in the column.  Our profiles also contain information about data cardinality,
+%data type, and numerical ranges if applicable~\cite{profiling_survey}.
+%
+%\item {\bf Graph builder.} Using the profiles, the graph builder finds
+%relationships among nodes and represents them as edges. Examples of
+%relationships are \emph{content similarity} based on measuring the similarity
+%distance between signatures and \emph{schema similarity} that captures the
+%similarity of the labels of the different nodes. Another kind of relationship
+%captures the hierarchical relationship between a table and its columns.
+%\nan{Each node is a column, or a table? The graph is not formally defined.}
+%\sibo{The definition of node appears in Section \ref{introduction}, but it will
+%be better to recap the definition again.}
+%
+%\end{enumerate}
+%
+%The graph resulting from this process can be used to answer discovery queries.
+%Discovery queries vary from simple keyword search, useful to quickly glance over
+%data, to more involved queries such as table augmentation, to add attributes of
+%interest to known tables. We discuss the queries at the end of the section. 
+
+%\subsection{Data Profiling at Scale}
+
+To run at scale, data profiling relies on sampling to estimate the cardinality of
+columns and the quantiles for numerical data. This avoids having to sort each
+column, which is not a linear computation.  This also allows us to avoid making
+a copy of the data,  reducing memory pressure.
+
+The profiler consists of a pipeline of stages. The first stage
+performs basic de-noising of the data, such as removing empty values and dealing
+with potential formatting issues of the underlying files, \eg figuring out the
+separator for a CSV file.  The second stage determines the data type of each
+column, information that is propagated along with the data to the next stages.
+The rest of the stages are responsible for computing cardinalities, and performing
+quantile estimation, \eg to determine numerical ranges.
+
+The profiler has connectors to read data from different data sources, such as
+HDFS files, RDBMS or CSV files. Data sets are streamed through the profiler
+pipeline;  the pipeline outputs the results
+%and  at the end the resulting attribute profile is sent
+to a {\it profile store} where it is later consumed by the graph builder, which
+will be explained in Section \ref{subsec:graphbuild}.
+%At the same time,
+The profiler works in a distributed environment using a lightweight coordinator
+that splits the work among multiple processors, helping to scale the
+computation.
+
+%The discovery module benefits from our distributed architecture that allows us
+%to parallelize profiling as well as graph building, further speeding up
+%execution times. Other kinds of relationships such as finding FK-PKs are too
+%expensive to compute at scale for the whole graph.  These are left to the
+%stitching module, which is described next.
+
+
+\subsection{Graph Builder}
+\label{subsec:graphbuild}
+
+The linkage graph is a hyper-graph where each simple node represents a column, each hyper-node consists of multiple simple nodes and can represents a table or a compound key, and each simple edge represents a relationship between two nodes in the graph. Note the hyper-graph can express relationships involving more than two columns. This is useful to capture relationships amongst tables, \eg \pkfk relationship between compound keys.
+
+Examples of relationships are 
+\emph{column similarity}, 
+\emph{schema similarity}, 
+\emph{structure similarity}, % based on SimRank~\cite{DBLP:conf/kdd/JehW02}\mourad{No need to mention how since we don't for the others.}, 
+\emph{inclusion dependency}, 
+\emph{\pkfk relationship}, and
+\emph{table subsumption}. 
+The node label contains table metadata, such as table name, cardinality and
+other information computed by the profiler. The edge label includes metadata
+about the relationship it represents, \eg type and score, if any. Computing
+the different relationships requires different time complexities. We 
+categorize them into, \textit{light relationships}, which can be computed in
+sub-quadratic time, and \textit{heavy relationships}, which needs at least
+quadratic time. The light relationships contain column similarity and schema
+similarity. The heavy relationships include the \pkfk (PK-FK), inclusion dependency, and structure similarity. 
+
+
+The graph builder first computes the light relationships amongst pairs of
+nodes in advance during offline processing. In particular, the graph builder first finds column similarity and
+schema similarity relationships.  Each edge is assigned a weight that represents
+the strength of the relationship: the particular meaning depends on the edge
+semantics. Also, edges with a similarity less than a user-defined threshold are
+discarded to avoid having a graph with too many edges that are not significant.
+A straightforward computation of such relationships requires a $O(n^2)$
+computation, which will not scale. However, for light-relationships, which depend on similarity metrics
+such as edit distance and Jaccard similarlity, we can employ locality sensitive hashing
+(LSH)~\cite{DBLP:conf/compgeom/DatarIIM04} to yield sub-quadratic runtime; we have found LSH to run quite well in practice, even for data sets up to several Terabytes.
+
+It is usually expensive to compute the heavy relationships. To address this
+issue, the graph builder adopts the following general approach: (i)~the
+computation of heavy relationships is performed in the background, (ii)~data
+profiles and light relationships are used as much as possible to prune the
+search space for the heavy relationships, and (iii)~after the user chooses the data of
+interest, if the heavy relationships are not ready amongst this data, the graph builder can construct the heavy relationships online.
+
+%For efficiently computing the heavy relationships, 
+We use the \pkfk relationships as an example of how
+we efficiently compute a heavy relationship and deal with the complexities that arise in real data where errors and noise make finding
+such relationships tricky. The graph builder utilizes an
+implementation of inclusion dependency (i.e., column A {\it includes all the values of} column B) to find candidate PK-FK relationships, since a PK should include all values in an FK column.  We then 
+ refine the candidates using machine learning methods. However,
+as it is well known, data in the wild is quite dirty, which makes discovering
+inclusion dependencies difficult. Specifically, foreign keys may not match a
+primary key, because of errors in either the PK or the FK. To tolerate errors,
+we extend traditional inclusion dependency discovery by both key coverage and
+text similarity and propose an \emph{\eind} approach. 
+We describe this approach in Section~\ref{subsec:eind} and the machine learning
+techniques to refine the candidate PK-FK relationships in Section~\ref{subsec:refine}.
+
+\subsection{Error-Robust Inclusion Dependency}\label{subsec:eind}
+
+As noted above, \Pkfk relationships are usually identified using inclusion
+dependency techniques. To overcome the presence of dirty data, we propose an
+error-robust inclusion dependency scheme.
+%, which enhances traditional inclusion dependency techniques.
+Consider two columns (or compound columns) from two tables \R and \S denoted by
+\RX and \SY. If there is a foreign key constraint on \RX with reference \SY, all
+the values in \RX must appear in \SY, which yields an inclusion dependency from
+\RX to \SY. However, in the real world, values in foreign key fields may not
+exist in the primary key fields due to errors.  In this case an inclusion
+dependency from foreign key to primary key does no hold.
+
+To address this, for each distinct value in \RX, we calculate the
+text similarity to values in \SY and use the maximum value as the strength of a
+value matching. We then compute the total strength of the maximum matching value
+divided by the number of values in \RX. This is the overall strength of the
+inclusion dependency.  If this number exceeds a predefined threshold $\delta$,
+we add an inclusion dependency from \RX to \SY in our linkage graph.
+%\nan{This is very weak. We can also tolerate errors by saying if $> x\%$ \RX
+%appears in \SY, then there is a related inclusion dependency.}
+
+When dealing with compound columns, we can utilize different text similarity functions on different fields. 
+Also, we must compose the individual column scores to achieve an overall strength.
+
+
+\subsection{Candidate PK-FK Relationships Refinement}
+\label{subsec:refine}
+
+
+The error-robust inclusion dependency algorithm returns a collection of candidate PK-FK relationships.
+We use the algorithms in the work by Rostin et al.~\cite{DBLP:conf/webdb/RostinABNL09} 
+%\nan{Ahmed's comment: Which is this system? Can it be named?}\mourad{It doesn't have a name!} 
+to refine our candidate selection. The authors proposed 10~different features to distinguish foreign key constraints from spurious inclusion dependencies. Consider two columns \RX and \SY with an inclusion dependency from the first one to the second one. 
+%In~\cite{DBLP:conf/webdb/RostinABNL09}, 
+The specified features include 
+\emph{coverage}, the ratio of distinct values in \RX that are contained in \SY, 
+\emph{column name similarity}, the similarity between the attribute names of X and Y, 
+and \emph{out-of-domain range}, the percentage of values in \SY not within $[\min(\RX), \max(\RX)]$ where $\min(\RX)$ and $\max(\RX)$ are respectively the minimum and maximum values in \RX.
+
+Using the above features, we implemented the four machine learning classification algorithms from Rostin et al.~\cite{DBLP:conf/webdb/RostinABNL09}. These allow us to distinguish spurious inclusion dependencies from real ones with high accuracy.   We add the highest confidence candidate PK-FK pairs as edges in the linkage graph.
+
+Next we discuss how to utilize the linkage graph to help the user discover his interesting data in Section~\ref{sec:discovery}. The PK-FK relationships can be used to link the tables of user interest from the discovery module. However, there may exist multiple subgraphs in the linkage graph that can connect all the interesting tables, which we call \emph{join paths}. In Section~\ref{sec:curating}, we discuss the choice of which one(s) to use to materialize a view for the user.

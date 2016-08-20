@@ -1,0 +1,96 @@
+% !TEX root = ../main.tex
+\section{Discovery}
+\label{sec:discovery}
+
+The data discovery module's goal is to find relevant data from perhaps hundreds
+to thousands of data sets  spread across the different storage systems of an
+enterprise, using the linkage graph to provide answers efficiently.
+
+Current solutions to finding relevant data include asking an expert (if one is
+available) or  performing manual exploration by inspecting data sets one by one.
+Obviously, both approaches are time-consuming and prone to missing relevant data
+sources. Recently, there have been efforts to automate this process, some
+examples are Goods~\cite{DBLP:conf/sigmod/HalevyKNOPRW16} and
+InfoGather~\cite{DBLP:conf/sigmod/YakoutGCC12}. Goods permits users to inspect
+datasets and find others similar to datasets of interest. Infogather permits to
+extend the attributes of a dataset of interest with attributes from other
+datasets. These systems are designed to solve these particular use cases, and so
+their indexes are built for this specific purpose. In
+contrast, our discovery module aims to support general \emph{discovery queries} that
+can then be used for unanticipated discovery needs. Hence, the discovery module
+uses a linkage graph (Section \ref{subsec:graphbuild}) to permit a broader range
+of queries. 
+
+%Mourad: A bit handwaving!
+
+%\srm{I don't understand the
+%following sentence, vis-a-vis the Goods paper, which seems to be about
+%supporting data discovery for a bunch of use cases, without one specific
+%use-case in mind.}\mourad{I agree with Sam; after skimming through the paper, I
+%see Goods as a serious competitor to DC, at least on the discovery side.}
+%
+%Unlike these systems that are designed with a specific use-case in mind, our
+%discovery module aims to collect enough information about the data sets and to
+%expose them to upper layers of \dcv, allowing the orchestration of complex query
+%workflows that integrate a variety of cleaning, linking, and querying
+%operations.
+
+%execution, which is the ultimate goal.  
+
+The data discovery module narrows down the search for relevant data from
+the total number of data sources to a handful, on which finer-grained
+relationships can be computed efficiently. \dcv discovery supports a
+user-level API to search for relevant data using a variety of techniques such as
+searching for tables with specific substrings in the schemas ({\it schema
+search}) or table values ({\it content search}). 
+%Discovery is extensible; an engineer can extend the supported relationships to
+%cover other relevant use cases.
+
+\subsection{Discovery Queries}
+\label{subsec:api}
+
+Users can submit
+\emph{discovery queries} to find data sets whose schemas are relevant to the
+task at hand. For example, to find all data sets that contain names of employees
+in a company, the user issues a discovery query that searches for all attributes
+referring to an employee or a name. The user can then write a SQL query to filter
+from a list. Here are some examples of functions that the discovery module
+provides to users;  each of these queries can be answered using data collected as a part of profiling:
+%\srm{I think a little more detail is
+%needed here describing how the profiles built above are used to answer these
+%queries.  As it is the two subsections don't seem well connected -- why are
+%profiles needed?} 
+
+\begin{itemize}
+\item \textbf{Fill-in schema}. Given a set of names, this function retrieves 
+tables or groups of tables that contain the desired attributes. The core
+of the operation consists of finding tables with similar attribute names to the
+provided ones, using they keyword index.
+%\mourad{How do you know?}
+
+\item \textbf{Extend attribute.} This is similar to the extend operator of
+Octopus~\cite{DBLP:journals/pvldb/CafarellaHK09}, or the ABA operation of
+Infogather~\cite{DBLP:conf/sigmod/YakoutGCC12}. Using this function users can
+extend tables of interest with additional attributes. The core of the operation
+consists of finding matches to the current table using the linkage graph, and then retrieving 
+attributes that do not appear.
+
+\item \textbf{Subsumption relationships.} Given some reference table, this
+function provides a list of tables or groups of tables that have some form of
+subsumption relationship (\ie are contained in or contain) with respect to the
+reference table;  this can be done directly from the linkage graph.
+
+\item \textbf{Similarity and lookup.} Discovery can also be used to find schemas
+that contain data similar to some provided schema (attribute or table), as well
+as to find schemas that contain certain values, \ie keyword search for textual
+data and range search for numerical data.  
+
+\end{itemize}
+
+Discovery works similarly to an information retrieval system: schema retrieval queries
+do not return a specific answer, but instead return a ranked set of results. We
+are currently exploring several ranking options, and a model that decouples
+discovery query processing from ranking evaluation seems the most promising.
+
+%\srm{Any suggestions about how to do this?}
+
