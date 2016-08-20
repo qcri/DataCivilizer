@@ -21,7 +21,7 @@ user.
 % in Section~\ref{subsec:selectview}. As one of the most important criteria to select the join path is its cleanliness, we then propose a model to estimate the cleanliness of the join path in Section~\ref{subsec:model}. When the join path is selected, we need to clean it with a given budget. We develop a method to integrate the cleaning operations in the query plan that materializes the view in Section~\ref{subsec:gain}.
 
 
-\subsection{Materialized View Selection}
+\subsection{Join Path Selection}
 
 The conventional data federation wisdom is to choose the join path that minimizes the query processing cost. However, this ignores data cleaning issues, to which we now turn. To achieve high quality results, one has to clean the data in conjunction with querying the table. For example, if one has a data value, \code{New Yark}, and wants to transform it to one of its airport codes \code{(JFK, LGA)}, then one must correct the data to \code{New York}, prior to the airport code lookup. Obviously, cleaning usually entails a human specification of the corrected value or a review of the value produced by an automatic algorithm. Such human costs can easily dominate the total query execution time and represent a significant financial cost in many data cleaning scenarios.
 As such, one goal of \dcv is to choose the join path that produces the highest quality answer, rather than the one that is easiest to compute. 
