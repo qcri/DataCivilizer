@@ -3,9 +3,11 @@
 \section{Data Civilizer in the Wild}
 \label{sec:wild}
 
-We have built an initial prototype of \dcv containing the data discovery module
-and the linkage graph builder as discussed in Section~\ref{sec:discovery}
-and~\ref{sec:stitching}. Ultimately, we will integrate \dcv with
+We have built an initial prototype of \dcv containing 
+the linkage graph builder 
+and the data discovery module
+as discussed in Sections~\ref{sec:stitching}
+and~\ref{sec:discovery}, respectively. Ultimately, we will integrate \dcv with
 \texttt{BigDawg}, our implementation of a polystore, to realize the end-to-end
 system described in this paper. We have been working closely with end users to
 adapt our prototype to relevant real world problems. In particular, we have
@@ -40,9 +42,9 @@ data. For example, staff usually want to create reports, for which they need
 access to various kinds of data. The warehouse contains around 1TB of data
 spread across approximately 3K tables.
 
-In their current workflow, a
+In the current workflow, a
 DWH customer presents a question, which a DWH team
-members by manually searching for tables containing relevant data. Once they have determined
+members addresses by manually searching for tables containing relevant data. Once they have determined
 the tables of interest, they create a view that is accessed by the customer to
 solve the question at hand. Below are some of the common use cases we have
 encountered:
@@ -62,7 +64,6 @@ of the warehouse and helps to maintain it tidy and minimal.
 Our prototype is deployed in an Amazon EC2 instance managed by the MIT DWH team
 with access to their data. We have been working with them for 3 months,
 iterating over priorities and learning about the problems they are facing.
-
 In the future, we aim to deploy the entire \dcv system to enable running queries
 directly over the hundreds of data sources, by using the polystore query
 processing and curation module and linkage graph builder to create the necessary
@@ -90,7 +91,7 @@ users' purpose.
 different identifiers and formats in different databases. Chemical identifiers
 have been a subject of research in the bioinformatics community: multiple
 different formats have been proposed with different properties according to the
-scenario. \dcv helps them on this task by discovering datasets that contain
+scenario. \dcv helps on this task by discovering datasets that contain
 schemas with the entities of interest.
 
 We have been collaborating with 4 engineers and bioinformatics experts at Merck

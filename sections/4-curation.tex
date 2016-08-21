@@ -30,21 +30,21 @@ In \dcv, a user has to decide how to trade off data quality and cleaning cost.
 \dcv defines two parameters, both under the user's control.
 
 \begin{enumerate}
-\item Minimize cost for a specific cleanliness metric. In this case, the user requires the data to be a certain percentage, \emph{P}, correct and will spend whatever it takes to get to that point.
+\item Minimize cost for a specific cleanliness metric. In this case, the user requires the data to be a certain percentage, \emph{P}, correct and will spend the least it takes to get to that point.
 
 \item Maximize accuracy for a specific cost. In this case, the user is willing to spend \emph{M} and wishes to make the data as clean as possible.
 \end{enumerate}
 
-Sometimes the user is the one actually cleaning the data. In this case, (s)he can use \emph{P} and \emph{M} to quantify the value of her/his time. 
+Sometimes the user is the one actually cleaning the data. In this case, she can use \emph{P} and \emph{M} to quantify the value of her time. 
 In other cases, cleaning is performed by other domain experts, who generally need to be paid. In this case, \emph{P} and \emph{M} are statements about budget priorities.
 
-Sometimes the user may prefer the join path that yields largest view size, \ie the number of rows in the view. 
+Sometimes the user may prefer the join path that yields the largest view size, \ie the number of rows in the view. 
 For example, the user may want a view with 1,000 rows and 90\% cleanliness rather than a view with 10 rows and 98\% cleanliness. 
-We can combine all the facets as the criteria for join path selection.
+We can combine all these facets as the criteria for join path selection.
 Estimating result set sizes has been extensively studied in the literature~\cite{DBLP:conf/sigmod/IoannidisP95} and we just utilize the cardinality estimates produced by \texttt{BigDAWG}.
 
 As a result, \dcv must make the following decisions. 
-First, it needs to assess the cleanliness of the result of any given join path. We treat this issue in Section~\ref{subsec:model}. 
+First, it needs to assess the cleanliness of the result of any given join path. We discuss this issue in Section~\ref{subsec:model}. 
 Then, we need to choose where to place, in the resulting query plan, data cleaning operations to be the most efficient. This is the topic of Section~\ref{subsec:gain}.
 
 
@@ -55,16 +55,18 @@ In \dcv, we collect information about the errors in each data set.
 Specifically, we need an accuracy metric for each column, namely an estimate for the percentage of the column which is erroneous. There are multiple ways to achieve this goal including: 
 (i)~Have the DBA who added the table make an estimate for the accuracy of each column. 
 (ii)~Estimate the fraction of null values and outliers in the column as $e$, and assume that a second accuracy estimator is $1-e$.
-(iii)~Conduct a similarity join on any foreign key and the primary key and assume any mismatched values are errors. We can also assume that these error estimates can be used for the non-key fields in the table. 
+(iii)~Conduct a similarity join on any foreign key and the primary key of the table and assume any mismatched values are errors. We can also assume that these error estimates can be used for the non-key fields in the table. 
 (iv)~Cluster the tables with similar primary keys and assume that their records have the same semantic information.  Therefore, we identify the columns in the cluster which are similar, and use majority voting to estimate the cleanliness of each column. 
 All of these methods can generate the  error estimates we need. 
-Hence, we can linearly combine these estimates based on our confidence in the four methods. For example, we can assign a high coefficient to the first method if the DBA is trustworthy. This gives us a mechanism to assign a cleanliness estimate to any non-key attribute. These cleanliness estimations can be stored and updated in the linkage graph.
+Hence, we can linearly combine these estimates based on our confidence in the four methods. For example, we can assign a high coefficient to the first method if the DBA is trustworthy. 
+%This gives us a mechanism to assign a cleanliness estimate to any non-key attribute. 
+These cleanliness estimations can be stored and updated in the linkage graph.
 
 An extension of the above majority voting methodology is to construct a ``disorder metric'' that indicates the distance between an incorrect value and its ground truth. For numeric values, we use the average and standard deviation as the disorder metric. For example, if salary errors average 5\% with standard deviation 2\%, then most of the errors are in the range from 3\% to 7\%. For text values, we use the ``lexical distance'' (such as distance based on WordNet~\cite{WordNet,DBLP:journals/cacm/Miller95} and edit distance) as the disorder metric. For example, if an address field routinely confuses ``\textit{road}'' and ``\textit{street}'', but very rarely gets the name of the street wrong, then the lexical distance is very small. Using this tactic, we can use fuzzy predicates and fuzzy joins in place of the exact operations to improve the accuracy of our results.
 We plan to examine this tactic in detail as future work. We now propose a mechanism to estimate the cleanliness of a join path using the error information.
 
 
-We first define the cleanliness of an edge in the join graph. We first consider the join on textual values. Consider two linked nodes \RX and \SY in the graph, where we align the values in \RX and \SY using the maximum matching defined in Section~\ref{subsec:eind}. Suppose that the maximum lexical distances in the two nodes are respectively \Dis(\RX) and \Dis(\SY). Hence, the distance between two values in \RX and \SY that represent the same object should be within $\Dis(\RX)+\Dis(\SY)$. Thus we limit the distance between the pairs of aligned values in the maximum matching to $\Dis(\RX)+\Dis(\SY)$. The fraction of the values in the foreign key that appear in the maximal matching is an estimate for the cleanliness of the edge. Similarly, we can do the same thing for numeric values with a numeric metric.
+We first define the cleanliness of an edge in the join graph. We first consider the join on textual values. Consider two linked nodes \RX and \SY in the graph, where we align the values in \RX and \SY using the maximum matching defined in Section~\ref{subsec:eind}. Suppose that the maximum lexical distances in the two nodes are respectively \Dis(\RX) and \Dis(\SY). Hence, the distance between two values in \RX and \SY that represent the same object should be within $\Dis(\RX)+\Dis(\SY)$. Thus we limit the distance between the pairs of aligned values in the maximum matching to $\Dis(\RX)+\Dis(\SY)$. The fraction of the values in the foreign key that appear in the maximal matching is an estimate for the cleanliness of the edge. Similarly, we can do the same  for numeric values with a numeric metric.
 Given a join path, its cleanliness is obtained by multiplying the cleanliness values of all the edges and the nodes involved in the predicates.
 
 
@@ -91,8 +93,9 @@ Given a join path, its cleanliness is obtained by multiplying the cleanliness va
 \label{subsec:gain}
 
 
-In a query plan with cleaning operations, the cleaning cost and the result quality are different based on the position of the data cleaning operation. For example, cleaning a whole column before the selection on this column yields a higher cleaning cost and query accuracy than putting the cleaning operation after the selection operation. Obviously expensive cleaning should be performed on as few records as possible and have as max impact as possible. We now give a way to obtain a query plan with cleaning operations that achieve high quality gain with a limited cleaning budget.
-The intuition is that for each value in each node of the join path, we count how many times it appears in the query result. Then we clean the values in the decreasing order of the number of times they appear, until our budget is exhausted. This will only address false positives; a different approach is required for false negatives. We leave it as a future work.
+In a query plan with cleaning operations, the cleaning cost and the result quality are different based on the position of the data cleaning operation. For example, cleaning a whole column before the selection on this column yields a higher cleaning cost and query accuracy than putting the cleaning operation after the selection operation. Obviously expensive cleaning should be performed on as few records as possible and have as most impact as possible. 
+Thus we need a way to obtain a query plan with cleaning operations that achieve high quality gain with a limited cleaning budget.
+The intuition of our solution is that for each value in each node of the join path, we count how many times it appears in the query result. Then we clean the values in the decreasing order of the number of times they appear, until our budget is exhausted. This will only address false positives; a different approach is required for false negatives. We leave it as a future work.
 
 
 %Another better way is that we use dynamic programming to obtain a query plan with cleaning operations that achieve the maximum accuracy gain with limited cleaning cost budget or achieve the desired accuracy with the smallest cleaning cost budget. 

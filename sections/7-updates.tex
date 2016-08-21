@@ -3,7 +3,7 @@
 \section{Updates}
 \label{sec:updates}
 
-Real-world data is rarely static, and so some way to deal new datasets and updates is needed. We consider three types of updates.
+Real-world data is rarely static and hence we need some way to deal with new datasets and updates. We consider three types of updates.
 
 \stitle{(1) Insertions/deletions on source tables.} This happens when there is a
 change to a table, \eg the insertion of a new procurement record in the MIT Data
@@ -34,7 +34,7 @@ In some cases, the human effort to update and clean MVs may be daunting, and aut
 \stitle{(ii) Provenance management.}  To perform update propagation, \dcv will need to keep track of the relationships between data sets (their provenance). \dcv will leverage Decibel~\cite{DBLP:journals/pvldb/MaddoxGEMPD16}, a system developed at MIT for this purpose.
 
 \stitle{(iii) Incremental graph updates.}  As data changes, the linkage graph and profiles will also need to be updated.  To support incremental updates  to profiles we  use a simple reference counting scheme, where each keyword has a count associated with it that is decremented when a word is removed.  A word
-is removed from the profile when its count reaches zero.  To support updates to the graph, rather than recomputing relationships every time an table changes, we 
+is removed from the profile when its count reaches zero.  To support updates to the graph, rather than recomputing relationships every time a table changes, we 
 maintain an estimate of the fraction of rows in a column that have changed since we last updated its node and edges in the graph, and re-index a column when
 this estimate goes above a set threshold.
 

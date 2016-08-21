@@ -16,8 +16,10 @@ and~\ref{subsec:refine}, respectively.
 The key idea is to summarize each column of each table into a {\em profile}.
 A profile consists of one or more {\it signatures};  each signature summarizes
 the original contents of the column into a domain-dependent, compact
-representation of the original data.  By default, signatures for numerical values consist of a
-histogram representing the data distribution and; for textual values they consist of a vector
+representation of the original data.  
+By default, signatures for numerical values consist of a
+histogram representing the data distribution and
+ for textual values, they consist of a vector
 of the most significant words in the column, indexed using a hash table.  Our profiles also
 contain information about data cardinality, data type, and numerical ranges if
 applicable~\cite{profiling_survey}. In addition to the profiles, we maintain a
@@ -127,7 +129,7 @@ Examples of relationships are
 The node label contains table metadata, such as table name, cardinality and
 other information computed by the profiler. The edge label includes metadata
 about the relationship it represents, \eg type and score, if any. Computing the
-different relationships requires different time complexities. We categorize them
+different relationships requires different time complexities. We thus categorize them
 into \textit{light relationships}, which can be computed in sub-quadratic time,
 and \textit{heavy relationships}, which need at least quadratic time. The light
 relationships contain column similarity and schema similarity. The heavy
@@ -185,7 +187,9 @@ Consider two columns (or compound columns) from two tables \R and \S denoted by
 the values in \RX must appear in \SY, which yields an inclusion dependency from
 \RX to \SY. However, in the real world, values in foreign key fields may not
 exist in the primary key fields due to errors.  In this case an inclusion
-dependency from foreign key to primary key does no hold.
+dependency 
+from the foreign key to the primary key 
+does no hold.
 
 To address this, for each distinct value in \RX, we calculate the
 text similarity to values in \SY and use the similarity as the strength of a
@@ -199,21 +203,22 @@ we add an inclusion dependency from \RX to \SY in our linkage graph.
 When dealing with compound columns, we can utilize different text similarity functions on different fields. 
 Also, we must compose the individual column scores to achieve an overall strength.
 
-
+\sloppypar 
 \subsection{Candidate PK-FK Relationships Refinement}
 \label{subsec:refine}
 
 
 The error-robust inclusion dependency algorithm returns a collection of candidate PK-FK relationships.
-We use the algorithms in the work by Rostin et al.~\cite{DBLP:conf/webdb/RostinABNL09} 
+We use the algorithms from~\cite{DBLP:conf/webdb/RostinABNL09} 
 %\nan{Ahmed's comment: Which is this system? Can it be named?}\mourad{It doesn't have a name!} 
 to refine our candidate selection. The authors proposed 10~different features to distinguish foreign key constraints from spurious inclusion dependencies. Consider two columns \RX and \SY with an inclusion dependency from the first one to the second one. 
 %In~\cite{DBLP:conf/webdb/RostinABNL09}, 
-The specified features include 
+Examples of features include 
 \emph{coverage}, the ratio of distinct values in \RX that are contained in \SY, 
 \emph{column name similarity}, the similarity between the attribute names, 
 and \emph{out-of-domain range}, the percentage of values in \SY not within $[\min(\RX), \max(\RX)]$ where $\min(\RX)$ and $\max(\RX)$ are respectively the minimum and maximum values in \RX.
 
-Using the above features, we implemented the four machine learning classification algorithms from Rostin et al.~\cite{DBLP:conf/webdb/RostinABNL09}. These allow us to distinguish spurious inclusion dependencies from real ones with high accuracy.   We add the highest confidence candidate PK-FK pairs as edges in the linkage graph.
+Using the defined features, we implemented the four machine learning classification algorithms from Rostin et al.~\cite{DBLP:conf/webdb/RostinABNL09}. These allow us to distinguish spurious inclusion dependencies from real ones with high accuracy.   We add the highest confidence candidate PK-FK pairs as edges in the linkage graph.
 
-Next we discuss how to utilize the linkage graph to help the user discover his interesting data in Section~\ref{sec:discovery}. The PK-FK relationships can be used to link the tables of user interest from the discovery module. However, there may exist multiple subgraphs in the linkage graph that can connect all the interesting tables, which we call \emph{join paths}. In Section~\ref{sec:curating}, we discuss the choice of which one(s) to use to materialize a view for the user.
+In Section~\ref{sec:discovery}, we will discuss how to utilize the linkage graph to help the user discover his interesting data. 
+The PK-FK relationships can be used to link the tables of interest from the discovery module. However, there may exist multiple subgraphs in the linkage graph that can connect all the interesting tables, which we call \emph{join paths}. In Section~\ref{sec:curating}, we discuss the choice of which join paths to use to materialize a view for the user.

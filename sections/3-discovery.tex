@@ -4,7 +4,8 @@
 
 The data discovery module's goal is to find relevant data from perhaps hundreds
 to thousands of data sets  spread across the different storage systems of an
-enterprise, using the linkage graph to provide answers efficiently.
+enterprise, using the linkage graph.
+% to provide answers efficiently.
 
 Current solutions to finding relevant data include asking an expert (if one is
 available) or  performing manual exploration by inspecting data sets one by one.
@@ -13,7 +14,7 @@ sources. Recently, there have been efforts to automate this process, some
 examples are Goods~\cite{DBLP:conf/sigmod/HalevyKNOPRW16} and
 InfoGather~\cite{DBLP:conf/sigmod/YakoutGCC12}. Goods permits users to inspect
 datasets and find others similar to datasets of interest. Infogather permits to
-extend the attributes of a dataset of interest with attributes from other
+extend the attributes of a dataset  with attributes from other
 datasets. These systems are designed to solve these particular use cases, and so
 their indexes are built for this specific purpose. In
 contrast, our discovery module aims to support general \emph{discovery queries} that
@@ -56,7 +57,7 @@ in a company, the user issues a discovery query that searches for all attributes
 referring to an employee or a name. The user can then write a SQL query to filter
 from a list. Here are some examples of functions that the discovery module
 provides to users;  each of these queries can be answered using data collected
-as a part of profiling as well as the information expressed in the
+as a part of profiling as well as the information  in the
 linkage graph:
 %\srm{I think a little more detail is
 %needed here describing how the profiles built above are used to answer these
@@ -75,7 +76,7 @@ Octopus~\cite{DBLP:journals/pvldb/CafarellaHK09}, or the ABA operation of
 Infogather~\cite{DBLP:conf/sigmod/YakoutGCC12}. Using this function users can
 extend tables of interest with additional attributes. The core of the operation
 consists of finding matches to the current table using the linkage graph, and then retrieving 
-attributes that do not appear.
+attributes that do not appear in this table.
 
 \item \textbf{Subsumption relationships.} Given some reference table, this
 function provides a list of tables or groups of tables that have some form of

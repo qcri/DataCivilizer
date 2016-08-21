@@ -15,7 +15,8 @@ helping data scientists to (i)~quickly {\it discover} data sets of interest from
 large numbers of tables; (ii)~{\it link} relevant data sets; (iii)~{\it compute} answers from the
 disparate data stores that host the discovered data sets; (iv)~{\it clean} the
 desired data; and (v)~{\it iterate} through these tasks using a workflow
-system, since data scientists often perform these tasks in different orders.
+system. 
+%, since data scientists often perform these tasks in different orders.
 
 
 \dcv consists of two major components, as shown in Figure~\ref{fig:arch}.  The
@@ -49,7 +50,7 @@ schemas, and run \textsf{SQL} queries on the discovered data sets.
 %changes and new tables are added, they can be scanned and added to the graph
 %incrementally.} 
 %\mourad{We could say: 
-Initially, all the linkages that can be found in linear time are built during the offline stage. As existing data changes and new tables are added, the graph is incrementally updated to reflect the changes. All the other linkages, such as primary key-foreign key (\pkfk) relationships, will be
+Initially, all the linkages that can be found in linear time are built during the offline stage. As existing data changes and new tables are added, the graph is incrementally updated to reflect these changes. All the other linkages, such as primary key-foreign key (\pkfk) relationships, will be
 built in the background or on-demand during the online stage. Our current
 prototype identifies \pkfk relationships, using inclusion dependencies. As such,
 the process of building the linkage graph can be run dynamically and on-demand;
@@ -154,11 +155,12 @@ Tamer~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} mainly performs schema mappings
 and record linkage, and DeepDive~\cite{DBLP:journals/pvldb/ShinWWSZR15} extracts
 facts and structured information from large corpora of text, images and other
 unstructured sources. However, no solution performs  discovery, linkage graph
-computation, and polystore operations in concert. In addition, we have recently
+computation, and polystore operations in concert. 
+In addition, we have recently
 studied several representative data cleaning systems on a collection of real
 world data sets``from the wild''~\cite{DBLP:journals/pvldb/AbedjanCDFIOPST16}
-and we found out that there was no cleaning Esperanto. Hence multiple tools are
-required to achieve reasonable accuracy and point solutions neither offer enough
-functionalities nor achieve acceptable performance. Therefore an ensemble
+and we found out that there was no cleaning Esperanto. 
+Hence multiple tools are
+required to achieve reasonable accuracy and point solutions neither offer enough functionalities nor achieve acceptable performance. Therefore an ensemble
 approach is required.
 
