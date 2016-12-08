@@ -2,7 +2,7 @@
 \section{Introduction}
 \label{introduction}
 
-An oft-cited statistic is that data scientists spend 80\% of their time finding,
+An often-cited statistic is that data scientists spend 80\% of their time finding,
 preparing, integrating, and cleaning data sets. The remaining 20\% is spent doing
 the desired analytic tasks. In practice, 80\% may be a lower bound; for example
 one data officer, Mark Schreiber of Merck, a large pharmaceutical company,
@@ -31,7 +31,8 @@ each module in the remainder of this section, using Merck as an example.
 
 
 \begin{figure}[!t]
-\includegraphics[width=3.5in]{arch3.pdf}
+%\includegraphics[width=3.5in]{arch3.pdf}
+\includegraphics[width=\columnwidth]{arch3.pdf}
 \caption{\dcv Architecture}
 \label{fig:arch}
 \end{figure}
@@ -39,7 +40,7 @@ each module in the remainder of this section, using Merck as an example.
 
 %For example, a data scientist at Merck wants to build an drug-indication
 %ontology. 
-\vspace{-.15em}
+%\vspace{-.15em}
 \stitle{[Linkage Graph Computation.]} The linkages amongst attributes and tables
 are needed so that the user can discover interesting data, assemble relational
 schemas, and run \textsf{SQL} queries on the discovered data sets. 
@@ -58,7 +59,7 @@ we discuss its details in Section~\ref{sec:stitching}.
 
 
 
-\vspace{-.15em}
+%\vspace{-.15em}
 \stitle{[Discovery.]} A data scientist at Merck has a hypothesis, for example,
 {\it the drug Ritalin causes brain cancer in rats weighing more than 300 grams}.
 His first job is to identify relevant data sets, both inside and outside of
@@ -79,7 +80,7 @@ Section~\ref{sec:discovery}.
 
 
 
-\vspace{-.15em}
+%\vspace{-.15em}
 \stitle{[Polystore Query Processing and Curation.]} Since organizations such as
 Merck have a variety of massive-scale data storage systems, it is not feasible
 to move all data to a central data warehouse. Also, it is neither economically
@@ -91,7 +92,7 @@ leverage the \texttt{BigDAWG} polystore
 system~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15} to pull data from multiple
 underlying storage engines to compute the final result (or the {\em view}) that
 satisfies the user's specifications.
-\vspace{-.15em}
+%\vspace{-.15em}
 %\stitle{[Curation Polystore]} 
 
 %In fact, we are building on the \texttt{BigDAWG} polystore system~\cite{DBLP:journals/pvldb/ElmoreDSBCGHHKK15}. The polystore architecture can pull data out of multiple underlying storage engines as needed. 
@@ -111,7 +112,7 @@ Section~\ref{sec:curating}.
 %We also plan to explore other possible relationships in the futu%The merger of polystores and data curation steps is discussed in Section~\ref{sec:curating}.re such as ???.
 %Effectively, the result of stitching is a ``view'' of multiple data sources that contains the composite data of interest to the scientist.
 
-\vspace{-.15em}
+%\vspace{-.15em}
 %\stitle{[Cleanliness Estimation]} 
 %Indeed, \dcv is an iterative process, the human effort will be involved in various modules. The expensive process in constructing the view mentioned above is the human effort required to validate cleaning decisions. Since there may be multiple views that ``solve'' a data scientist's query, each with different accuracy and human validation cost, \dcv must estimate the cost of curating the possible views,
 %%to reason about the feasibility of using each one,
@@ -119,9 +120,9 @@ Section~\ref{sec:curating}.
 
 %Estimating the cleanliness of a view entails constructing a model for the dirtiness of the data in each source data set, which we discuss in Section~\ref{sec:curating}. Also discussed in Section~\ref{sec:curating} is where in a query plan we should allocate a cleaning budget.
 
-\vspace{-.15em}
+%\vspace{-.15em}
 %\stitle{[Optimizing Stitching]} It is highly inefficient and wasteful to  discard expensive-to-construct materialized views after their initial use by a data scientist.  Hence, we assume that they are generally retained for future use.  Moreover, future materialized views  may be based off previously constructed ones or on original data sources.  As a result, there may be several ways to construct a new view, with different  costs and accuracy. Therefore, the data stitching problem must be revisited to deal with this materialization cost/accuracy trade-off.  This is the subject of Sections~\ref{sec:enhancedstitching}.\mourad{Why not merge this section with Data Stitching?}
-\vspace{-.15em}
+%\vspace{-.15em}
 \stitle{[Updates.]}  If a source data set is updated, these updates must be
 incrementally propagated through the data curation pipeline to update downstream
 materialized views.  In some cases, the human effort involved may be daunting
@@ -131,7 +132,7 @@ views, as well as back upstream to data sources, if this is possible.
 Section~\ref{sec:updates} discusses these  issues.
 
 
-\vspace{-.15em}
+%\vspace{-.15em}
 \stitle{[Workflow.]} \dcv offers a workflow engine whereby data scientists can
 iterate over its components in whatever order they wish. Moreover, they
 need to be able to undo previous workflow steps and perform alternate branching
@@ -161,6 +162,5 @@ studied several representative data cleaning systems on a collection of real
 world data sets``from the wild''~\cite{DBLP:journals/pvldb/AbedjanCDFIOPST16}
 and we found out that there was no cleaning Esperanto. 
 Hence multiple tools are
-required to achieve reasonable accuracy and point solutions neither offer enough functionalities nor achieve acceptable performance. Therefore an ensemble
-approach is required.
+required to achieve reasonable accuracy and point solutions neither offer enough functionalities nor achieve acceptable performance. Therefore an ensemble approach is needed.
 
