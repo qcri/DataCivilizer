@@ -23,7 +23,9 @@ user.
 
 \subsection{Join Path Selection}
 
-The conventional data federation wisdom is to choose the join path that minimizes the query processing cost. However, this ignores data cleaning issues, to which we now turn. To achieve high quality results, one has to clean the data in conjunction with querying the table. For example, if one has a data value, \code{New Yark}, and wants to transform it to one of its airport codes \code{(JFK, LGA)}, then one must correct the data to \code{New York}, prior to the airport code lookup. Obviously, cleaning usually entails a human specification of the corrected value or a review of the value produced by an automatic algorithm. Such human costs can easily dominate the total query execution time and represent a significant financial cost in many data cleaning scenarios.
+The conventional data federation wisdom is to choose the join path that minimizes the query processing cost. However, this ignores data cleaning issues, to which we now turn. To achieve high quality results, one has to clean the data in conjunction with querying the table. For example, if one has a data value, \code{New Yark}, and wants to transform it to one of its airport codes \code{(JFK, LGA)}, then one must correct the data to \code{New York}, prior to the airport code lookup. 
+Cleaning usually entails a human specification of the correct value or a review of the value produced by an automatic algorithm. 
+Such human costs can easily dominate the total query execution time and represent a significant financial cost in many data cleaning scenarios.
 As such, one goal of \dcv is to choose the join path that produces the highest quality answer, rather than the one that is easiest to compute. 
 
 In \dcv, a user has to decide how to trade off data quality and cleaning cost. 
@@ -51,22 +53,34 @@ Then, we need to choose where to place, in the resulting query plan, data cleani
 \subsection{Cleanliness Model}
 \label{subsec:model}
 
-\dong{In \dcv, we collect information about the errors in each data set. Specifically, we need an accuracy metric for each cell, namely an estimate for the probability of the cell to be erroneous. To this end, \dcv first applies automatic error detection tools and then uses a composite metric to accumulate detected errors. The detect errors are categorized as follows.
+\dong{
+To assess the cleanliness of join paths and eventually full queries, 
+%In \dcv, we collect information about the errors in each data set. Specifically, 
+we need to devise an accuracy metric for each cell, namely an estimate for the probability of the cell to be erroneous. To this end, \dcv first applies automatic error detection tools and then uses a composite metric to accumulate detected errors. 
+
+While there are several types of data errors that we could consider, in \dcv we limit to the following three types:
 
 \stab
 (i)~Outliers -- these are data values that are distant from the distribution of values in the same column. 
 
 \stab
-(ii)~Duplicates -- these are a bunch of tuples that refer to the same real-world entity. The mismatching values between these duplicate tuples can signify an error.
+(ii)~Duplicates -- these are groups of tuples that refer to the same real-world entity. The mismatching values between these duplicate tuples is considered to be an error.
 
 \stab
-(iii)~Integrity Constraint (IC) Violations -- these include functional dependency (FD) violations and inclusion dependency (IND) violations. There is a violation between two tuples in a table $\R$ of an FD $\varphi: R(X\rightarrow Y)$ if their values on the LHS of $\varphi$ are the same while their values on the RHS are not. There is a violation between tuples in tables $\R$ and $\S$ of an IND: $\R[X]\subseteq\S[Y]$ if a value on the LHS does not exist in the RHS. To detect more errors, we can further conduct schema mapping, merge semantic equivalent tables, and detect the IC violations in the merged table.
+(iii)~Integrity Constraint (IC) Violations -- these include functional dependency (FD) violations and inclusion dependency (IND) violations. There is a violation between two tuples in a table $\R$ of an FD $\varphi: R(X\rightarrow Y)$ if their values on the LHS of $\varphi$ are the same while their values on the RHS are not. There is a violation between tuples in tables $\R$ and $\S$ of an IND: $\R[X]\subseteq\S[Y]$ if a value on the LHS does not exist in the RHS. To detect more errors, we can further conduct schema mapping, merge semantically equivalent tables, and detect the IC violations in the merged table.
 
-We have recently studied several representative data cleaning systems on a collection of real world data sets ``from the wild''~\cite{DBLP:journals/pvldb/AbedjanCDFIOPST16} and we found out that there was no cleaning Esperanto. Hence multiple tools are required to achieve reasonable accuracy and point solutions neither offer enough functionalities nor achieve acceptable performance. Therefore an ensemble approach is required. For this purpose, we model the detected errors as a conflict hypergraph~\cite{DBLP:conf/icde/ChuIP13} and composite an overall cleanliness score for each cell. Next we discuss how to estimate the cleanliness of a join path, based on the cleanliness estimation of each cell participating in the join.
 
-For each join path, we first construct a query corresponding to this join path and execute it. Then we extend the techniques in data lineage~\cite{DBLP:conf/cidr/Widom05} to find the cell level lineage $\lambda$. Given a cell in the result, $\lambda$ indicates all the cells in the source table that can affect the probability of the result cell to be clean. To get the lineage $\lambda$, for each selection and join predicates, we propagate the cells in the attributes that participate in the predicate to the other cells within the same tuple. Then for each result cell, we multiply the cleanlinesses of all the source cells in its lineage to get its cleanliness. In this way, we can propagate the cleanliness of the source cells to the result cells.
+We have recently studied several representative data cleaning systems on a collection of real world data sets ``from the wild''~\cite{DBLP:journals/pvldb/AbedjanCDFIOPST16} and we found out that there was no cleaning Esperanto. Hence multiple tools are required to achieve reasonable accuracy and point solutions neither offer enough functionalities nor achieve acceptable performance. Therefore an ensemble approach is required. For this purpose, we model the errors detected from multiple tools (we use one tool for each of the above error category) as a conflict hypergraph~\cite{DBLP:conf/icde/ChuIP13} and compose an overall cleanliness score for each cell. Next we discuss how to estimate the cleanliness of a join path, based on the cleanliness estimation of each cell participating in the join.
 
-The cleanliness of a join path is measured by the average cleanliness of all the cells in the result. \dcv selects the join paths based on the criteria which linear combines the size and the cleanliness of their corresponding query results. Note that \dcv also uses schema mapping~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} to cluster the join paths based on their semantics and ranks the join paths within each categories for users to choose.}
+For each join path, we first construct a query corresponding to this join path and execute it. 
+Then we extend the techniques in data lineage~\cite{DBLP:conf/cidr/Widom05} to find the cell level lineage $\lambda$. 
+Given a cell in the result, $\lambda$ indicates all the cells in the source table that can affect the probability of the result cell to be clean. 
+To obtain the lineage $\lambda$, 
+%for each selection and join predicates, %Mourad: Selection predicates are coming from nowhere. 
+we propagate for each join predicate the cells in the attributes that participate in the predicate to the other cells within the same tuple. 
+Then for each result cell, we multiply the cleanliness values of all the source cells in its lineage to get its cleanliness. In this way, we can propagate the cleanliness of the source cells to the result cells.
+
+The cleanliness of a join path is measured by the average cleanliness of all the cells in the result. \dcv selects the join paths based on the criteria that linearly combines the size and the cleanliness of their corresponding query results. Note that \dcv also uses schema mapping~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} to cluster the join paths based on their semantics and ranks the join paths within each categories for users to choose.}
 
 
 %An extension of the above majority voting methodology is to construct a ``disorder metric'' that indicates the distance between an incorrect value and its ground truth. For numeric values, we use the average and standard deviation as the disorder metric. For example, if salary errors average 5\% with standard deviation 2\%, then most of the errors are in the range from 3\% to 7\%. For text values, we use the ``lexical distance'' (such as distance based on WordNet~\cite{WordNet,DBLP:journals/cacm/Miller95} and edit distance) as the disorder metric. For example, if an address field routinely confuses ``\textit{road}'' and ``\textit{street}'', but very rarely gets the name of the street wrong, then the lexical distance is very small. Using this tactic, we can use fuzzy predicates and fuzzy joins in place of the exact operations to improve the accuracy of our results.
@@ -120,8 +134,17 @@ Given a join path, its cleanliness is obtained by multiplying the cleanliness va
 
 
 In a query plan with cleaning operations, the cleaning cost and the result quality are different based on the position of the data cleaning operation. For example, cleaning a whole column before the selection on this column yields a higher cleaning cost and query accuracy than putting the cleaning operation after the selection operation. Obviously expensive cleaning should be performed on as few records as possible and have as most impact as possible. 
-Thus we need a way to obtain a query plan with cleaning operations that achieve high quality gain with a limited cleaning budget.
-The intuition of our solution is that \dong{we first execute the query and get the query result. Then we map back the cells in the query result to the cells in the source tables using the data lineage~\cite{DBLP:conf/cidr/Widom05}. Next only the source cells that are involved in the erroneous result cells are cleaned. As each source cell can contribute to multiple erroneous result cells, for each source cell, we accumulate its impact on the result and clean them in the decreasing order of their impacts until the budget is exhausted. This is not only effective in cleaning the current join path results, but also help enhance the quality of the whole system and subsequent queries.}
+%Thus, we need a way to obtain a query plan with cleaning operations that achieve high quality gain with a limited cleaning budget. 
+\dong{In \dcv, we assume that given a query and the cleanliness estimation value on each result cell we are give a set budget $B$ of user's actions to check and eventually change a value if it is erroneous.
+Based on this input, we need to determine which cells need to be sent to the user for feedback in order
+to achieve the highest quality gain.}
+
+\dong{More specifically,
+%The intuition of our solution is that \dong{we 
+we first execute the query and obtain its result. 
+We then map the cells in the query result back to the cells in the source tables using the data lineage as discussed in the previous section. 
+To achieve the maximum quality and be able to reuse user's cleaning efforts, 
+we focus only on the source cells that are involved in the erroneous result cells. As each source cell can contribute to multiple erroneous result cells, for each source cell, we accumulate its impact on the result and clean them in the decreasing order of their impacts until the budget is exhausted. This is not only effective in cleaning the current join path results, but also help enhance the quality of the whole system and subsequent queries.}
 
 
 %Another better way is that we use dynamic programming to obtain a query plan with cleaning operations that achieve the maximum accuracy gain with limited cleaning cost budget or achieve the desired accuracy with the smallest cleaning cost budget. 
