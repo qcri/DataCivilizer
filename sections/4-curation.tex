@@ -53,7 +53,6 @@ Then, we need to choose where to place, in the resulting query plan, data cleani
 \subsection{Cleanliness Model}
 \label{subsec:model}
 
-\dong{
 To assess the cleanliness of join paths and eventually full queries, 
 %In \dcv, we collect information about the errors in each data set. Specifically, 
 we need to devise an accuracy metric for each cell, namely an estimate for the probability of the cell to be erroneous. To this end, \dcv first applies automatic error detection tools and then uses a composite metric to accumulate detected errors. 
@@ -80,7 +79,7 @@ To obtain the lineage $\lambda$,
 we propagate for each join predicate the cells in the attributes that participate in the predicate to the other cells within the same tuple. 
 Then for each result cell, we multiply the cleanliness values of all the source cells in its lineage to get its cleanliness. In this way, we can propagate the cleanliness of the source cells to the result cells.
 
-The cleanliness of a join path is measured by the average cleanliness of all the cells in the result. \dcv selects the join paths based on the criteria that linearly combines the sizes and the cleanlinesses of their corresponding query results. Note that \dcv also uses schema mapping~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} to cluster the join paths based on their semantics and ranks the join paths within each categories for users to choose.}
+The cleanliness of a join path is measured by the average cleanliness of all the cells in the result. \dcv selects the join paths based on the criteria that linearly combines the sizes and the cleanlinesses of their corresponding query results. Note that \dcv also uses schema mapping~\cite{DBLP:conf/cidr/StonebrakerBIBCZPX13} to cluster the join paths based on their semantics and ranks the join paths within each categories for users to choose.
 
 
 %An extension of the above majority voting methodology is to construct a ``disorder metric'' that indicates the distance between an incorrect value and its ground truth. For numeric values, we use the average and standard deviation as the disorder metric. For example, if salary errors average 5\% with standard deviation 2\%, then most of the errors are in the range from 3\% to 7\%. For text values, we use the ``lexical distance'' (such as distance based on WordNet~\cite{WordNet,DBLP:journals/cacm/Miller95} and edit distance) as the disorder metric. For example, if an address field routinely confuses ``\textit{road}'' and ``\textit{street}'', but very rarely gets the name of the street wrong, then the lexical distance is very small. Using this tactic, we can use fuzzy predicates and fuzzy joins in place of the exact operations to improve the accuracy of our results.
@@ -135,16 +134,16 @@ Given a join path, its cleanliness is obtained by multiplying the cleanliness va
 
 In a query plan with cleaning operations, the cleaning cost and the result quality are different based on the position of the data cleaning operation. For example, cleaning a whole column before the selection on this column yields a higher cleaning cost and query accuracy than putting the cleaning operation after the selection operation. Obviously expensive cleaning should be performed on as few records as possible and have as most impact as possible. 
 %Thus, we need a way to obtain a query plan with cleaning operations that achieve high quality gain with a limited cleaning budget. 
-\dong{In \dcv, we assume that given a query and the cleanliness estimation value on each result cell we are give a set budget $B$ of user's actions to check and eventually change a value if it is erroneous.
+In \dcv, we assume that given a query and the cleanliness estimation value on each result cell we are give a set budget $B$ of user's actions to check and eventually change a value if it is erroneous.
 Based on this input, we need to determine which cells need to be sent to the user for feedback in order
-to achieve the highest quality gain.}
+to achieve the highest quality gain.
 
-\dong{More specifically,
+More specifically,
 %The intuition of our solution is that \dong{we 
 we first execute the query and obtain its result. 
 We then map the cells in the query result back to the cells in the source tables using the data lineage as discussed in the previous section. 
 To achieve the maximum quality and be able to reuse user's cleaning efforts, 
-we focus only on the source cells that are involved in the erroneous result cells. As each source cell can contribute to multiple erroneous result cells, for each source cell, we accumulate its impact on the result and clean them in the decreasing order of their impacts until the budget is exhausted. This is not only effective in cleaning the current join path results, but also help enhance the quality of the whole system and subsequent queries.}
+we focus only on the source cells that are involved in the erroneous result cells. As each source cell can contribute to multiple erroneous result cells, for each source cell, we accumulate its impact on the result and clean them in the decreasing order of their impacts until the budget is exhausted. This is not only effective in cleaning the current join path results, but also help enhance the quality of the whole system and subsequent queries.
 
 
 %Another better way is that we use dynamic programming to obtain a query plan with cleaning operations that achieve the maximum accuracy gain with limited cleaning cost budget or achieve the desired accuracy with the smallest cleaning cost budget. 
